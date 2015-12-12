@@ -18,18 +18,12 @@
 #include "musicapplicationobject.h"
 #include "musicconnectionpool.h"
 
-#include <QDesktopWidget>
-
-MusicApplication::MusicApplication(QWidget *parent) :
-    MusicAbstractMoveWidget(parent),
-    ui(new Ui::MusicApplication)
+MusicApplication::MusicApplication(QWidget *parent)
+    : MusicAbstractMoveWidget(parent),
+      ui(new Ui::MusicApplication)
 {
     ui->setupUi(this);
-
-    QWidget *widget = QApplication::desktop();
-    M_SETTING->setValue(MusicSettingManager::ScreenSize, widget->size());
-    move((widget->width() - width())/2, (widget->height() - height())/2);
-    M_Connection->setValue("MusicApplication", this);
+    M_CONNECTION->setValue("MusicApplication", this);
 
     m_object = new MusicApplicationObject(this);
     setAttribute(Qt::WA_TranslucentBackground, true);
@@ -49,15 +43,14 @@ MusicApplication::MusicApplication(QWidget *parent) :
     m_rightAreaWidget->setupUi(ui);
     m_leftAreaWidget = new MusicLeftAreaWidget(this);
     m_leftAreaWidget->setupUi(ui);
-    connect(m_topAreaWidget,SIGNAL(setTransparent(int)),m_musicSongTree,SLOT(setTransparent(int)));
-    connect(m_topAreaWidget,SIGNAL(updateArtPicture()),m_musicSongTree,SLOT(updateArtPicture()));
-    connect(m_topAreaWidget,SIGNAL(musicSearchButtonClicked()),m_rightAreaWidget,SLOT(musicSearchButtonSearched()));
-    connect(m_rightAreaWidget,SIGNAL(updateBgThemeDownload()),m_topAreaWidget,SLOT(musicBgThemeDownloadFinished()));
-    connect(m_rightAreaWidget,SIGNAL(updateBackgroundTheme()),m_topAreaWidget,SLOT(musicBgTransparentChanged()));
-    connect(m_bottomAreaWidget,SIGNAL(setShowDesktopLrc(bool)),m_rightAreaWidget,SLOT(setDestopLrcVisible(bool)));
-    connect(m_bottomAreaWidget,SIGNAL(setWindowLockedChanged()),m_rightAreaWidget,SLOT(setWindowLockedChanged()));
-    connect(m_rightAreaWidget,SIGNAL(lockDesktopLrc(bool)),m_bottomAreaWidget,SLOT(lockDesktopLrc(bool)));
-    connect(m_rightAreaWidget,SIGNAL(desktopLrcClosed()),m_bottomAreaWidget,SLOT(desktopLrcClosed()));
+    connect(m_topAreaWidget, SIGNAL(setTransparent(int)), m_musicSongTree, SLOT(setTransparent(int)));
+    connect(m_topAreaWidget, SIGNAL(musicSearchButtonClicked()), m_rightAreaWidget, SLOT(musicSearchButtonSearched()));
+    connect(m_rightAreaWidget, SIGNAL(updateBgThemeDownload()), m_topAreaWidget, SLOT(musicBgThemeDownloadFinished()));
+    connect(m_rightAreaWidget, SIGNAL(updateBackgroundTheme()), m_topAreaWidget, SLOT(musicBgTransparentChanged()));
+    connect(m_bottomAreaWidget, SIGNAL(setShowDesktopLrc(bool)), m_rightAreaWidget, SLOT(setDestopLrcVisible(bool)));
+    connect(m_bottomAreaWidget, SIGNAL(setWindowLockedChanged()), m_rightAreaWidget, SLOT(setWindowLockedChanged()));
+    connect(m_rightAreaWidget, SIGNAL(lockDesktopLrc(bool)), m_bottomAreaWidget, SLOT(lockDesktopLrc(bool)));
+    connect(m_rightAreaWidget, SIGNAL(desktopLrcClosed()), m_bottomAreaWidget, SLOT(desktopLrcClosed()));
 
     initWindowSurface();
     setAcceptDrops(true);
@@ -67,32 +60,43 @@ MusicApplication::MusicApplication(QWidget *parent) :
     m_musicPlayer->setPlaylist(m_musicList);
     m_musicPlayer->setVolume(100);
     //The default Volume is 100
-    ui->musicSoundSlider->setRange(0,100);
+    ui->musicSoundSlider->setRange(0, 100);
     ui->musicSoundSlider->setValue(100);
     m_playControl = true;//The default in the suspended state
     m_currentMusicSongTreeIndex = 0;
 
-    connect(m_musicPlayer,SIGNAL(positionChanged(qint64)),SLOT(positionChanged(qint64)));
-    connect(m_musicPlayer,SIGNAL(durationChanged(qint64)),SLOT(durationChanged(qint64)));
-    connect(m_musicPlayer,SIGNAL(stateChanged(MusicPlayer::State)),SLOT(stateChanged()));
-    connect(m_musicList,SIGNAL(currentIndexChanged(int)), this, SLOT(showCurrentSong(int)));
-    connect(m_musicList,SIGNAL(currentIndexChanged(int)), m_musicSongTree, SLOT(setMusicPlayCount(int)));
+    connect(m_musicPlayer, SIGNAL(positionChanged(qint64)), SLOT(positionChanged(qint64)));
+    connect(m_musicPlayer, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
+    connect(m_musicPlayer, SIGNAL(stateChanged(MusicPlayer::State)), SLOT(stateChanged()));
+    connect(m_musicList, SIGNAL(currentIndexChanged(int)), SLOT(showCurrentSong(int)));
+    connect(m_musicList, SIGNAL(currentIndexChanged(int)), m_musicSongTree, SLOT(setMusicPlayCount(int)));
 
-    connect(m_musicSongTree,SIGNAL(deleteItemAt(MIntList)),SLOT(setDeleteItemAt(MIntList)));
-    connect(m_musicSongTree,SIGNAL(updatePlayLists(QString)),m_musicList,SLOT(appendMedia(QString)));
-    connect(m_musicSongTree,SIGNAL(updateMediaLists(QStringList,int)),m_musicList,SLOT(updateMediaLists(QStringList,int)));
+    connect(m_musicSongTree, SIGNAL(deleteItemAt(MIntList)), SLOT(setDeleteItemAt(MIntList)));
+    connect(m_musicSongTree, SIGNAL(updatePlayLists(QString)), m_musicList, SLOT(appendMedia(QString)));
+    connect(m_musicSongTree, SIGNAL(updateMediaLists(QStringList, int)), m_musicList, SLOT(updateMediaLists(QStringList, int)));
 
+    ui->lrcDisplayAllButton->hide();
     ui->SurfaceStackedWidget->setCurrentIndex(0);
     ui->musicTimeWidget->setObject(this);
 
     readXMLConfigFromText();
 }
 
+#if defined(Q_OS_WIN)
+#  ifdef MUSIC_QT_5
 bool MusicApplication::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
     m_object->nativeEvent(eventType, message, result);
     return QWidget::nativeEvent(eventType, message, result);
 }
+#  else
+bool MusicApplication::winEvent(MSG *message, long *result)
+{
+    m_object->winEvent(message, result);
+    return QWidget::winEvent(message, result);
+}
+#  endif
+#endif
 
 MusicApplication::~MusicApplication()
 {
@@ -168,28 +172,30 @@ void MusicApplication::contextMenuEvent(QContextMenuEvent *event)
     QWidget::contextMenuEvent(event);
     QMenu rightClickMenu(this);
     rightClickMenu.setStyleSheet(MusicUIObject::MMenuStyle02);
-    rightClickMenu.addAction(QIcon(":/contextMenu/login"),tr("logout"),m_topAreaWidget,SLOT(musicUserContextLogin()));
+    rightClickMenu.addAction(QIcon(":/contextMenu/login"), tr("logout"), m_topAreaWidget, SLOT(musicUserContextLogin()));
     rightClickMenu.addSeparator();
 
-    QMenu musicAddNewFiles(tr("addNewFiles"),&rightClickMenu);
+    QMenu musicAddNewFiles(tr("addNewFiles"), &rightClickMenu);
     rightClickMenu.addMenu(&musicAddNewFiles)->setIcon(QIcon(":/contextMenu/add"));
-    musicAddNewFiles.addAction(tr("openOnlyFiles"),this,SLOT(musicImportSongsOnlyFile()));
-    musicAddNewFiles.addAction(tr("openOnlyDir"),this,SLOT(musicImportSongsOnlyDir()));
+    musicAddNewFiles.addAction(tr("openOnlyFiles"), this, SLOT(musicImportSongsOnlyFile()));
+    musicAddNewFiles.addAction(tr("openOnlyDir"), this, SLOT(musicImportSongsOnlyDir()));
 
-    QMenu musicPlaybackMode(tr("playbackMode"),&rightClickMenu);
+    QMenu musicPlaybackMode(tr("playbackMode"), &rightClickMenu);
     rightClickMenu.addMenu(&musicPlaybackMode);
     createPlayModeMenu(musicPlaybackMode);
 
     rightClickMenu.addSeparator();
-    QMenu musicRemoteControl(tr("RemoteControl"),&rightClickMenu);
+    QMenu musicRemoteControl(tr("RemoteControl"), &rightClickMenu);
     rightClickMenu.addMenu(&musicRemoteControl)->setIcon(QIcon(":/contextMenu/remote"));
     musicRemoteControl.addAction(tr("SquareRemote"), m_topAreaWidget, SLOT(musicSquareRemote()));
     musicRemoteControl.addAction(tr("RectangleRemote"), m_topAreaWidget, SLOT(musicRectangleRemote()));
     musicRemoteControl.addAction(tr("DiamondRemote"), m_topAreaWidget, SLOT(musicDiamondRemote()));
+    musicRemoteControl.addAction(tr("SimpleStyleRemote"), m_topAreaWidget, SLOT(musicSimpleStyleRemote()));
+    musicRemoteControl.addAction(tr("ComplexStyleRemote"), m_topAreaWidget, SLOT(musicComplexStyleRemote()));
     musicRemoteControl.addAction(tr("CircleRemote"), m_topAreaWidget, SLOT(musicCircleRemote()));
     musicRemoteControl.addAction(tr("DeleteRemote"), m_topAreaWidget, SLOT(musicDeleteRemote()));
 
-    rightClickMenu.addAction(QIcon(":/contextMenu/equalizer"),tr("Equalizer"), m_object, SLOT(musicSetEqualizer()));
+    rightClickMenu.addAction(QIcon(":/contextMenu/equalizer"), tr("Equalizer"), m_object, SLOT(musicSetEqualizer()));
     rightClickMenu.addAction(tr("AudioRecorder"), m_object, SLOT(musicAudioRecorder()));
     rightClickMenu.addAction(tr("TimingSettings"), m_object, SLOT(musicTimerWidget()));
     rightClickMenu.addAction(tr("ShowingSpectrum"), m_leftAreaWidget, SLOT(musicSpectrumWidget()));
@@ -198,16 +204,16 @@ void MusicApplication::contextMenuEvent(QContextMenuEvent *event)
     QAction *window = rightClickMenu.addAction(tr("WindowTop"), m_object, SLOT(musicSetWindowToTop()));
     window->setIcon(QIcon(m_object->getWindowToTop() ? ":/share/selected" : QString()));
 
-    rightClickMenu.addAction(QIcon(":/contextMenu/setting"),tr("Setting"),this,SLOT(musicSetting()));
-    rightClickMenu.addAction(QIcon(":/contextMenu/location"),tr("musicLocation"),this,SLOT(musicCurrentPlayLocation()));
+    rightClickMenu.addAction(QIcon(":/contextMenu/setting"), tr("Setting"), this, SLOT(musicSetting()));
+    rightClickMenu.addAction(QIcon(":/contextMenu/location"), tr("musicLocation"), this, SLOT(musicCurrentPlayLocation()));
 
-    QMenu musicInfo(tr("musicAbout"),&rightClickMenu);
+    QMenu musicInfo(tr("musicAbout"), &rightClickMenu);
     rightClickMenu.addMenu(&musicInfo)->setIcon(QIcon(":/contextMenu/about"));
-    musicInfo.addAction(QIcon(":/contextMenu/about"),tr("musicAbout"), m_object, SLOT(musicAboutUs()));
-    musicInfo.addAction(QIcon(":/contextMenu/edition"), QMUSICPLAYER_VERSION);
+    musicInfo.addAction(QIcon(":/contextMenu/about"), tr("musicAbout"), m_object, SLOT(musicAboutUs()));
+    musicInfo.addAction(QIcon(":/contextMenu/edition"), QMUSICPLAYER_VERSION_STR);
 
     rightClickMenu.addSeparator();
-    rightClickMenu.addAction(QIcon(":/contextMenu/quit"),tr("quit"),this,SLOT(quitWindowClose()));
+    rightClickMenu.addAction(QIcon(":/contextMenu/quit"), tr("quit"), this, SLOT(quitWindowClose()));
     rightClickMenu.exec(QCursor::pos());
 }
 
@@ -228,7 +234,7 @@ void MusicApplication::keyReleaseEvent(QKeyEvent *event)
 void MusicApplication::initWindowSurface()
 {
     connect(ui->action_About, SIGNAL(triggered()), m_object, SLOT(musicAboutUs()));
-    connect(ui->musicSearch,SIGNAL(clicked()), m_leftAreaWidget, SLOT(musicSearch()));
+    connect(ui->musicSearch, SIGNAL(clicked()), m_leftAreaWidget, SLOT(musicSearch()));
     connect(ui->musicDesktopLrc, SIGNAL(clicked(bool)), m_rightAreaWidget, SLOT(setDestopLrcVisible(bool)));
     ui->musicPlayMode->setMenu(&m_playModeMenu);
     ui->musicPlayMode->setPopupMode(QToolButton::InstantPopup);
@@ -248,11 +254,11 @@ void MusicApplication::createPlayModeMenuIcon(QMenu &menu)
 void MusicApplication::createPlayModeMenu(QMenu &menu)
 {
     menu.setStyleSheet(MusicUIObject::MMenuStyle02);
-    menu.addAction(tr("OrderPlay"),this,SLOT(musicPlayOrder()));
-    menu.addAction(tr("RandomPlay"),this,SLOT(musicPlayRandom()));
-    menu.addAction(tr("ListCycle"),this,SLOT(musicPlayListLoop()));
-    menu.addAction(tr("SingleCycle"),this,SLOT(musicPlayOneLoop()));
-    menu.addAction(tr("PlayOnce"),this,SLOT(musicPlayItemOnce()));
+    menu.addAction(tr("OrderPlay"), this, SLOT(musicPlayOrder()));
+    menu.addAction(tr("RandomPlay"), this, SLOT(musicPlayRandom()));
+    menu.addAction(tr("ListCycle"), this, SLOT(musicPlayListLoop()));
+    menu.addAction(tr("SingleCycle"), this, SLOT(musicPlayOneLoop()));
+    menu.addAction(tr("PlayOnce"), this, SLOT(musicPlayItemOnce()));
     createPlayModeMenuIcon(menu);
 }
 
@@ -267,7 +273,7 @@ void MusicApplication::readXMLConfigFromText()
     }
     //////////////////////////////////////////////////////////////
     //Path configuration song
-    MMusicList songs;
+    MusicSongsList songs;
     xml.readMusicSongsConfig(songs);
     m_musicSongTree->setMusicLists(songs);
     //////////////////////////////////////////////////////////////
@@ -277,6 +283,7 @@ void MusicApplication::readXMLConfigFromText()
     }
     //Configure playback mode
     ui->musicEnhancedButton->setEnhancedMusicConfig(xml.readEnhancedMusicConfig());
+    xml.readOtherLoadConfig();
 
     createPlayModeMenu(m_playModeMenu);
     switch( xml.readMusicPlayModeConfig() )
@@ -311,15 +318,11 @@ void MusicApplication::readXMLConfigFromText()
     m_bottomAreaWidget->setDestopLrcVisible(key);
     m_rightAreaWidget->setDestopLrcVisible(key);
     //////////////////////////////////////////////////////////////
-    //Configure automatic playback
-    key = xml.readSystemAutoPlayConfig();
-    M_SETTING->setValue(MusicSettingManager::AutoPlayChoiced, key);
-    m_bottomAreaWidget->showPlayStatus(m_playControl);
-    m_rightAreaWidget->showPlayStatus(m_playControl);
-    if(key == "true")
-    {
-        musicKey();
-    }
+    //Set the current background color
+    //Set the current alpha value
+    m_topAreaWidget->setParameters(xml.readBackgroundTheme(),
+                                   xml.readBackgroundTransparent().toInt(),
+                                   xml.readBackgroundListTransparent().toInt());
     //////////////////////////////////////////////////////////////
     //Configuration from next time also stopped at the last record.
     QStringList keyList;
@@ -336,46 +339,50 @@ void MusicApplication::readXMLConfigFromText()
         m_musicList->blockSignals(false);
     }
     //////////////////////////////////////////////////////////////
+    //Configure automatic playback
+    key = xml.readSystemAutoPlayConfig();
+    M_SETTING->setValue(MusicSettingManager::AutoPlayChoiced, key);
+    if(key == "true")
+    {
+        m_playControl = true;
+        musicKey();
+    }
+    m_bottomAreaWidget->showPlayStatus(m_playControl);
+    m_rightAreaWidget->showPlayStatus(m_playControl);
+    //////////////////////////////////////////////////////////////
     //When the configuration is close to the direct exit
     key = xml.readSystemCloseConfig();
     M_SETTING->setValue(MusicSettingManager::CloseEventChoiced, key);
     m_bottomAreaWidget->setSystemCloseConfig(key);
     //////////////////////////////////////////////////////////////
-    //Set the current background color
-    //Set the current alpha value
-    m_topAreaWidget->setParameters(xml.readBackgroundTheme(),
-                                   xml.readBackgroundTransparent().toInt(),
-                                   xml.readBackgroundListTransparent().toInt());
-    //////////////////////////////////////////////////////////////
-    xml.readTimeAutoConfig();
     //Set the lrc color the user set
-    M_SETTING->setValue(MusicSettingManager::LrcColorChoiced,xml.readShowLrcColor());
-    M_SETTING->setValue(MusicSettingManager::LrcFgColorChoiced,xml.readShowLrcFgColor());
-    M_SETTING->setValue(MusicSettingManager::LrcBgColorChoiced,xml.readShowLrcBgColor());
-    M_SETTING->setValue(MusicSettingManager::LrcFamilyChoiced,xml.readShowLrcFamily());
-    M_SETTING->setValue(MusicSettingManager::LrcTypeChoiced,xml.readShowLrcType());
-    M_SETTING->setValue(MusicSettingManager::LrcColorTransChoiced,xml.readShowLrcTransparent());
-    M_SETTING->setValue(MusicSettingManager::LrcSizeChoiced,xml.readShowLrcSize());
+    M_SETTING->setValue(MusicSettingManager::LrcColorChoiced, xml.readShowLrcColor());
+    M_SETTING->setValue(MusicSettingManager::LrcFgColorChoiced, xml.readShowLrcFgColor());
+    M_SETTING->setValue(MusicSettingManager::LrcBgColorChoiced, xml.readShowLrcBgColor());
+    M_SETTING->setValue(MusicSettingManager::LrcFamilyChoiced, xml.readShowLrcFamily());
+    M_SETTING->setValue(MusicSettingManager::LrcTypeChoiced, xml.readShowLrcType());
+    M_SETTING->setValue(MusicSettingManager::LrcColorTransChoiced, xml.readShowLrcTransparent());
+    M_SETTING->setValue(MusicSettingManager::LrcSizeChoiced, xml.readShowLrcSize());
     //////////////////////////////////////////////////////////////
     //Set the lrc size the user set
-    M_SETTING->setValue(MusicSettingManager::DLrcColorChoiced,xml.readShowDLrcColor());
-    M_SETTING->setValue(MusicSettingManager::DLrcFgColorChoiced,xml.readShowDLrcFgColor());
-    M_SETTING->setValue(MusicSettingManager::DLrcBgColorChoiced,xml.readShowDLrcBgColor());
-    M_SETTING->setValue(MusicSettingManager::DLrcFamilyChoiced,xml.readShowDLrcFamily());
-    M_SETTING->setValue(MusicSettingManager::DLrcTypeChoiced,xml.readShowDLrcType());
-    M_SETTING->setValue(MusicSettingManager::DLrcColorTransChoiced,xml.readShowDLrcTransparent());
-    M_SETTING->setValue(MusicSettingManager::DLrcSizeChoiced,xml.readShowDLrcSize());
-    M_SETTING->setValue(MusicSettingManager::DLrcLockedChoiced,xml.readShowDLrcLocked());
-    M_SETTING->setValue(MusicSettingManager::DLrcGeometryChoiced,xml.readShowDLrcGeometry());
+    M_SETTING->setValue(MusicSettingManager::DLrcColorChoiced, xml.readShowDLrcColor());
+    M_SETTING->setValue(MusicSettingManager::DLrcFgColorChoiced, xml.readShowDLrcFgColor());
+    M_SETTING->setValue(MusicSettingManager::DLrcBgColorChoiced, xml.readShowDLrcBgColor());
+    M_SETTING->setValue(MusicSettingManager::DLrcFamilyChoiced, xml.readShowDLrcFamily());
+    M_SETTING->setValue(MusicSettingManager::DLrcTypeChoiced, xml.readShowDLrcType());
+    M_SETTING->setValue(MusicSettingManager::DLrcColorTransChoiced, xml.readShowDLrcTransparent());
+    M_SETTING->setValue(MusicSettingManager::DLrcSizeChoiced, xml.readShowDLrcSize());
+    M_SETTING->setValue(MusicSettingManager::DLrcLockedChoiced, xml.readShowDLrcLocked());
+    M_SETTING->setValue(MusicSettingManager::DLrcGeometryChoiced, xml.readShowDLrcGeometry());
     m_bottomAreaWidget->lockDesktopLrc(xml.readShowDLrcLocked());
     m_rightAreaWidget->setSettingParameter();
     //////////////////////////////////////////////////////////////
-    M_SETTING->setValue(MusicSettingManager::EqualizerEnableChoiced,xml.readEqualizerEnale());
-    M_SETTING->setValue(MusicSettingManager::EqualizerValueChoiced,xml.readEqualizerValue());
-    M_SETTING->setValue(MusicSettingManager::EqualizerIndexChoiced,xml.readEqualizerIndex());
+    M_SETTING->setValue(MusicSettingManager::EqualizerEnableChoiced, xml.readEqualizerEnale());
+    M_SETTING->setValue(MusicSettingManager::EqualizerValueChoiced, xml.readEqualizerValue());
+    M_SETTING->setValue(MusicSettingManager::EqualizerIndexChoiced, xml.readEqualizerIndex());
     m_musicPlayer->setEqInformation();
     //////////////////////////////////////////////////////////////
-    M_SETTING->setValue(MusicSettingManager::CurrentLanIndexChoiced,xml.readLanguageIndex());
+    M_SETTING->setValue(MusicSettingManager::CurrentLanIndexChoiced, xml.readLanguageIndex());
 
 }
 
@@ -388,9 +395,16 @@ void MusicApplication::writeXMLConfigToText()
     M_SETTING->setValue(MusicSettingManager::PlayModeChoiced, m_musicList->playbackMode());
     M_SETTING->setValue(MusicSettingManager::VolumeChoiced, ui->musicSoundSlider->value());
     lastPlayIndexChoiced = M_SETTING->value(MusicSettingManager::LastPlayIndexChoiced).toStringList();
-    lastPlayIndexChoiced[1] = QString::number(m_musicSongTree->getCurrentPlayToolIndex());
-    lastPlayIndexChoiced[2] = QString::number(m_musicList->currentIndex());
-    M_SETTING->setValue(MusicSettingManager::LastPlayIndexChoiced,lastPlayIndexChoiced);
+    if(lastPlayIndexChoiced.isEmpty())
+    {
+        lastPlayIndexChoiced << "0" << "0" << "-1";
+    }
+    else
+    {
+        lastPlayIndexChoiced[1] = QString::number(m_musicSongTree->getCurrentPlayToolIndex());
+        lastPlayIndexChoiced[2] = QString::number(m_musicList->currentIndex());
+    }
+    M_SETTING->setValue(MusicSettingManager::LastPlayIndexChoiced, lastPlayIndexChoiced);
     M_SETTING->setValue(MusicSettingManager::BgThemeChoiced, m_topAreaWidget->getBgSkin());
     M_SETTING->setValue(MusicSettingManager::BgTransparentChoiced, m_topAreaWidget->getBgSkinAlpha());
     M_SETTING->setValue(MusicSettingManager::BgListTransparentChoiced, m_topAreaWidget->getListBgSkinAlpha());
@@ -428,8 +442,8 @@ void MusicApplication::positionChanged(qint64 position)
 void MusicApplication::durationChanged(qint64 duration)
 {
     //Show the current play total time
-    ui->musicTimeWidget->setRange(0,duration);
-    ui->playTotalTime->setText(MusicTime::msecTime2LabelJustified(duration));
+    ui->musicTimeWidget->setRange(0, duration);
+    ui->playTotalTime->setText("/" + MusicTime::msecTime2LabelJustified(duration));
     //Loading the current song lrc
     musicLoadCurrentSongLrc();
 #ifdef MUSIC_DEBUG
@@ -441,9 +455,9 @@ void MusicApplication::showCurrentSong(int index)
 {
     if( index > -1 ) //The list to end
     {
-        m_musicSongTree->selectRow(index);
+        m_musicSongTree->selectRow(index);      
         QString name = m_musicSongTree->getMusicSongsFileName(m_musicSongTree->currentIndex())[index];
-        ui->showCurrentSong->setText(tr("Playing")+QString(": %1 = = %2").arg(index + 1).arg(name));
+        ui->showCurrentSong->setText( name );
         //Show the current play song information
         M_BG_MANAGER->clearArtName();
         m_rightAreaWidget->musicCheckHasLrcAlready();
@@ -470,6 +484,11 @@ void MusicApplication::stateChanged()
 {
     m_playControl = true;
     ui->musicKey->setIcon(QIcon(QString::fromUtf8(":/image/play")));
+}
+
+void MusicApplication::musicImportPlay()
+{
+    musicPlayIndex(m_musicList->mediaCount() - 1, 0);
 }
 
 void MusicApplication::musicKey()
@@ -578,22 +597,21 @@ void MusicApplication::musicPlayItemOnce()
     createPlayModeMenuIcon(m_playModeMenu);
 }
 
-void MusicApplication::musicVolumeNULL()
+void MusicApplication::musicVolumeMute()
 {
     if(!m_musicPlayer->isMuted())
     {
         m_musicPlayer->setMuted(true);
-        ui->musicSound->setStyleSheet(MusicUIObject::MCustomStyle24);
+        ui->musicSound->setStyleSheet(MusicUIObject::MCustomStyle25);
     }
     else
     {
         m_musicPlayer->setMuted(false);
-        ui->musicSound->setStyleSheet(MusicUIObject::MCustomStyle25);
+        ui->musicSound->setStyleSheet(MusicUIObject::MCustomStyle24);
     }
     ui->musicSoundSlider->blockSignals(true);
     ui->musicSoundSlider->setValue(m_musicPlayer->volume());
     ui->musicSoundSlider->blockSignals(false);
-    ui->volumeValue->setText(QString("%1%").arg(m_musicPlayer->volume()));
     M_SETTING->setValue(MusicSettingManager::VolumeChoiced, m_musicPlayer->volume());
 }
 
@@ -602,7 +620,6 @@ void MusicApplication::musicVolumeChanged(int volume)
     m_topAreaWidget->setVolumeValue(volume);
     m_bottomAreaWidget->setVolumeValue(volume);
     m_musicPlayer->setVolume(volume);
-    ui->volumeValue->setText(QString("%1%").arg(volume));
     (volume > 0) ? ui->musicSound->setStyleSheet(MusicUIObject::MCustomStyle24)
                  : ui->musicSound->setStyleSheet(MusicUIObject::MCustomStyle25);
     M_SETTING->setValue(MusicSettingManager::VolumeChoiced, volume);
@@ -682,8 +699,8 @@ void MusicApplication::musicImportSongs()
 {
     QMenu menu;
     menu.setStyleSheet(MusicUIObject::MMenuStyle02);
-    menu.addAction(tr("openOnlyFiles"),this,SLOT(musicImportSongsOnlyFile()));
-    menu.addAction(tr("openOnlyDir"),this,SLOT(musicImportSongsOnlyDir()));
+    menu.addAction(tr("openOnlyFiles"), this, SLOT(musicImportSongsOnlyFile()));
+    menu.addAction(tr("openOnlyDir"), this, SLOT(musicImportSongsOnlyDir()));
     menu.addSeparator();
     menu.addAction(tr("dragAnddrop"))->setEnabled(false);
     menu.exec(QCursor::pos());
@@ -740,11 +757,26 @@ void MusicApplication::musicCurrentPlayLocation()
 
 void MusicApplication::setDeleteItemAt(const MIntList &index)
 {
+    if(index.isEmpty())
+    {
+        return;
+    }
+
+    bool contains = false;
+    int oldIndex = m_musicList->currentIndex();
     for(int i=index.count() - 1; i>=0; --i)
     {
         m_musicList->removeMedia(index[i]);
+        if(i != 0 && !contains && oldIndex <= index[i] && oldIndex >= index[i - 1])
+        {
+            oldIndex -= i;
+            contains = true;
+        }
     }
-    int oldIndex = m_musicList->currentIndex();
+    if(!contains && m_musicList->currentIndex() > index[0])
+    {
+        oldIndex -= index.count();
+    }
     if( oldIndex == m_musicList->mediaCount())  //Play index error correction
     {
         --oldIndex;
@@ -759,6 +791,7 @@ void MusicApplication::setDeleteItemAt(const MIntList &index)
 
 void MusicApplication::getParameterSetting()
 {
+    m_object->getParameterSetting();
     m_rightAreaWidget->getParameterSetting();
     bool config = M_SETTING->value(MusicSettingManager::CloseEventChoiced).toBool();
     m_bottomAreaWidget->setSystemCloseConfig(config);
@@ -776,7 +809,7 @@ void MusicApplication::musicSearchIndexChanged(int, int index)
     {
         searchResult << j;
     }
-    m_searchfileListCache.insert(index,searchResult);
+    m_searchfileListCache.insert(index, searchResult);
     m_musicSongTree->setMusicSongsSearchedFileName(searchResult);
 }
 
@@ -789,8 +822,8 @@ void MusicApplication::musicLoadCurrentSongLrc()
     {
         return;
     }
-    QString filename = LRC_DOWNLOAD + m_musicSongTree->getMusicSongsFileName( \
-              m_currentMusicSongTreeIndex)[m_musicList->currentIndex()] + LRC_FILE;
+    QString filename = LRC_DOWNLOAD_AL + m_musicSongTree->getMusicSongsFileName(m_currentMusicSongTreeIndex)
+                                         [m_musicList->currentIndex()] + LRC_FILE;
     m_rightAreaWidget->loadCurrentSongLrc(getCurrentFileName(), filename);
 }
 
@@ -812,7 +845,7 @@ bool MusicApplication::checkMusicListCurrentIndex() const
 void MusicApplication::musicCurrentLrcUpdated()
 {
     QString filename = getCurrentFileName();
-    QFile file(LRC_DOWNLOAD + filename + LRC_FILE);
+    QFile file(LRC_DOWNLOAD_AL + filename + LRC_FILE);
     if(file.exists())
     {
         file.remove();
@@ -845,12 +878,13 @@ void MusicApplication::setPlaySongChanged(int index)
     {
         return;
     }
-    musicPlayIndex(index,0);
+    musicPlayIndex(index, 0);
 }
 
 void MusicApplication::setStopSongChanged()
 {
-    m_musicPlayer->pause();
+    m_playControl = false;
+    musicKey();
 }
 
 void MusicApplication::addSongToPlayList(const QStringList &item)

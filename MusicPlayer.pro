@@ -5,10 +5,13 @@
 #-------------------------------------------------
 
 QT       += core gui xml sql
-QT       += multimedia multimediawidgets
-QT       += winextras
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+equals(QT_MAJOR_VERSION, 4){
+QT       += multimedia network script
+}
+equals(QT_MAJOR_VERSION, 5){
+QT       += widgets multimediawidgets
+}
 
 TARGET = MusicPlayer
 #TARGET = MusicCore
@@ -16,39 +19,47 @@ TARGET = MusicPlayer
 TEMPLATE = app
 #LIBS += -L"./" -lMusicCore
 #TEMPLATE = lib
-LIBS += -L"./MPlugins/" -llibzplay
 
+win32{
+    equals(QT_MAJOR_VERSION, 5):{
+    QT   += winextras
+        msvc{
+            LIBS += -L"./MPlugins" -llibzplay
+            #support on windows XP
+            QMAKE_LFLAGS_WINDOWS += /SUBSYSTEM:WINDOWS,5.01
+        }
+
+        gcc{
+            LIBS += ./MPlugins/libzplay.a
+            QMAKE_CXXFLAGS += -std=c++11
+            QMAKE_CXXFLAGS += -Wunused-function
+            QMAKE_CXXFLAGS += -Wswitch
+        }
+    }
+    equals(QT_MAJOR_VERSION, 4):{
+            LIBS += ./MPlugins/libzplay.a
+            QMAKE_CXXFLAGS += -std=c++11
+            QMAKE_CXXFLAGS += -Wunused-function
+            QMAKE_CXXFLAGS += -Wswitch
+    }
+}
 DEFINES += MUSIC_LIBRARY
 
-INCLUDEPATH += $$PWD/core \
-               $$PWD/core\network \
-               $$PWD/core-widget \
-               $$PWD/localsearch \
-               $$PWD/lrcmanager \
-               $$PWD/remotewidget \
-               $$PWD/toolsetswidget \
-               $$PWD/toolswidget \
-               $$PWD/usermanager \
-               $$PWD/videokits \
-               $$PWD/
+INCLUDEPATH += $$PWD
 
-TRANSLATIONS += language/cn.ts \
-                language/cn_c.ts \
-                language/en.ts
+TRANSLATIONS += musicLanguage/cn.ts \
+                musicLanguage/cn_c.ts \
+                musicLanguage/en.ts
 
-#support on windows XP
-QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
-
-
-include(core/MusicCore.pri)
-include(core-widget/MusicWidget.pri)
-include(localsearch/MusicLocalSearch.pri)
-include(lrcmanager/MusicLrc.pri)
-include(remotewidget/MusicRemote.pri)
-include(toolsetswidget/MusicToolsSets.pri)
-include(toolswidget/MusicToolsWidget.pri)
-include(usermanager/MusicUser.pri)
-include(videokits/MusicVideo.pri)
+include(musicCore/MusicCore.pri)
+include(musicWidget/MusicWidget.pri)
+include(musicLocalsearch/MusicLocalSearch.pri)
+include(musicLrcmanager/MusicLrc.pri)
+include(musicRemotewidget/MusicRemote.pri)
+include(musicToolsetswidget/MusicToolsSets.pri)
+include(musicToolswidget/MusicToolsWidget.pri)
+include(musicUsermanager/MusicUser.pri)
+include(musicVideokits/MusicVideo.pri)
 
 
 SOURCES += \
@@ -71,12 +82,12 @@ HEADERS  += \
 
 
 FORMS    += \
-    ui/application/musicapplication.ui
+    musicUi/application/musicapplication.ui
 
 
 RESOURCES += \
-    qrc/MusicPlayerShare.qrc \
-    qrc/MusicPlayer.qrc \
+    musicQrc/MusicPlayerShare.qrc \
+    musicQrc/MusicPlayer.qrc \
 
 RC_FILE = \
     MusicPlayer.rc

@@ -38,6 +38,7 @@ public:
     QString getCurrentFileName() const;
     bool checkMusicListCurrentIndex() const;
     void musicLoadCurrentSongLrc();
+    void musicImportSongsSettingPath(const QStringList &path);
 
 public slots:
     void quitWindowClose();
@@ -53,7 +54,7 @@ public slots:
     void musicPlayListLoop();
     void musicPlayOneLoop();
     void musicPlayItemOnce();
-    void musicVolumeNULL();
+    void musicVolumeMute();
     void musicVolumeChanged(int volume);
     void musicImportSongs();
     void musicImportSongsOnlyFile();
@@ -67,6 +68,7 @@ public slots:
     void musicAddSongToLovestListAt();
     void musicWindowConciseChanged();
     void musicEnhancedMusicChanged(int type);
+    void musicImportPlay();
     /////////////////////////////////////////////
     //This is a slot by MusicLocalSongSearch's signal emit
     void musicSearchIndexChanged(int row, int col);
@@ -92,18 +94,23 @@ protected:
     void initWindowSurface();
     void createPlayModeMenu(QMenu &menu);
     void createPlayModeMenuIcon(QMenu &menu);
-    virtual void closeEvent(QCloseEvent *event);
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent *event);
-    virtual void dropEvent(QDropEvent *event);
-    virtual void contextMenuEvent(QContextMenuEvent *event);
-    virtual void keyPressEvent(QKeyEvent *event);
-    virtual void keyReleaseEvent(QKeyEvent *event);
-    virtual bool nativeEvent(const QByteArray &, void *, long *);
+    virtual void closeEvent(QCloseEvent *event) override;
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual void dragMoveEvent(QDragMoveEvent *event) override;
+    virtual void dropEvent(QDropEvent *event) override;
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void keyReleaseEvent(QKeyEvent *event) override;
+#if defined(Q_OS_WIN)
+#  ifdef MUSIC_QT_5
+     virtual bool nativeEvent(const QByteArray &, void *, long *) override;
+#  else
+     virtual bool winEvent(MSG *message, long *result) override;
+#  endif
+#endif
 
     void readXMLConfigFromText();
     void writeXMLConfigToText();
-    void musicImportSongsSettingPath(const QStringList &path);
 
 private:
     Ui::MusicApplication *ui;

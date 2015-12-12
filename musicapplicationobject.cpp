@@ -9,18 +9,22 @@
 #include "musicequalizerdialog.h"
 #include "musicconnectionpool.h"
 #include "musicsettingmanager.h"
+#include "musicregeditmanager.h"
 
 #include <QPropertyAnimation>
 #include <QApplication>
-#include <QDebug>
+#include <QDesktopWidget>
 
 MusicApplicationObject::MusicApplicationObject(QObject *parent)
-    : QObject(parent), m_mobileDevices(NULL)
+    : QObject(parent), m_mobileDevices(nullptr)
 {
     m_supperClass = static_cast<QWidget*>(parent);
+    QWidget *widget = QApplication::desktop();
+    m_supperClass->move( (widget->width() - m_supperClass->width())/2,
+                         (widget->height() - m_supperClass->height())/2 );
+    M_SETTING->setValue(MusicSettingManager::ScreenSize, widget->size());
 
     windowStartAnimationOpacity();
-
     m_musicTimerAutoObj = new MusicTimerAutoObject(this);
     connect(m_musicTimerAutoObj, SIGNAL(setPlaySong(int)), parent,
                                  SLOT(setPlaySongChanged(int)));
@@ -28,9 +32,9 @@ MusicApplicationObject::MusicApplicationObject(QObject *parent)
                                  SLOT(setStopSongChanged()));
 
     m_setWindowToTop = false;
-    M_Connection->setValue("MusicApplicationObject", this);
-    M_Connection->connect("MusicApplicationObject", "MusicApplication");
-    M_Connection->connect("MusicApplicationObject", "MusicEnhancedWidget");
+    M_CONNECTION->setValue("MusicApplicationObject", this);
+    M_CONNECTION->connect("MusicApplicationObject", "MusicApplication");
+    M_CONNECTION->connect("MusicApplicationObject", "MusicEnhancedWidget");
 
     musicToolSetsParameter();
 }
@@ -40,6 +44,15 @@ MusicApplicationObject::~MusicApplicationObject()
     delete m_mobileDevices;
     delete m_musicTimerAutoObj;
     delete m_animation;
+}
+
+void MusicApplicationObject::getParameterSetting()
+{
+    if(M_SETTING->value(MusicSettingManager::FileAssociationChoiced).toInt())
+    {
+        MusicRegeditManager regeditManager;
+        regeditManager.setMusicRegeditAssociateFileIcon();
+    }
 }
 
 void MusicApplicationObject::windowStartAnimationOpacity()
@@ -61,10 +74,16 @@ void MusicApplicationObject::windowCloseAnimationOpacity()
     QTimer::singleShot(1000, qApp, SLOT(quit()));
 }
 
+#if defined(Q_OS_WIN)
+#  ifdef MUSIC_QT_5
 void MusicApplicationObject::nativeEvent(const QByteArray &,
                                          void *message, long *)
 {
     MSG* msg = reinterpret_cast<MSG*>(message);
+#  else
+void MusicApplicationObject::winEvent(MSG *msg, long *)
+{
+#  endif
     if(msg->message == WM_DEVICECHANGE)
     {
         PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)msg->lParam;
@@ -86,7 +105,8 @@ void MusicApplicationObject::nativeEvent(const QByteArray &,
                                 break;
                             unitmask = unitmask >> 1;
                         }
-                        M_LOOGER << "USB_Arrived and The USBDisk is: "<<(char)(i + 'A');
+                        M_LOGGER << "USB_Arrived and The USBDisk is: "
+                                 << (char)(i + 'A') << LOG_END;
                         delete m_mobileDevices;
                         m_mobileDevices = new MusicMobileDevicesWidget;
                         m_mobileDevices->show();
@@ -99,9 +119,9 @@ void MusicApplicationObject::nativeEvent(const QByteArray &,
                     PDEV_BROADCAST_VOLUME lpdbv = (PDEV_BROADCAST_VOLUME)lpdb;
                     if (lpdbv -> dbcv_flags == 0)
                     {
-                        M_LOOGER << "USB_remove";
+                        M_LOGGER << "USB_remove" << LOG_END;
                         delete m_mobileDevices;
-                        m_mobileDevices = NULL;
+                        m_mobileDevices = nullptr;
                     }
                 }
                 break;
@@ -109,6 +129,7 @@ void MusicApplicationObject::nativeEvent(const QByteArray &,
         }
     }
 }
+#endif
 
 void MusicApplicationObject::musicAboutUs()
 {

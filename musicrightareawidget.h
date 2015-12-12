@@ -12,7 +12,7 @@
 #include <QWidget>
 #include "musiclibexportglobal.h"
 
-class MusicVideoPlayer;
+class MusicVideoPlayWidget;
 class MusicSettingWidget;
 class MusicDownloadStatusLabel;
 class MusicLrcContainerForDesktop;
@@ -65,17 +65,19 @@ public slots:
     void musicVideoButtonSearched(const QString &name);
     void musicVideoSetPopup(bool popup);
     void musicVideoFullscreen(bool full);
+    void musicLrcDisplayAllButtonClicked();
 
 protected:
     void createVideoWidget(bool create);
     void musicButtonStyleClear();
 
+    bool m_lrcDisplayAll;
     QWidget *m_supperClass;
     Ui::MusicApplication *m_ui;
     MusicSettingWidget *m_setting;
     MusicLrcContainerForDesktop *m_musiclrcfordesktop;
     MusicDownloadStatusLabel *m_downloadStatusLabel;
-    MusicVideoPlayer *m_videoPlayer;
+    MusicVideoPlayWidget *m_videoPlayer;
 
 };
 
