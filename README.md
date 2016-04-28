@@ -1,30 +1,43 @@
-# QMusicPlayer
-
-[![Join the chat at https://gitter.im/syoyo/tinyobjloader](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/syoyo/tinyobjloader?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-[![Build status](https://ci.appveyor.com/api/projects/status/tlb421q3t2oyobcn/branch/master?svg=true)](https://ci.appveyor.com/project/syoyo/tinyobjloader/branch/master)
-
-[![wercker status](https://app.wercker.com/status/495a3bac400212cdacdeb4dd9397bf4f/m "wercker status")](https://app.wercker.com/project/bykey/495a3bac400212cdacdeb4dd9397bf4f)
+# TTKMusicPlayer
 
 Usage
 ----
-The music player use of  libzplay(http://sourceforge.net/projects/libzplay) library based on Qt.
+The music player use of qmmp core ( http://pan.baidu.com/s/1bv4iSY ) library based on Qt.
+Compiler tutorial I have written in the wiki.
  * Qt develop version be tested on Qt4.8.7 for windows-mingw 32bit
- * Qt develop version be tested on Qt5.5.0 for windows-msvc 2013 32bit
- * Qt develop version be tested on Qt5.5.0 for windows-mingw 32bit
-
+ * Qt develop version be tested on Qt4.8.6 for ubuntu-linux-gcc 64bit
+ * Qt develop version be tested on Qt5.x for windows-mingw 32bit
+ * Qt develop version be tested on Qt5.x for windows-msvc 32bit
+ * Qt develop version be tested on Qt5.x for ubuntu-linux-gcc 64bit
+ 
 # For Developers
 
 License
 ---
-QMusicPlayer is free software licensed under the term of GPL v2. If you use QMusicPlayer or its constituent libraries, you must adhere to the terms of the license in question.
+TTKMusicPlayer is free software licensed under the term of GPL v2. If you use TTKMusicPlayer or its constituent libraries, you must adhere to the terms of the license in question.
 
 Features
 -------
-QMusicPlayer can meet your most demands
- * Support for multiple music formats (mp3, mp2, mp1, wav, ogg, flac, ac3, aac, oga, pcm).
- * 
-Junior fans interface. Interface cool, gorgeous pop. Maintaining a perfect performance under Vista and XP, refreshing
+TTKMusicPlayer can meet your most demands
+ * Support for multiple music formats.
+ * SID File(*.sid *.mus *.str *.prg *.P00) on linux
+ * MusePack File(*.mpc)
+ * WavPack File(*.wv)
+ * Ogg Vorbis File(*.ogg)
+ * Ogg Opus File(*.opus)
+ * ADTS AAC File(*.aac)
+ * MIDI File(*.mid)
+ * PCM File(*.wav *.au *.snd *.aif *.aiff *.8svx *.sph *.sf *.voc *.w64)
+ * CUE File(*.cue)
+ * MPEG File(*.mp1 *.mp2 *.mp3 *.wav)
+ * Game File(*.ay *.gms *.gym *.hes *.kss *.nsf *.nsfe *.sap *.spc *.vgm *.vgz)
+ * FLAC File(*.flac *.oga)
+ * Monkey's Audio File(*.ape)
+ * FFmpeg File(*.wma *.ape *.tta *.m4a *.ra *.shn *.vqf *.ac3)
+ * ModPlug File(*.mod *.s3m *.xm *.it *.669 *.amf *.ams *.dbm *.dmf *.dsm *.far,mdl *.med *.mtm 
+                *.okt *.ptm *.stm *.ult *.umx *.mt2 *.psm *.mdz *.s3z *.xmz *.itz *.mdr *.s3r
+                *.xmr *.itr *.dgz *.s3gz *.xmgz *.itgz)
+ * Junior fans interface. Interface cool, gorgeous pop. Maintaining a perfect performance under Vista and XP, refreshing
 Screenshots.
  * 
 Search and high-speed downloads. Song search accuracy optimization, intelligent save bandwidth, you can disable the network function, 8 source download speed.
@@ -43,33 +56,39 @@ Screenshots
 ----
 
 Index
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/1.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/1.jpg?raw=true)
 
 Search
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/2.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/2.jpg?raw=true)
 
 Lrc
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/3.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/3.jpg?raw=true)
 
 Desktop-lrc
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/4.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/4.jpg?raw=true)
 
 Remote Controller
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/5.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/5.jpg?raw=true)
 
 Lrc Display Expand
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/6.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/6.jpg?raw=true)
 
 MV
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/7.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/7.jpg?raw=true)
+
+Video Barrage
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/8.jpg?raw=true)
 
 Magic Music
-![Rungholt](https://github.com/Greedysky/QMusicPlayer/blob/plugins/8.png?raw=true)
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/9.jpg?raw=true)
+
+App Narrow
+![Rungholt](https://github.com/Greedysky/TTKMusicPlayer/blob/plugins/10.jpg?raw=true)
 
 Copyright
 -------
- * This file is part of the Music Player project.
- * Copyright (c) 2014 - 2015 Greedysky Studio.
+ * This file is part of the TTK Music Player project.
+ * Copyright (c) 2014 - 2016 Greedysky Studio.
  * All rights reserved!
  * Redistribution and use of the source code or any derivative.
  * works are strictly forbiden.
