@@ -9,7 +9,6 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QWidget>
 #include "musiclrcmanager.h"
 #include "musicobject.h"
 #include "musicuiobject.h"
@@ -31,6 +30,10 @@ public:
      */
     virtual ~MusicLrcContainer();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startTimerClock() = 0;
     /*!
      * Start timer clock to draw lrc.
@@ -102,6 +105,10 @@ public Q_SLOTS:
     void theLinkLrcChanged();
     /*!
      * Link current lrc state changed.
+     */
+    void theCurrentLrcError();
+    /*!
+     * Show making error lrcs widget.
      */
 
 protected:

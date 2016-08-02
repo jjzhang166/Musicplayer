@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MusicVolumeGainWidget</string>
+   <string>音乐增强界面</string>
   </property>
   <widget class="QLabel" name="background">
    <property name="geometry">
@@ -203,7 +203,7 @@ QProgressBar::chunk {
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background:transparent</string>
+     <string notr="true">QGroupBox{border:1px solid #FFF;background:transparent;}</string>
     </property>
     <property name="title">
      <string/>

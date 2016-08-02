@@ -1,7 +1,7 @@
 #include "musicradiothreadabstract.h"
 
 MusicRadioThreadAbstract::MusicRadioThreadAbstract(QObject *parent, QNetworkCookieJar *cookie)
-    : QObject(parent), m_reply(nullptr), m_manager(nullptr)
+    : MusicNetworkAbstract(parent)
 {
     m_cookJar = cookie;
 }
@@ -11,22 +11,7 @@ MusicRadioThreadAbstract::~MusicRadioThreadAbstract()
     deleteAll();
 }
 
-void MusicRadioThreadAbstract::deleteAll()
+QString MusicRadioThreadAbstract::getClassName()
 {
-    if(m_reply)
-    {
-        m_reply->deleteLater();;
-        m_reply = nullptr;
-    }
-    if(m_manager)
-    {
-        m_manager->deleteLater();;
-        m_manager = nullptr;
-    }
-}
-
-void MusicRadioThreadAbstract::replyError(QNetworkReply::NetworkError)
-{
-    emit networkReplyFinished("The file create failed");
-    deleteAll();
+    return staticMetaObject.className();
 }

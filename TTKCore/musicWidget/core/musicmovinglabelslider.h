@@ -9,14 +9,14 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QSlider>
 #include <QLabel>
 #include "musicglobaldefine.h"
+#include "musicclickedslider.h"
 
 /*! @brief The class of the slider that can show such as tooltip.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicMovingLabelSlider : public QSlider
+class MUSIC_WIDGET_EXPORT MusicMovingLabelSlider : public MusicClickedSlider
 {
     Q_OBJECT
 public:
@@ -24,13 +24,16 @@ public:
     /*!
      * Object contsructor.
      */
-    explicit MusicMovingLabelSlider(Qt::Orientation orientation,
-                                    QWidget *parent = 0);
+    explicit MusicMovingLabelSlider(Qt::Orientation orientation, QWidget *parent = 0);
     /*!
      * Object contsructor by slider orientation.
      */
     ~MusicMovingLabelSlider();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     inline bool isMoving() const { return m_isMoving;}
     /*!
      * Slider is now moving or not.
@@ -52,19 +55,10 @@ public Q_SLOTS:
      * Set slider current value.
      */
 
-private Q_SLOTS:
-    void sliderMovedChanged();
-    /*!
-     * Slider start to move or stop to move just.
-     */
-    void sliderReleasedChanged();
-    /*!
-     * Slider stop to move just.
-     */
-
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void enterEvent(QEvent *event) override;
     virtual void leaveEvent(QEvent *event) override;
     /*!

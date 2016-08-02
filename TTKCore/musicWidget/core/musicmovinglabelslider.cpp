@@ -1,15 +1,16 @@
 #include "musicmovinglabelslider.h"
 #include "musictime.h"
 
+#include <QDebug>
+
 MusicMovingLabelSlider::MusicMovingLabelSlider(QWidget *parent)
-    : MusicMovingLabelSlider(Qt::Vertical, parent)
+    : MusicMovingLabelSlider(Qt::Horizontal, parent)
 {
 
 }
 
-MusicMovingLabelSlider::MusicMovingLabelSlider(Qt::Orientation orientation,
-                                               QWidget *parent)
-    : QSlider(orientation, parent)
+MusicMovingLabelSlider::MusicMovingLabelSlider(Qt::Orientation orientation, QWidget *parent)
+    : MusicClickedSlider(orientation, parent)
 {
     setMouseTracking(true);
 
@@ -21,9 +22,6 @@ MusicMovingLabelSlider::MusicMovingLabelSlider(Qt::Orientation orientation,
     m_textLabel->setAlignment(Qt::AlignCenter);
     m_textLabel->setStyleSheet("QLabel{color:#888888; background-color:#FFE6E6; \
                                        border:1px solid gray;}");
-
-    connect(this, SIGNAL(sliderMoved(int)), SLOT(sliderMovedChanged()));
-    connect(this, SIGNAL(sliderReleased()), SLOT(sliderReleasedChanged()));
 }
 
 MusicMovingLabelSlider::~MusicMovingLabelSlider()
@@ -31,34 +29,35 @@ MusicMovingLabelSlider::~MusicMovingLabelSlider()
     delete m_textLabel;
 }
 
+QString MusicMovingLabelSlider::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicMovingLabelSlider::setValue(int value)
 {
     if(!m_isMoving)
     {
-        QSlider::setValue(value);
+        MusicClickedSlider::setValue(value);
     }
-}
-
-void MusicMovingLabelSlider::sliderMovedChanged()
-{
-    m_isMoving = true;
-}
-
-void MusicMovingLabelSlider::sliderReleasedChanged()
-{
-    m_isMoving = false;
-    emit sliderReleasedAt( value() );
 }
 
 void MusicMovingLabelSlider::mousePressEvent(QMouseEvent *event)
 {
-    QSlider::mousePressEvent(event);
+    MusicClickedSlider::mousePressEvent(event);
+    m_isMoving = false;
+    emit sliderMoved( m_value );
     m_textLabel->raise();
 }
 
 void MusicMovingLabelSlider::mouseMoveEvent(QMouseEvent *event)
 {
-    QSlider::mouseMoveEvent(event);
+    MusicClickedSlider::mouseMoveEvent(event);
+    if(m_mousePress)
+    {
+        m_isMoving = true;
+        emit sliderMoved( m_value );
+    }
 
     QPoint curPos = mapFromGlobal(QCursor::pos());
     QPoint glbPos = mapToGlobal(QPoint(0, 0));
@@ -78,15 +77,22 @@ void MusicMovingLabelSlider::mouseMoveEvent(QMouseEvent *event)
     m_textLabel->setText(MusicTime::msecTime2LabelJustified(changePos.y()));
 }
 
+void MusicMovingLabelSlider::mouseReleaseEvent(QMouseEvent *event)
+{
+    MusicClickedSlider::mouseReleaseEvent(event);
+    emit sliderReleasedAt( m_value );
+    m_isMoving = false;
+}
+
 void MusicMovingLabelSlider::enterEvent(QEvent *event)
 {
-    QSlider::enterEvent(event);
+    MusicClickedSlider::enterEvent(event);
     m_textLabel->show();
 }
 
 void MusicMovingLabelSlider::leaveEvent(QEvent *event)
 {
-    QSlider::leaveEvent(event);
+    MusicClickedSlider::leaveEvent(event);
     m_textLabel->hide();
 }
 

@@ -14,12 +14,17 @@ MusicLocalSongSearchPopTableWidget::MusicLocalSongSearchPopTableWidget(QWidget *
     QHeaderView *headerview = horizontalHeader();
     headerview->resizeSection(0, 215);
     headerview->resizeSection(1, 62);
-    MusicUtils::setTransparent(this, 255);
+    MusicUtils::UWidget::setTransparent(this, 255);
 }
 
 MusicLocalSongSearchPopTableWidget::~MusicLocalSongSearchPopTableWidget()
 {
     clearAllItems();
+}
+
+QString MusicLocalSongSearchPopTableWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLocalSongSearchPopTableWidget::clearAllItems()
@@ -56,7 +61,8 @@ void MusicLocalSongSearchPopTableWidget::listCellClicked(int row, int)
 MusicLocalSongSearchPopWidget::MusicLocalSongSearchPopWidget(QWidget *parent)
     : QWidget(parent)
 {
-    setGeometry(304, 60, 0, 0);
+    move(545, 45);
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -77,6 +83,11 @@ MusicLocalSongSearchPopWidget::~MusicLocalSongSearchPopWidget()
 {
     delete m_popTableWidget;
     delete m_clearButton;
+}
+
+QString MusicLocalSongSearchPopWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLocalSongSearchPopWidget::createItems()
@@ -103,7 +114,7 @@ void MusicLocalSongSearchPopWidget::createItems()
 
 QString MusicLocalSongSearchPopWidget::utcTimeToLocal(const QString &time) const
 {
-    qint64 t = (QDateTime::currentMSecsSinceEpoch() - time.toLongLong()) / 1000;
+    qint64 t = (QDateTime::currentMSecsSinceEpoch() - time.toLongLong()) / MT_S2MS;
     return MusicTime::normalTime2Label(t);
 }
 
@@ -115,6 +126,7 @@ void MusicLocalSongSearchPopWidget::clearButtonClicked()
         return;
     }
     search.writeSearchConfig( MusicSearchRecord() );
+    close();
 }
 
 void MusicLocalSongSearchPopWidget::leaveEvent(QEvent *event)

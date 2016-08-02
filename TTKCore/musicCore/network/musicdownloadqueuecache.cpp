@@ -27,14 +27,29 @@ MusicDownloadQueueCache::~MusicDownloadQueueCache()
     if(m_request)
     {
         delete m_request;
+        m_request = nullptr;
     }
     deleteAll();
+}
+
+QString MusicDownloadQueueCache::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicDownloadQueueCache::startToDownload()
 {
     m_manager = new QNetworkAccessManager(this);
     m_request = new QNetworkRequest();
+#ifndef QT_NO_SSL
+    connect(m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
+                       SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
+    M_LOGGER_INFO(QString("%1 Support ssl: %2").arg(getClassName()).arg(QSslSocket::supportsSsl()));
+
+    QSslConfiguration sslConfig = m_request->sslConfiguration();
+    sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
+    m_request->setSslConfiguration(sslConfig);
+#endif
     if(!m_imageQueue.isEmpty())
     {
         startOrderImageQueue();
@@ -61,25 +76,25 @@ void MusicDownloadQueueCache::addImageQueue(const QStringList &url,
     m_imageQueue.clear();
     for(int i=0; i<url.count(); ++i)
     {
-        DownloadData data;
-        data.url = url[i];
-        data.savePath = savePath[i];
+        DownloadQueueData data;
+        data.m_url = url[i];
+        data.m_savePath = savePath[i];
         m_imageQueue << data;
     }
 }
 
 void MusicDownloadQueueCache::startOrderImageQueue()
 {
-    if(!m_imageQueue.isEmpty() && M_NETWORK->isOnline())
+    if(!m_imageQueue.isEmpty() && M_NETWORK_PTR->isOnline())
     {
-        if(QFile::exists(m_imageQueue.first().savePath))
+        if(QFile::exists(m_imageQueue.first().m_savePath))
         {
-            emit musicDownLoadFinished(m_imageQueue.takeFirst().savePath);
+            emit downLoadDataChanged(m_imageQueue.takeFirst().m_savePath);
             startOrderImageQueue();
         }
         else
         {
-            startDownload(m_imageQueue.first().url);
+            startDownload(m_imageQueue.first().m_url);
         }
     }
 }
@@ -88,7 +103,7 @@ void MusicDownloadQueueCache::startDownload(const QString &url)
 {
     m_isDownload = true;
     delete m_file;
-    m_file = new QFile( m_imageQueue.first().savePath, this);
+    m_file = new QFile( m_imageQueue.first().m_savePath, this);
     if(!m_file->open(QFile::WriteOnly))
     {
         m_file->close();
@@ -96,7 +111,7 @@ void MusicDownloadQueueCache::startDownload(const QString &url)
         m_file = nullptr;
         return;
     }
-    m_timer.start(1000);
+    m_timer.start(MT_S2MS);
 
     m_request->setUrl(QUrl(url));
     m_reply = m_manager->get(*m_request);
@@ -119,7 +134,7 @@ void MusicDownloadQueueCache::downLoadFinished()
     m_reply->deleteLater();
     m_reply = nullptr;
     m_isDownload = false;
-    emit musicDownLoadFinished(m_imageQueue.takeFirst().savePath);
+    emit downLoadDataChanged(m_imageQueue.takeFirst().m_savePath);
 
     startOrderImageQueue();
 }

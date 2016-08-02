@@ -8,8 +8,7 @@
 #include "musicsettingmanager.h"
 #include "musicconnectionpool.h"
 #include "musicnetworkthread.h"
-
-#include <QLabel>
+#include "musicsongsearchonlinewidget.h"
 
 MusicDownloadStatusLabel::MusicDownloadStatusLabel(QWidget *w)
     : QObject(w)
@@ -17,9 +16,9 @@ MusicDownloadStatusLabel::MusicDownloadStatusLabel(QWidget *w)
     m_parentWidget = MStatic_cast(MusicApplication*, w);
     m_downloadLrcThread = nullptr;
 
-    M_CONNECTION->setValue("MusicDownloadStatusLabel", this);
-    M_CONNECTION->poolConnect("MusicSongSearchOnlineTableWidget", "MusicDownloadStatusLabel");
-    M_CONNECTION->poolConnect("MusicNetworkThread", "MusicDownloadStatusLabel");
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(MusicSongSearchOnlineTableWidget::getClassName(), getClassName());
+    M_CONNECTION_PTR->poolConnect(MusicNetworkThread::getClassName(), getClassName());
 }
 
 MusicDownloadStatusLabel::~MusicDownloadStatusLabel()
@@ -27,30 +26,34 @@ MusicDownloadStatusLabel::~MusicDownloadStatusLabel()
     delete m_downloadLrcThread;
 }
 
+QString MusicDownloadStatusLabel::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicDownloadStatusLabel::showDownLoadInfoFor(MusicObject::DownLoadType type)
 {
     QString stringType;
     switch(type)
     {
-        case MusicObject::DisConnection:
-            stringType = ":/download/disconnection";
+        case MusicObject::DW_DisConnection:
+            stringType = "disconnection";
             break;
-        case MusicObject::DownLoading:
-            stringType = ":/download/downloading";
+        case MusicObject::DW_DownLoading:
+            stringType = "downloading";
             break;
-        case MusicObject::Buffing:
-            stringType = ":/download/buffing";
+        case MusicObject::DW_Buffing:
+            stringType = "buffing";
             break;
-        case MusicObject::Waiting:
+        case MusicObject::DW_Waiting:
             break;
-            stringType = ":/download/buffing";
-        case MusicObject::Null:
+            stringType = "waiting";
+        case MusicObject::DW_Null:
             break;
         default:
             break;
     }
-    ///Start up the information for show download - message;
-    !stringType.isEmpty() ? m_movieLabel->setPixmap( QPixmap(stringType) ) : m_movieLabel->clear();
+    M_LOGGER_INFO(stringType);
 }
 
 void MusicDownloadStatusLabel::showDownLoadInfoFinished(const QString &type)
@@ -61,26 +64,25 @@ void MusicDownloadStatusLabel::showDownLoadInfoFinished(const QString &type)
         m_parentWidget->musicLoadCurrentSongLrc();
     }
     m_parentWidget->updateCurrentArtist();
-    m_movieLabel->clear();
 }
 
 void MusicDownloadStatusLabel::networkConnectionStateChanged(bool state)
 {
-    showDownLoadInfoFor(state ? MusicObject::Null : MusicObject::DisConnection);
+    showDownLoadInfoFor(state ? MusicObject::DW_Null : MusicObject::DW_DisConnection);
 }
 
 bool MusicDownloadStatusLabel::checkSettingParameterValue() const
 {
-    return ( M_SETTING->value(MusicSettingManager::ShowInlineLrcChoiced).toBool() ||
-             M_SETTING->value(MusicSettingManager::ShowDesktopLrcChoiced).toBool() );
+    return ( M_SETTING_PTR->value(MusicSettingManager::ShowInlineLrcChoiced).toBool() ||
+             M_SETTING_PTR->value(MusicSettingManager::ShowDesktopLrcChoiced).toBool() );
 }
 
 void MusicDownloadStatusLabel::musicCheckHasLrcAlready()
 {
-    if(!M_NETWORK->isOnline())
+    if(!M_NETWORK_PTR->isOnline())
     {
         ///no network connection
-        showDownLoadInfoFor(MusicObject::DisConnection);
+        showDownLoadInfoFor(MusicObject::DW_DisConnection);
         return;
     }
     else if( checkSettingParameterValue() )
@@ -92,8 +94,8 @@ void MusicDownloadStatusLabel::musicCheckHasLrcAlready()
        }
        QString filename = m_parentWidget->getCurrentFileName();
        ///Check if the file exists
-       QFile file(LRC_DOWNLOAD_AL + filename + LRC_FILE);
-       if(file.exists())
+       if( QFile::exists(LRC_DIR_FULL + filename + LRC_FILE) ||
+           QFile::exists(LRC_DIR_FULL + filename + KRC_FILE) )
        {
            return;
        }
@@ -110,42 +112,53 @@ void MusicDownloadStatusLabel::musicCheckHasLrcAlready()
        m_downloadLrcThread = new MusicDownLoadQueryMultipleThread(this);
 #endif
        m_downloadLrcThread->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, filename);
-       connect(m_downloadLrcThread, SIGNAL(resolvedSuccess()), SLOT(musicHaveNoLrcAlready()));
-       showDownLoadInfoFor(MusicObject::Buffing);
+       connect(m_downloadLrcThread, SIGNAL(downLoadDataChanged(QString)), SLOT(musicHaveNoLrcAlready()));
+       showDownLoadInfoFor(MusicObject::DW_Buffing);
     }
 }
 
 void MusicDownloadStatusLabel::musicHaveNoLrcAlready()
 {
-    if(!M_NETWORK->isOnline())
+    if(!M_NETWORK_PTR->isOnline())
     {   //no network connection
-        showDownLoadInfoFor(MusicObject::DisConnection);
+        showDownLoadInfoFor(MusicObject::DW_DisConnection);
         return;
     }
-    MusicSongInfomations musicSongInfos(m_downloadLrcThread->getMusicSongInfos());
+    MusicObject::MusicSongInfomations musicSongInfos(m_downloadLrcThread->getMusicSongInfos());
     if(!musicSongInfos.isEmpty())
     {
-        MusicSongInfomation musicSongInfo = musicSongInfos.first();
         QString filename = m_parentWidget->getCurrentFileName();
+        int count = filename.split('-').count();
+        QString artistName = filename.split('-').front().trimmed();
+        QString songName = filename.split('-').back().trimmed();
+
+        MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos.first();
+        foreach(MusicObject::MusicSongInfomation var, musicSongInfos)
+        {
+            if( var.m_singerName.contains(artistName, Qt::CaseInsensitive) &&
+                var.m_songName.contains(songName, Qt::CaseInsensitive) )
+            {
+                musicSongInfo = var;
+                break;
+            }
+        }
+
         ///download lrc
         MusicTextDownLoadThread* lrc = new MusicTextDownLoadThread(musicSongInfo.m_lrcUrl,
-                                 LRC_DOWNLOAD_AL + filename + LRC_FILE,
+                                 LRC_DIR_FULL + filename + LRC_FILE,
                                  MusicDownLoadThreadAbstract::Download_Lrc, this);
         lrc->startToDownload();
 
-        int count = filename.split('-').count();
-        filename = filename.split('-').front().trimmed();
         ///download art picture
 #ifndef USE_MULTIPLE_QUERY
-        (new MusicData2DownloadThread(musicSongInfo.m_smallPicUrl, ART_DOWNLOAD_AL + filename + SKN_FILE,
+        (new MusicData2DownloadThread(musicSongInfo.m_smallPicUrl, ART_DIR_FULL + artistName + SKN_FILE,
                                  MusicDownLoadThreadAbstract::Download_SmlBG, this))->startToDownload();
 #else
-        (new MusicDataDownloadThread(musicSongInfo.m_smallPicUrl, ART_DOWNLOAD_AL + filename + SKN_FILE,
+        (new MusicDataDownloadThread(musicSongInfo.m_smallPicUrl, ART_DIR_FULL + artistName + SKN_FILE,
                                  MusicDownLoadThreadAbstract::Download_SmlBG, this))->startToDownload();
 #endif
         ///download big picture
-        (new MusicBackgroundDownload( count == 1 ? musicSongInfo.m_singerName : filename,
-                                   filename, this))->startToDownload();
+        (new MusicBackgroundDownload( count == 1 ? musicSongInfo.m_singerName : artistName, artistName, this))->startToDownload();
     }
     else
     {

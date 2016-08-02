@@ -1,6 +1,7 @@
 #include "musiclrccontainer.h"
 #include "musiclrcsearchwidget.h"
 #include "musiclrcmakerwidget.h"
+#include "musiclrcerrorwidget.h"
 
 #include <QActionGroup>
 
@@ -16,6 +17,11 @@ MusicLrcContainer::MusicLrcContainer(QWidget *parent)
 MusicLrcContainer::~MusicLrcContainer()
 {
     delete m_musicLrcSearchWidget;
+}
+
+QString MusicLrcContainer::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLrcContainer::clearAllMusicLRCManager()
@@ -45,16 +51,16 @@ void MusicLrcContainer::searchMusicLrcs()
 void MusicLrcContainer::createColorMenu(QMenu &menu)
 {
     QActionGroup *group = new QActionGroup(this);
-    group->addAction(menu.addAction(QIcon(":/color/origin"), tr("origin")));
-    group->addAction(menu.addAction(QIcon(":/color/red"), tr("red")));
-    group->addAction(menu.addAction(QIcon(":/color/orange"), tr("orange")));
-    group->addAction(menu.addAction(QIcon(":/color/yellow"), tr("yellow")));
-    group->addAction(menu.addAction(QIcon(":/color/green"), tr("green")));
-    group->addAction(menu.addAction(QIcon(":/color/blue"), tr("blue")));
-    group->addAction(menu.addAction(QIcon(":/color/indigo"), tr("indigo")));
-    group->addAction(menu.addAction(QIcon(":/color/purple"), tr("purple")));
-    group->addAction(menu.addAction(QIcon(":/color/white"), tr("white")));
-    group->addAction(menu.addAction(QIcon(":/color/black"), tr("black")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_origin"), tr("origin")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_red"), tr("red")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_orange"), tr("orange")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_yellow"), tr("yellow")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_green"), tr("green")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_blue"), tr("blue")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_indigo"), tr("indigo")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_purple"), tr("purple")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_white"), tr("white")));
+    group->addAction(menu.addAction(QIcon(":/color/lb_black"), tr("black")));
     connect(group, SIGNAL(triggered(QAction*)), SLOT(changeCurrentLrcColor(QAction*)));
     menu.addSeparator();
     menu.addAction(tr("custom"), this, SLOT(currentLrcCustom()));
@@ -110,7 +116,7 @@ void MusicLrcContainer::setLinearGradientColor(MusicLRCManager::LrcColorType lrc
         }
     }
 
-    M_SETTING->setValue( (m_containerType == "DESKTOP") ? MusicSettingManager::DLrcColorChoiced :
+    M_SETTING_PTR->setValue( (m_containerType == "DESKTOP") ? MusicSettingManager::DLrcColorChoiced :
                                                           MusicSettingManager::LrcColorChoiced, lrcColorType);
 }
 
@@ -123,23 +129,23 @@ void MusicLrcContainer::setSettingParameter(const QString &t) const
 {
     foreach(MusicLRCManager *manager, m_musicLrcContainer)
     {
-        manager->setFontFamily(M_SETTING->value(t + "LrcFamilyChoiced").toInt());
-        manager->setFontType(M_SETTING->value(t + "LrcTypeChoiced").toInt());
-        manager->setFontTransparent(M_SETTING->value(t + "LrcColorTransChoiced").toInt());
-        manager->setLrcFontSize((MusicLRCManager::LrcSizeTable)(M_SETTING->value(t + "LrcSizeChoiced").toInt()));
+        manager->setFontFamily(M_SETTING_PTR->value(t + "LrcFamilyChoiced").toInt());
+        manager->setFontType(M_SETTING_PTR->value(t + "LrcTypeChoiced").toInt());
+        manager->setFontTransparent(M_SETTING_PTR->value(t + "LrcColorTransChoiced").toInt());
+        manager->setLrcFontSize((MusicLRCManager::LrcSizeTable)(M_SETTING_PTR->value(t + "LrcSizeChoiced").toInt()));
     }
-    if(M_SETTING->value(t + "LrcColorChoiced").toInt() != -1)
+    if(M_SETTING_PTR->value(t + "LrcColorChoiced").toInt() != -1)
     {
-        setLinearGradientColor((MusicLRCManager::LrcColorType)M_SETTING->value(t + "LrcColorChoiced").toInt());
+        setLinearGradientColor((MusicLRCManager::LrcColorType)M_SETTING_PTR->value(t + "LrcColorChoiced").toInt());
         setMaskLinearGradientColor();
     }
     else
     {
         foreach(MusicLRCManager *manager, m_musicLrcContainer)
         {
-            manager->setLinearGradientColor(M_SETTING->value(t + "LrcBgColorChoiced").value<QColor>());
+            manager->setLinearGradientColor(M_SETTING_PTR->value(t + "LrcBgColorChoiced").value<QColor>());
         }
-        setMaskLinearGradientColor(M_SETTING->value(t + "LrcFgColorChoiced").value<QColor>());
+        setMaskLinearGradientColor(M_SETTING_PTR->value(t + "LrcFgColorChoiced").value<QColor>());
     }
 }
 
@@ -160,4 +166,9 @@ void MusicLrcContainer::theLinkLrcChanged()
     {
         w->setVisible( m_linkLocalLrc );
     }
+}
+
+void MusicLrcContainer::theCurrentLrcError()
+{
+    MusicLrcErrorWidget(this).exec();
 }

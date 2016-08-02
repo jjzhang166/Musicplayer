@@ -1,5 +1,6 @@
 #include "musicitemdelegate.h"
 #include "musicuiobject.h"
+#include "musicobject.h"
 
 #include <QPainter>
 #include <QCheckBox>
@@ -15,6 +16,11 @@ MusicCheckBoxDelegate::MusicCheckBoxDelegate(QObject *parent)
 MusicCheckBoxDelegate::~MusicCheckBoxDelegate()
 {
     delete m_checkBox;
+}
+
+QString MusicCheckBoxDelegate::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 QSize MusicCheckBoxDelegate::sizeHint(const QStyleOptionViewItem &option,
@@ -53,6 +59,11 @@ MusicQueryTableDelegate::~MusicQueryTableDelegate()
 
 }
 
+QString MusicQueryTableDelegate::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicQueryTableDelegate::paint(QPainter *painter,
                                     const QStyleOptionViewItem &option,
                                     const QModelIndex &index) const
@@ -73,6 +84,11 @@ MusicProgressBarDelegate::MusicProgressBarDelegate(QObject *parent)
 MusicProgressBarDelegate::~MusicProgressBarDelegate()
 {
     delete m_progress;
+}
+
+QString MusicProgressBarDelegate::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 QSize MusicProgressBarDelegate::sizeHint(const QStyleOptionViewItem &option,

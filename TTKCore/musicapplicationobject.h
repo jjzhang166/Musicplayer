@@ -32,12 +32,16 @@ public:
      */
     ~MusicApplicationObject();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     bool getWindowToTop() const {return m_setWindowToTop;}
     /*!
      * Get current window is to top.
      */
 #if defined(Q_OS_WIN)
-#  ifdef MUSIC_QT_5
+#  ifdef MUSIC_GREATER_NEW
     void nativeEvent(const QByteArray &eventType,
                      void *message, long *result);
     /*!

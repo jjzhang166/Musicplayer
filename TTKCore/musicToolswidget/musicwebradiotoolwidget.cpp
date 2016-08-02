@@ -1,6 +1,7 @@
 #include "musicwebradiotoolwidget.h"
 #include "musicwebentainradiolistview.h"
 #include "musicwebmusicradiolistview.h"
+#include "musicanimationstackedwidget.h"
 
 #include <QBoxLayout>
 #include <QButtonGroup>
@@ -21,15 +22,16 @@ MusicWebRadioToolWidget::MusicWebRadioToolWidget(QWidget *parent)
     toolLayout->setContentsMargins(0, 0, 0, 0);
     m_netRadioButton1 = new QPushButton(tr("entertainmentRadio"), toolWidget);
     m_netRadioButton2 = new QPushButton(tr("musicRadio"), toolWidget);
-    m_netRadioButton1->setStyleSheet("border:none; background:url(':/radio/toolOn');");
-    m_netRadioButton2->setStyleSheet("border:none; background:url(':/radio/toolOff');");
+    m_netRadioButton1->setStyleSheet("border:none; background:url(':/toolSets/btn_tool_on');");
+    m_netRadioButton2->setStyleSheet("border:none; background:url(':/toolSets/btn_tool_off');");
     toolLayout->addWidget(m_netRadioButton1);
     toolLayout->addWidget(m_netRadioButton2);
     toolWidget->setLayout(toolLayout);
     m_netRadioButton1->setFixedHeight(40);
     m_netRadioButton2->setFixedHeight(40);
 
-    m_stackedWidget = new QStackedWidget(this);
+    m_stackedWidget = new MusicAnimationStackedWidget(this);
+    m_stackedWidget->setLength(320, MusicAnimationStackedWidget::LeftToRight);
     mainLayout->addWidget(toolWidget);
     mainLayout->addWidget(m_stackedWidget);
     setLayout(mainLayout);
@@ -56,10 +58,17 @@ MusicWebRadioToolWidget::~MusicWebRadioToolWidget()
     delete m_stackedWidget;
 }
 
+QString MusicWebRadioToolWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicWebRadioToolWidget::buttonClicked(int index)
 {
-    QString on = "border:none; background:url(':/radio/toolOn');";
-    QString off = "border:none; background:url(':/radio/toolOff');";
+    m_stackedWidget->start(index);
+
+    QString on = "border:none; background:url(':/toolSets/btn_tool_on');";
+    QString off = "border:none; background:url(':/toolSets/btn_tool_off');";
     if(index == 0)
     {
         m_netRadioButton1->setStyleSheet(on);
@@ -71,5 +80,9 @@ void MusicWebRadioToolWidget::buttonClicked(int index)
         m_netRadioButton2->setStyleSheet(on);
         m_musicRadioListView->initListItems();
     }
-    m_stackedWidget->setCurrentIndex(index);
+}
+
+void MusicWebRadioToolWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    Q_UNUSED(event);
 }

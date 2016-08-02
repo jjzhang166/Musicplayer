@@ -7,7 +7,7 @@ MusicRemoteWidgetForComplexStyle::MusicRemoteWidgetForComplexStyle(QWidget *pare
     setGeometry(200, 200, 320, 110);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    QSize windowSize = M_SETTING->value(MusicSettingManager::ScreenSize).toSize();
+    QSize windowSize = M_SETTING_PTR->value(MusicSettingManager::ScreenSize).toSize();
     move( windowSize.width() - width() - 150, height() + 70);
 
     m_iconLabel = new QLabel(this);
@@ -48,11 +48,6 @@ MusicRemoteWidgetForComplexStyle::MusicRemoteWidgetForComplexStyle(QWidget *pare
     m_iconLabel->setFixedSize(80, 80);
     m_songName->setStyleSheet(MusicUIObject::MWidgetStyle01);
     m_songArtist->setStyleSheet(MusicUIObject::MWidgetStyle01);
-    m_PreSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
-    m_NextSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
-    m_PlayButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
-    m_SettingButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
-    m_mainWidget->setStyleSheet("#mainWidget{" + MusicUIObject::MCustomStyle09 + "}");
 
 }
 
@@ -61,6 +56,11 @@ MusicRemoteWidgetForComplexStyle::~MusicRemoteWidgetForComplexStyle()
     delete m_iconLabel;
     delete m_songName;
     delete m_songArtist;
+}
+
+QString MusicRemoteWidgetForComplexStyle::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicRemoteWidgetForComplexStyle::setLabelText(const QString &value)
@@ -77,13 +77,13 @@ void MusicRemoteWidgetForComplexStyle::setLabelText(const QString &value)
     if(!showArtPicture(strings.first().trimmed()) &&
        !showArtPicture(strings.last().trimmed()))
     {
-        m_iconLabel->setPixmap(QPixmap(":/share/defaultArt").scaled(80, 80));
+        m_iconLabel->setPixmap(QPixmap(":/image/lb_defaultArt").scaled(80, 80));
     }
 }
 
 bool MusicRemoteWidgetForComplexStyle::showArtPicture(const QString &name)
 {
-    QPixmap originPath(QString(ART_DOWNLOAD_AL + name + SKN_FILE));
+    QPixmap originPath(QString(ART_DIR_FULL + name + SKN_FILE));
     if(!originPath.isNull())
     {
         m_iconLabel->setPixmap(originPath.scaled(80, 80));

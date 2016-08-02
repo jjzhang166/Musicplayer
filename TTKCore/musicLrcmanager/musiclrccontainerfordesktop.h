@@ -11,8 +11,9 @@
 
 #include "musiclrccontainer.h"
 
-#define TOOLBAR_HEIGHT 30
-#define TOOLBAR_WIDTH  320
+#define TOOLBAR_HEIGHT      23
+#define TOOLBAR_TEXT_LENGTH 58
+#define TOOLBAR_WIDTH       600
 
 class QPushButton;
 class QToolButton;
@@ -31,6 +32,10 @@ public:
      */
     virtual ~MusicLrcContainerForDesktop();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startTimerClock() override;
     /*!
      * Start timer clock to draw lrc.
@@ -94,18 +99,6 @@ protected:
     /*!
      * Creat toolBar widget.
      */
-    void setButtonIcon() const;
-    /*!
-     * Set button icon.
-     */
-    void setButtonCursor() const;
-    /*!
-     * Set button cursor.
-     */
-    void setButtonTips() const;
-    /*!
-     * Set button tips.
-     */
     void resizeLrcSizeArea();
     /*!
      * Resize lrc size area by change size.
@@ -128,13 +121,9 @@ protected:
     int m_currentLrcFontSize;
     QPoint m_offset, m_geometry;
 
-    QWidget *m_supperClass, *m_toolBarWidget, *m_desktopWidget;
-    QPushButton *m_showMainWindow;
-    QToolButton *m_toolPreSongButton, *m_toolNextSongButton;
-    QToolButton *m_toolPlayButton, *m_toolSettingButton;
-    QToolButton *m_toolCloseButton, *m_toolWindowLockedButton;
-    QToolButton *m_toolLrcBigerButton, *m_toolLrcSmallerButton;
-    QToolButton *m_toolUpdateLrcButton;
+    QWidget *m_supperClass, *m_toolBarWidget;
+    QToolButton *m_toolPlayButton;
+
 };
 
 #endif // MUSICLRCCONTAINERFORDESKTOP_H

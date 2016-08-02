@@ -9,7 +9,6 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QPair>
 #include <QColor>
 #include "musicabstractxml.h"
 
@@ -18,17 +17,22 @@
  */
 class MUSIC_CORE_EXPORT MusicXMLConfigManager : public MusicAbstractXml
 {
+    Q_OBJECT
 public:
     explicit MusicXMLConfigManager(QObject *parent = 0);
     /*!
      * Object contsructor.
      */
 
-    inline bool readXMLConfig() { return readConfig(COFIGPATH_AL); }
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    inline bool readXMLConfig() { return readConfig(COFIGPATH_FULL); }
     /*!
      * Read config datas from xml file by given name.
      */
-    inline bool readMusicXMLConfig(){ return readConfig(MUSICPATH_AL); }
+    inline bool readMusicXMLConfig(){ return readConfig(MUSICPATH_FULL); }
     /*!
      * Read music datas from xml file by given name.
      */
@@ -36,11 +40,11 @@ public:
     /*!
      * Write datas into xml file.
      */
-    void writeMusicSongsConfig(const MusicSongsList &musics);
+    void writeMusicSongsConfig(const MusicSongItems &musics);
     /*!
      * Write music datas into xml file.
      */
-    void readMusicSongsConfig(MusicSongsList &musics);
+    void readMusicSongsConfig(MusicSongItems &musics);
     /*!
      * Read music datas into xml file.
      */
@@ -53,6 +57,11 @@ public:
     { return readXmlAttributeByTagNameValue("playVolume").toInt(); }
     /*!
      * Read Music Play Volume Config.
+     */
+    inline int readEnhancedMusicConfig() const
+    { return readXmlAttributeByTagNameValue("enhancedMusic").toInt(); }
+    /*!
+     * Read Enhanced Music Config.
      */
     inline int readSystemCloseConfig() const
     { return readXmlAttributeByTagNameValue("closeEvent").toInt(); }
@@ -68,11 +77,6 @@ public:
     { return readXmlAttributeByTagNameValue("autoPlay").toInt(); }
     /*!
      * Read System Auto Play Config.
-     */
-    inline int readEnhancedMusicConfig() const
-    { return readXmlAttributeByTagNameValue("enhancedMusic").toInt(); }
-    /*!
-     * Read Enhanced Music Config.
      */
     inline QString readBackgroundTheme() const
     { return readXmlAttributeByTagNameValue("bgTheme"); }
@@ -210,7 +214,11 @@ public:
     /*!
      * Read System Last Play Index Config.
      */
-    QRect readShowDLrcGeometry() const;
+    QRect readWindowGeometry() const;
+    /*!
+     * Read window widget Geometry Config.
+     */
+    QPoint readShowDLrcGeometry() const;
     /*!
      * Read Show Desktop Lrc Geometry Config.
      */
@@ -220,7 +228,7 @@ public:
      */
 
 protected:
-    MusicSongs readMusicFilePath(const QString &value) const;
+    MusicSongs readMusicFilePath(const QDomNode &node) const;
     /*!
      * Read Music File Path.
      */

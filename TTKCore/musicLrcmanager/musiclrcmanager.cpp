@@ -21,7 +21,7 @@ MusicLRCManager::MusicLRCManager(QWidget *parent)
 
     //Set the timer
     m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), SLOT(setTimeOut()));
+    connect(m_timer, SIGNAL(timeout()), SLOT(setUpdateMask()));
     m_lrcMaskWidth = 0;
     m_lrcMaskWidthInterval = 0;
     m_speedLeve = 1;
@@ -32,6 +32,11 @@ MusicLRCManager::MusicLRCManager(QWidget *parent)
 MusicLRCManager::~MusicLRCManager()
 {
     delete m_timer;
+}
+
+QString MusicLRCManager::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLRCManager::startTimerClock()
@@ -110,7 +115,7 @@ void MusicLRCManager::setMaskLinearGradientColor(QColor color)
     m_maskLinearGradient.setColorAt(0.9, color);
 }
 
-void MusicLRCManager::setTimeOut()
+void MusicLRCManager::setUpdateMask()
 {
     //At a fixed period of time covered length increases.
     m_lrcMaskWidth += m_lrcMaskWidthInterval;

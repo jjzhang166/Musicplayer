@@ -6,6 +6,7 @@
 #include "musicmessagebox.h"
 #include "musictime.h"
 #include "musicconnectionpool.h"
+#include "musicplayer.h"
 
 MusicLrcMakerWidget::MusicLrcMakerWidget(QWidget *parent)
     : MusicAbstractMoveWidget(parent),
@@ -17,7 +18,7 @@ MusicLrcMakerWidget::MusicLrcMakerWidget(QWidget *parent)
     ui->lrcTextEdit->setFontPointSize(11);
     ui->lrcTextEdit->setAlignment(Qt::AlignLeft);
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -44,19 +45,24 @@ MusicLrcMakerWidget::MusicLrcMakerWidget(QWidget *parent)
     m_position = 0;
     m_currentLine = 0;
 
-    M_CONNECTION->setValue("MusicLrcMakerWidget", this);
-    M_CONNECTION->poolConnect("MusicPlayer", "MusicLrcMakerWidget");
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(MusicPlayer::getClassName(), getClassName());
 }
 
 MusicLrcMakerWidget::~MusicLrcMakerWidget()
 {
-    M_CONNECTION->poolDisConnect("MusicLrcMakerWidget");
+    M_CONNECTION_PTR->poolDisConnect(getClassName() );
+}
+
+QString MusicLrcMakerWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLrcMakerWidget::setCurrentSongName(const QString& name)
 {
     m_plainText.clear();
-    m_file.setFileName(QString("%1%2%3").arg(LRC_DOWNLOAD_AL).arg(name).arg(LRC_FILE));
+    m_file.setFileName(QString("%1%2%3").arg(LRC_DIR_FULL).arg(name).arg(LRC_FILE));
     QStringList ls = name.split('-');
     if(!ls.isEmpty())
     {
@@ -117,7 +123,9 @@ void MusicLrcMakerWidget::saveButtonClicked()
         {
             array.append(var + "\n");
         }
-        m_file.write(array);
+        QTextStream outstream(&m_file);
+        outstream.setCodec("utf-8");
+        outstream << array << endl;
         m_file.close();
 
         MusicMessageBox message;
@@ -187,7 +195,7 @@ void MusicLrcMakerWidget::keyReleaseEvent(QKeyEvent* event)
 
 void MusicLrcMakerWidget::show()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     MusicAbstractMoveWidget::show();
 }

@@ -12,7 +12,8 @@
 #include "musicobject.h"
 #include "musicsingleton.h"
 
-#define M_BG_MANAGER (MusicSingleton<MusicBackgroundManager>::createInstance())
+#define M_BACKGROUND_PTR (MusicSingleton<MusicBackgroundManager>::createInstance())
+
 #define MAX_INDEX 5
 
 /*! @brief The class of the manager of dealing with artist pictures.
@@ -22,6 +23,10 @@ class MUSIC_CORE_EXPORT MusicBackgroundManager : public QObject
 {
     Q_OBJECT
 public:
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setArtName(const QString &name);
     /*!
      * Set current artist name.
@@ -31,6 +36,10 @@ public:
      * Remove current artist name.
      */
 
+    inline int getCurrentIndex() const { return m_currentIndex; }
+    /*!
+     * Get artist photo current index.
+     */
     inline int getArtPhotoCount() const { return m_photos.count(); }
     /*!
      * Get artist photo count.
@@ -78,6 +87,9 @@ Q_SIGNALS:
 
 protected:
     MusicBackgroundManager();
+    /*!
+     * Object contsructor.
+     */
     ~MusicBackgroundManager() = default;
 
     QString m_currentArtName;

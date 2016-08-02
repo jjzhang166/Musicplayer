@@ -24,13 +24,17 @@ public:
      */
     virtual ~MusicDownLoadQuerySingleThread();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startSearchSong(QueryType type, const QString &text) override;
     /*!
      * Start to Search data from name and type.
      */
 
 public Q_SLOTS:
-    virtual void searchFinshed() override;
+    virtual void downLoadFinished() override;
     /*!
      * Download data from net finished.
      */

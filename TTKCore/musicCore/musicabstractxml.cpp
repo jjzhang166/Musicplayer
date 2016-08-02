@@ -17,6 +17,11 @@ MusicAbstractXml::~MusicAbstractXml()
     delete m_ddom;
 }
 
+QString MusicAbstractXml::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 bool MusicAbstractXml::readConfig(const QString &name)
 {
     delete m_file;
@@ -56,23 +61,35 @@ QString MusicAbstractXml::readXmlAttributeByTagNameValue(const QString &tagName)
 }
 
 QString MusicAbstractXml::readXmlAttributeByTagName(const QString &tagName,
-                                                       const QString &attrName) const
+                                                    const QString &attrName) const
 {
     QDomNodeList nodelist = m_ddom->elementsByTagName(tagName);
+    if(nodelist.isEmpty())
+    {
+        return QString();
+    }
     return nodelist.at(0).toElement().attribute(attrName);
 }
 
 QString MusicAbstractXml::readXmlTextByTagName(const QString &tagName) const
 {
     QDomNodeList nodelist = m_ddom->elementsByTagName(tagName);
+    if(nodelist.isEmpty())
+    {
+        return QString();
+    }
     return nodelist.at(0).toElement().text();
 }
 
-MStriantMap MusicAbstractXml::readXmlAttributesByTagName(const QString &tagName) const
+MusicObject::MStriantMap MusicAbstractXml::readXmlAttributesByTagName(const QString &tagName) const
 {
     QDomNodeList nodelist = m_ddom->elementsByTagName(tagName);
+    if(nodelist.isEmpty())
+    {
+        return MusicObject::MStriantMap();
+    }
     QDomNamedNodeMap nodes = nodelist.at(0).toElement().attributes();
-    MStriantMap maps;
+    MusicObject::MStriantMap maps;
     for(int i=0; i<nodes.count(); ++i)
     {
         QDomAttr attr = nodes.item(i).toAttr();
@@ -114,8 +131,10 @@ QDomElement MusicAbstractXml::writeDomElementMutil(QDomElement &element, const Q
                                                    const QStringList &keys,
                                                    const QList<QVariant> &values)
 {
-    Q_ASSERT(!keys.isEmpty());
-    Q_ASSERT(!values.isEmpty());
+    if(keys.isEmpty() || values.isEmpty())
+    {
+        QDomElement();
+    }
 
     QDomElement domElement = writeDomElement(element, node, keys.front(), values.front());
     for(int i=1; i<keys.count(); ++i)
@@ -159,8 +178,10 @@ QDomElement MusicAbstractXml::writeDomElementMutilText(QDomElement &element, con
                                                        const QStringList &keys, const QList<QVariant> &values,
                                                        const QString &text)
 {
-    Q_ASSERT(!keys.isEmpty());
-    Q_ASSERT(!values.isEmpty());
+    if(keys.isEmpty() || values.isEmpty())
+    {
+        QDomElement();
+    }
 
     QDomElement domElement = writeDomElementMutil(element, node, keys, values);
     QDomText domText = m_ddom->createTextNode( text );

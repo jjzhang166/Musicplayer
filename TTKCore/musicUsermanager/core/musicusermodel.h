@@ -11,6 +11,7 @@
 
 #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlQuery>
+#include "musicobject.h"
 #include "musicglobaldefine.h"
 
 /*! @brief The class of the user data model.
@@ -26,6 +27,10 @@ public:
      * Object contsructor.
      */
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     bool addUser(const QString &uid, const QString &pwd,
                  const QString &mail);
     /*!
@@ -102,7 +107,7 @@ public:
     inline QString getUserIcon(const QString &uid)
     {
         QString icon = getRecordData(uid, "ICON");
-        return icon.isEmpty()  || !QFile::exists(icon) ? ":/share/defaultArt" : icon;
+        return icon.isEmpty()  || !QFile::exists(icon) ? ":/image/lb_defaultArt" : icon;
     }
     /*!
      * Get user icon.
@@ -130,7 +135,7 @@ protected:
     /*!
      * Get record data by uid and field.
      */
-    bool updateRecordData(const QString &uid, const QVariantMap &data);
+    bool updateRecordData(const QString &uid, const MusicObject::MStriantMap &data);
     /*!
      * Update record data by uid and field and data.
      */

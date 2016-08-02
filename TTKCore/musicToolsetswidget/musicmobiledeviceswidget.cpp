@@ -12,12 +12,12 @@ MusicMobileDevicesWidget::MusicMobileDevicesWidget(QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
 
-    QSize windowSize = M_SETTING->value(MusicSettingManager::ScreenSize).toSize();
+    QSize windowSize = M_SETTING_PTR->value(MusicSettingManager::ScreenSize).toSize();
     setGeometry(windowSize.width() - 246, windowSize.height() - 169, 246, 169);
-    setPixmap(QPixmap(":/toolSets/mobile"));
+    setPixmap(QPixmap(":/toolSets/lb_mobile_devices"));
 
     m_closeButton = new QToolButton(this);
-    m_closeButton->setIcon(QIcon(":/share/searchclosed"));
+    m_closeButton->setIcon(QIcon(":/functions/btn_close_hover"));
     m_closeButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     m_closeButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_closeButton->setToolTip(tr("Close"));
@@ -37,6 +37,11 @@ MusicMobileDevicesWidget::~MusicMobileDevicesWidget()
 {
     delete m_closeButton;
     delete m_openButton;
+}
+
+QString MusicMobileDevicesWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicMobileDevicesWidget::showMobileManager()

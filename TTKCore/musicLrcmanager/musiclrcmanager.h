@@ -68,6 +68,10 @@ public:
      */
     virtual ~MusicLRCManager();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void startTimerClock();
     /*!
      * Start timer clock to draw lrc.
@@ -105,10 +109,8 @@ public:
      * Set lrc font transparent by given valu.e
      */
 
-Q_SIGNALS:
-
 public Q_SLOTS:
-    void setTimeOut();
+    void setUpdateMask();
     /*!
      * Time out to calculate lrc mask line length.
      */

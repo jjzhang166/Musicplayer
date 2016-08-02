@@ -43,6 +43,11 @@ MusicNetworkSuspensionWidget::~MusicNetworkSuspensionWidget()
     delete m_thread;
 }
 
+QString MusicNetworkSuspensionWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicNetworkSuspensionWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     MusicAbstractMoveWidget::contextMenuEvent(event);
@@ -59,12 +64,12 @@ void MusicNetworkSuspensionWidget::contextMenuEvent(QContextMenuEvent *event)
         m_actionGroup->addAction(action);
         if(available.contains(var))
         {
-            action->setIcon(QIcon(":/share/selected"));
+            action->setIcon(QIcon(":/contextMenu/btn_selected"));
         }
     }
 
     rightClickMenu.setStyleSheet(MusicUIObject::MMenuStyle02);
-    rightClickMenu.addAction(QIcon(":/contextMenu/quit"), tr("quit"), this, SLOT(close()));
+    rightClickMenu.addAction(QIcon(":/contextMenu/btn_quit"), tr("quit"), this, SLOT(close()));
     rightClickMenu.exec(QCursor::pos());
 }
 
@@ -108,8 +113,8 @@ void MusicNetworkSuspensionWidget::setAvailableNewtworkNames(const QStringList &
 
 void MusicNetworkSuspensionWidget::networkData(ulong upload, ulong download)
 {
-    m_upload = MusicUtils::speed2Label(upload);
-    m_download = MusicUtils::speed2Label(download);
+    m_upload = MusicUtils::UNumber::speed2Label(upload);
+    m_download = MusicUtils::UNumber::speed2Label(download);
     update();
 }
 
@@ -117,7 +122,7 @@ void MusicNetworkSuspensionWidget::actionTriggered(QAction *action)
 {
     if(action->icon().isNull())
     {
-        action->setIcon(QIcon(":/share/selected"));
+        action->setIcon(QIcon(":/contextMenu/btn_selected"));
     }
     else
     {
@@ -137,7 +142,7 @@ void MusicNetworkSuspensionWidget::actionTriggered(QAction *action)
 #elif defined Q_OS_UNIX
         action->setIcon(QIcon());
     }
-    action->setIcon(QIcon(":/share/selected"));
+    action->setIcon(QIcon(":/contextMenu/btn_selected"));
     selected << action->text();
 #endif
     m_thread->setAvailableNewtworkNames(selected);

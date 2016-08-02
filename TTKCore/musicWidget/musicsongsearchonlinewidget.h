@@ -32,6 +32,10 @@ public:
      */
     virtual ~MusicSongSearchOnlineTableWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startSearchQuery(const QString &text) override;
     /*!
      * Start search query by text.
@@ -49,10 +53,14 @@ public:
     /*!
      * Stop play audition to music by row.
      */
+    void setSearchQuality(const QString &quality);
+    /*!
+     * Set search data quality.
+     */
 
 Q_SIGNALS:
-    void muiscSongToPlayListChanged(const QString &name, const QString &size,
-                                    const QString &format);
+    void muiscSongToPlayListChanged(const QString &name, const QString &time,
+                                    const QString &format, bool play);
     /*!
      * Add current network music to download to local.
      */
@@ -60,37 +68,28 @@ Q_SIGNALS:
     /*!
      * Check current audtion is playing or not.
      */
-    void getQualityString(QString &string);
-    /*!
-     * Get current quality string.
-     */
 
 public Q_SLOTS:
-    void listCellClicked(int row, int column) override;
+    virtual void listCellClicked(int row, int column) override;
     /*!
      * Table widget list cell click.
      */
-    void clearAllItems() override;
+    virtual void clearAllItems() override;
     /*!
      * Clear All Items.
      */
-    void createSearchedItems(const QString &songname,
-                             const QString &artistname,
-                             const QString &time) override;
+    virtual void createSearchedItems(const QString &songname, const QString &artistname,
+                                     const QString &time) override;
     /*!
      * Create searched items.
      */
-    void itemDoubleClicked(int row, int column) override;
+    virtual void itemDoubleClicked(int row, int column) override;
     /*!
      * Item has double clicked.
      */
-    void actionGroupClick(QAction *action) override;
+    virtual void actionGroupClick(QAction *action) override;
     /*!
      * Left context menu action group click by action.
-     */
-    void researchQueryByQuality();
-    /*!
-     * Research query by quality it changed.
      */
     void searchDataDwonloadFinished();
     /*!
@@ -98,6 +97,7 @@ public Q_SLOTS:
      */
 
 protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.
@@ -107,10 +107,9 @@ protected:
      * Add search music to play list by index.
      */
 
-    MusicCoreMPlayer *m_audition;
     int m_previousAuditionRow;
-    QString m_searchText;
-    QStringList m_downloadDatas;
+    MusicCoreMPlayer *m_audition;
+    DownloadData m_downloadData;
 
 };
 
@@ -131,9 +130,17 @@ public:
      */
     ~MusicSongSearchOnlineWidget();
 
-    void startSearchQuery(const QString &name) const;
+    static QString getClassName();
+    /*!
+    * Get class object name.
+    */
+    void startSearchQuery(const QString &name);
     /*!
      * Start search query by text.
+     */
+    void researchQueryByQuality(const QString &name, const QString &quality);
+    /*!
+     * Research query by quality it changed.
      */
 
 public Q_SLOTS:
@@ -147,9 +154,17 @@ public Q_SLOTS:
      */
 
 protected:
-    void createToolWidget();
+    virtual void resizeEvent(QResizeEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
+    void createToolWidget(QWidget *widget);
     /*!
      * Create tool widget.
+     */
+    void setResizeLabelText(const QString &name);
+    /*!
+     * Set resize labelt ext.
      */
 
     QLabel *m_textLabel;

@@ -13,8 +13,6 @@
 #include "musicuiobject.h"
 #include "musicglobaldefine.h"
 
-class QProcess;
-
 /*! @brief The class of the tool sets widget.
  * @author Greedysky <greedysky@163.com>
  */
@@ -27,6 +25,11 @@ public:
      * Object contsructor.
      */
     ~MusicToolSetsWidget();
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
 
 Q_SIGNALS:
     void getCurrentPlayList(QStringList &list);
@@ -53,8 +56,10 @@ protected:
     /*!
      * Clear All Items.
      */
-
-    QProcess *m_process;
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
 
 };
 

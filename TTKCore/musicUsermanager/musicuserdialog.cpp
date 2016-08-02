@@ -22,7 +22,7 @@ MusicUserDialog::MusicUserDialog(QWidget *parent)
     MusicTime::timeSRand();
     changeVerificationCode();
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -52,6 +52,11 @@ MusicUserDialog::~MusicUserDialog()
 {
     delete m_userModel;
     delete ui;
+}
+
+QString MusicUserDialog::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicUserDialog::readFromUserConfig()
@@ -167,7 +172,7 @@ void MusicUserDialog::clearOriginData()
 
     ui->automaticLogon->setChecked(false);
     ui->rememberPwd->setChecked(false);
-#ifdef MUSIC_QT_5
+#ifdef MUSIC_GREATER_NEW
     ui->userComboBox->setCurrentText(QString());
 #else
     ui->userComboBox->setCurrentIndex(-1);

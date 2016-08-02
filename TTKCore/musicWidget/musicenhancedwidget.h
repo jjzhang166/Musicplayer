@@ -9,13 +9,45 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QToolButton>
 #include "musicglobaldefine.h"
+#include "musictoolmenuwidget.h"
+
+class QLabel;
+class QPropertyAnimation;
+
+/*! @brief The class of the enhanced tool button.
+ * @author Greedysky <greedysky@163.com>
+ */
+class MUSIC_WIDGET_EXPORT MusicEnhancedToolButton : public QToolButton
+{
+    Q_OBJECT
+public:
+    explicit MusicEnhancedToolButton(QWidget *parent = 0);
+    /*!
+     * Object contsructor.
+     */
+    virtual ~MusicEnhancedToolButton();
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
+protected:
+    virtual void enterEvent(QEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
+
+    QLabel *m_label;
+    QPropertyAnimation *m_animation;
+};
+
 
 /*! @brief The class of the enhanced widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicEnhancedWidget : public QToolButton
+class MUSIC_WIDGET_EXPORT MusicEnhancedWidget : public MusicToolMenuWidget
 {
     Q_OBJECT
 public:
@@ -23,7 +55,12 @@ public:
     /*!
      * Object contsructor.
      */
-    ~MusicEnhancedWidget();
+    virtual ~MusicEnhancedWidget();
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
 
 Q_SIGNALS:
     void enhancedMusicChanged(int type);
@@ -36,6 +73,10 @@ public Q_SLOTS:
     /*!
      * Set enhanced music config.
      */
+    void caseButtonOnAndOff();
+    /*!
+     * Case button on and off.
+     */
 
 protected:
     void initWidget();
@@ -43,9 +84,10 @@ protected:
      * Create all widget in layout.
      */
 
-    QMenu *m_menu;
-    QToolButton *m_caseButton, *m_Button1, *m_Button2;
-    QToolButton *m_Button3, *m_Button4;
+    int m_lastSelectedIndex;
+    QToolButton *m_caseButton;
+    MusicEnhancedToolButton *m_Button1, *m_Button2, *m_Button3, *m_Button4;
+
 
 };
 

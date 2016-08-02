@@ -29,6 +29,10 @@ public:
      */
     virtual ~MusicLrcContainerForInline();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startTimerClock() override;
     /*!
      * Start timer clock to draw lrc.
@@ -50,9 +54,9 @@ public:
     /*!
      * Update current lrc by given time.
      */
-    bool transLrcFileToTime(const QString &lrcFileName);
+    bool transLyricFileToTime(const QString &lrcFileName);
     /*!
-     * Analysis lrc file to map return the state.
+     * Analysis lyric file to map return the state.
      */
     QString text() const;
     /*!
@@ -67,7 +71,15 @@ public:
      * Get current lrc and next lrc in container by current time.
      */
 
-    inline bool artBackgroundIsShow() const {return m_showArtBackground;}
+    inline void setLrcDisplayExpand(bool expand) { m_lrcDisplayAll = expand;}
+    /*!
+     * Get state of background is artist shown.
+     */
+    inline bool lrcDisplayExpand() const { return m_lrcDisplayAll;}
+    /*!
+     * Get state of background is artist shown.
+     */
+    inline bool artBackgroundIsShow() const { return m_showArtBackground;}
     /*!
      * Get state of background is artist shown.
      */
@@ -79,10 +91,6 @@ public:
     /*!
      * Get current lrc size.
      */
-    void resizeWidth(int width);
-    /*!
-     * Resize width bound by given width.
-     */
 
 Q_SIGNALS:
     void updateCurrentTime(qint64 time);
@@ -92,6 +100,10 @@ Q_SIGNALS:
     void theArtBgHasChanged();
     /*!
      * The art background state has changed emit.
+     */
+    void videoButtonClicked(const QString &text);
+    /*!
+     * Video button clicked it emit.
      */
 
 public Q_SLOTS:
@@ -106,6 +118,10 @@ public Q_SLOTS:
     void revertLrcTimeSpeed();
     /*!
      * Revert lrc time speed.
+     */
+    void saveLrcTimeChanged();
+    /*!
+     * Save lrc time changed to current lrc file.
      */
     void theArtBgChanged();
     /*!
@@ -123,13 +139,19 @@ public Q_SLOTS:
     /*!
      * Copy all lrcs to clipboard.
      */
-    void theCurrentLrcError();
-    /*!
-     * Show making error lrcs widget.
-     */
     void showLocalLinkWidget();
     /*!
      * Show local link widget.
+     */
+
+private Q_SLOTS:
+    void getTranslatedLrcFinished(const QString &data);
+    /*!
+     * Get translated lrc finished.
+     */
+    void videoButtonClicked();
+    /*!
+     * Video button clicked.
      */
 
 protected:
@@ -139,6 +161,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void wheelEvent(QWheelEvent *event) override;
     virtual void paintEvent(QPaintEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
     /*!
      * Override the widget event.
      */
@@ -162,6 +185,10 @@ protected:
     /*!
      * Init current lrc when the first show.
      */
+    void initFunctionLabel();
+    /*!
+     * Init function label widget.
+     */
     void setItemStyleSheet();
     /*!
      * Set per lrc line style sheet.
@@ -170,9 +197,14 @@ protected:
     /*!
      * Set per lrc line style sheet by index and size and transparent.
      */
+    void resizeWidth(int width, int height);
+    /*!
+     * Resize width bound by given width.
+     */
 
     QPoint m_mousePressedAt, m_mouseMovedAt;
     bool m_mouseLeftPressed, m_showArtBackground;
+    bool m_lrcDisplayAll;
     qint64 m_changeSpeedValue;
     QVBoxLayout *m_vBoxLayout;
     MusicLrcFloatWidget *m_lrcFloatWidget;

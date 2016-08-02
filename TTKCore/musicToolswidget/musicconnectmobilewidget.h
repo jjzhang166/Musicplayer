@@ -12,7 +12,7 @@
 #include <QWidget>
 #include "musicglobaldefine.h"
 
-class QStackedWidget;
+class MusicAnimationStackedWidget;
 
 /*! @brief The class of the connect mobile widget.
  * @author Greedysky <greedysky@163.com>
@@ -27,6 +27,11 @@ public:
      */
     ~MusicConnectMobileWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
 private Q_SLOTS:
     void changeStatckedWidgetFirst();
     /*!
@@ -40,13 +45,18 @@ private Q_SLOTS:
     /*!
      * Change to wire widget.
      */
-    void openTransferFilesWidget();
+    void openTransferFiles2Mobile();
     /*!
-     * Open transfer files widget.
+     * Open transfer files to mobile widget.
+     */
+    void openTransferFiles2Wifi();
+    /*!
+     * Open transfer files to wifi widget.
      */
 
 protected:
     virtual void paintEvent(QPaintEvent *event) override;
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.
      */
@@ -63,7 +73,7 @@ protected:
      * Init connect to wire widget.
      */
 
-    QStackedWidget *m_stackedWidget;
+    MusicAnimationStackedWidget *m_stackedWidget;
 
 };
 

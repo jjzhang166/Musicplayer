@@ -49,6 +49,10 @@ public:
      * Object contsructor by music path and name and playcout and time.
      */
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     QString getMusicArtistFront() const;
     /*!
      * Get music artist name.
@@ -119,5 +123,21 @@ protected:
 
 typedef QList<MusicSong>    MusicSongs;
 typedef QList<MusicSongs>   MusicSongsList;
+
+class MusicSongsListWidget;
+typedef struct MUSIC_CORE_EXPORT MusicSongItem
+{
+    int m_itemIndex;
+    QString m_itemName;
+    MusicSongs m_songs;
+    MusicSongsListWidget* m_itemObject;
+
+    MusicSongItem()
+    {
+        m_itemIndex = -1;
+        m_itemObject = nullptr;
+    }
+}MusicSongItem;
+typedef QList<MusicSongItem> MusicSongItems;
 
 #endif // MUSICSONG_H

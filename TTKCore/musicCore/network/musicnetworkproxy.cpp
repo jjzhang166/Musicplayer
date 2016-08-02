@@ -1,4 +1,5 @@
 #include "musicnetworkproxy.h"
+#include "musicobject.h"
 
 #include <QNetworkProxy>
 
@@ -12,6 +13,11 @@ MusicNetworkProxy::MusicNetworkProxy(QObject *parent)
 MusicNetworkProxy::~MusicNetworkProxy()
 {
     delete m_testSocket;
+}
+
+QString MusicNetworkProxy::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicNetworkProxy::setHostName(const QString &name)

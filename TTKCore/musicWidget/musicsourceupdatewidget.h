@@ -11,6 +11,14 @@
 
 #include "musicabstractmovedialog.h"
 
+#define VERSION_URL     "http://7xpa0g.com1.z0.glb.clouddn.com/version"
+#define DOWNLOAD_URL    "http://7xpa0g.com1.z0.glb.clouddn.com/"
+#define CSDN_URL        "http://download.csdn.net/album/detail/3094"
+
+#define DD_TYPE_ZIP     ".zip"
+#define LAST_UPDATE_URL "TTKUpdate.exe"
+#define NEW_UPDATE_URL  "TTKUpdate.exe"
+
 namespace Ui {
 class MusicSourceUpdateWidget;
 }
@@ -28,19 +36,36 @@ public:
      */
     virtual ~MusicSourceUpdateWidget();
 
-Q_SIGNALS:
-public Q_SLOTS:
-    virtual int exec();
+    static QString getClassName();
     /*!
-     * Override exec function.
+     * Get class object name.
      */
+
+public Q_SLOTS:
     void upgradeButtonClicked();
     /*!
      * Upgrade button clicked.
      */
+    void upgradeFailedClicked();
+    /*!
+     * Upgrade failed clicked.
+     */
+    void downLoadFinished(const QByteArray &data);
+    /*!
+     * Download data from kuwo net finished.
+     */
+    void downloadProgressChanged(float percent, const QString &total);
+    /*!
+     * Update download percent\ total size progress.
+     */
+    virtual int exec();
+    /*!
+     * Override exec function.
+     */
 
 protected:
     Ui::MusicSourceUpdateWidget *ui;
+    QString m_newVersionStr;
 
 };
 

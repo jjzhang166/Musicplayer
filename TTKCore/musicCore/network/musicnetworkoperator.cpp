@@ -1,7 +1,9 @@
 #include "musicnetworkoperator.h"
-#include "musicdatadownloadthread.h"
+#include "musicsourcedownloadthread.h"
+#include "musicobject.h"
 
-#define IP_DOWNLOAD "ip_tmp"
+#include <QStringList>
+
 const QString IP_CHECK_URL = "http://1212.ip138.com/ic.asp";
 
 MusicNetworkOperator::MusicNetworkOperator(QObject *parent)
@@ -15,29 +17,25 @@ MusicNetworkOperator::~MusicNetworkOperator()
 
 }
 
-void MusicNetworkOperator::startToOperator()
+QString MusicNetworkOperator::getClassName()
 {
-    MusicDataDownloadThread *download = new MusicDataDownloadThread(
-                             IP_CHECK_URL, IP_DOWNLOAD,
-                             MusicDownLoadThreadAbstract::Download_Other, this);
-    ///Set search ip operator API
-    connect(download, SIGNAL(musicDownLoadFinished(QString)), SLOT(downLoadFinished()));
-    download->startToDownload();
+    return staticMetaObject.className();
 }
 
-void MusicNetworkOperator::downLoadFinished()
+void MusicNetworkOperator::startToOperator()
 {
-    QFile file(IP_DOWNLOAD);
-    ///Check if the file exists and can be written
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        return;
-    }
+    MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
+    ///Set search ip operator API
+    connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(downLoadFinished(QByteArray)));
+    download->startToDownload(IP_CHECK_URL);
+}
 
-    QTextStream in(&file);
+void MusicNetworkOperator::downLoadFinished(const QByteArray &data)
+{
+    QTextStream in(MConst_cast(QByteArray*, &data));
     QString line = in.readLine();
 
-    QString data;
+    QString dataLine;
     while(!line.isNull())
     {
         if(line.contains("<center>"))
@@ -46,16 +44,13 @@ void MusicNetworkOperator::downLoadFinished()
             if(l.count() >= 2)
             {
                 l = l[1].split(" ");
-                data = l.last();
-                data.chop(2); /// remove </
+                dataLine = l.last();
+                dataLine.chop(2); /// remove </
             }
         }
         line = in.readLine();
     }
-    file.close();
-    ///The file is closed and remove the temporary files
-    QFile::remove(IP_DOWNLOAD);
 
-    emit getNetworkOperatorFinished(data);
+    emit getNetworkOperatorFinished(dataLine);
     deleteLater();
 }

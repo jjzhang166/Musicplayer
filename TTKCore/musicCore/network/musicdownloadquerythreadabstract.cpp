@@ -1,20 +1,25 @@
 #include "musicdownloadquerythreadabstract.h"
 
 MusicDownLoadQueryThreadAbstract::MusicDownLoadQueryThreadAbstract(QObject *parent)
-    : QObject(parent), m_reply(nullptr)
+    : MusicNetworkAbstract(parent)
 {
     m_manager = new QNetworkAccessManager(this);
+#ifndef QT_NO_SSL
+    connect(m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
+                       SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
+    M_LOGGER_INFO(QString("%1 Support ssl: %2").arg(getClassName()).arg(QSslSocket::supportsSsl()));
+#endif
     m_queryAllRecords = false;
 }
 
 MusicDownLoadQueryThreadAbstract::~MusicDownLoadQueryThreadAbstract()
 {
-    deleteAll();///The release of all the objects
-    if(m_manager)
-    {
-        m_manager->deleteLater();
-        m_manager = nullptr;
-    }
+    deleteAll();
+}
+
+QString MusicDownLoadQueryThreadAbstract::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicDownLoadQueryThreadAbstract::deleteAll()
@@ -24,10 +29,4 @@ void MusicDownLoadQueryThreadAbstract::deleteAll()
         m_reply->deleteLater();
         m_reply = nullptr;
     }
-}
-
-void MusicDownLoadQueryThreadAbstract::replyError(QNetworkReply::NetworkError)
-{
-    M_LOGGER_ERROR("Abnormal network connection");
-    deleteAll();
 }

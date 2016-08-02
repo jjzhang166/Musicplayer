@@ -1,11 +1,11 @@
 #include "musicvolumegainwidget.h"
 #include "ui_musicvolumegainwidget.h"
 #include "musicbackgroundmanager.h"
-#include "musicsemaphoreeventloop.h"
 #include "musicmessagebox.h"
 #include "musicuiobject.h"
 
 #include <QProcess>
+#include <QEventLoop>
 #include <QFileDialog>
 
 #define GAIN_DEFAULT 89
@@ -29,10 +29,15 @@ MusicVolumeGainTableWidget::~MusicVolumeGainTableWidget()
 
 }
 
-void MusicVolumeGainTableWidget::listCellClicked(int row, int col)
+QString MusicVolumeGainTableWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
+void MusicVolumeGainTableWidget::listCellClicked(int row, int column)
 {
     Q_UNUSED(row);
-    Q_UNUSED(col);
+    Q_UNUSED(column);
 }
 
 
@@ -42,48 +47,49 @@ MusicVolumeGainWidget::MusicVolumeGainWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    ui->addFileButton->setIcon(QIcon(":/toolSets/gainAddFile"));
+    ui->addFileButton->setIcon(QIcon(":/toolSets/btn_gain_add_file"));
     ui->addFileButton->setIconSize(QSize(40, 40));
     ui->addFileButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->addFileButton->setToolTip(tr("addFile"));
     ui->addFileButton->setCursor(QCursor(Qt::PointingHandCursor));
 
-    ui->addFilesButton->setIcon(QIcon(":/toolSets/gainAddFiles"));
+    ui->addFilesButton->setIcon(QIcon(":/toolSets/btn_gain_add_files"));
     ui->addFilesButton->setIconSize(QSize(40, 40));
     ui->addFilesButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->addFilesButton->setToolTip(tr("addFiles"));
     ui->addFilesButton->setCursor(QCursor(Qt::PointingHandCursor));
 
-    ui->rmFileButton->setIcon(QIcon(":/toolSets/gainRmFile"));
+    ui->rmFileButton->setIcon(QIcon(":/toolSets/btn_gain_rm_file"));
     ui->rmFileButton->setIconSize(QSize(40, 40));
     ui->rmFileButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->rmFileButton->setToolTip(tr("rmFile"));
     ui->rmFileButton->setCursor(QCursor(Qt::PointingHandCursor));
 
-    ui->rmFilesButton->setIcon(QIcon(":/toolSets/gainRmFiles"));
+    ui->rmFilesButton->setIcon(QIcon(":/toolSets/btn_gain_rm_files"));
     ui->rmFilesButton->setIconSize(QSize(40, 40));
     ui->rmFilesButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->rmFilesButton->setToolTip(tr("rmFiles"));
     ui->rmFilesButton->setCursor(QCursor(Qt::PointingHandCursor));
 
-    ui->analysisButton->setIcon(QIcon(":/toolSets/analysis"));
+    ui->analysisButton->setIcon(QIcon(":/toolSets/btn_analysis"));
     ui->analysisButton->setIconSize(QSize(40, 40));
     ui->analysisButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->analysisButton->setToolTip(tr("analysis"));
     ui->analysisButton->setCursor(QCursor(Qt::PointingHandCursor));
 
-    ui->applyButton->setIcon(QIcon(":/toolSets/apply"));
+    ui->applyButton->setIcon(QIcon(":/toolSets/btn_analysis_apply"));
     ui->applyButton->setIconSize(QSize(50, 50));
     ui->applyButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->applyButton->setToolTip(tr("apply"));
     ui->applyButton->setCursor(QCursor(Qt::PointingHandCursor));
 
+    ui->volumeLineEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->volumeLineEdit->setValidator(new QRegExpValidator(QRegExp("-?[0-9]+$"), this));
 
     m_currentIndex = -1;
@@ -106,6 +112,11 @@ MusicVolumeGainWidget::~MusicVolumeGainWidget()
     delete ui;
 }
 
+QString MusicVolumeGainWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicVolumeGainWidget::createItemFinished(const QString &track, const QString &album)
 {
     if(m_currentIndex >= m_paths.count())
@@ -117,7 +128,7 @@ void MusicVolumeGainWidget::createItemFinished(const QString &track, const QStri
     ui->tableWidget->setRowCount(row + 1);
 
     QTableWidgetItem *item = new QTableWidgetItem;
-    item->setText(QFontMetrics(font()).elidedText(m_paths[m_currentIndex], Qt::ElideRight, 320));
+    item->setText(MusicUtils::UWidget::elidedText(font(), m_paths[m_currentIndex], Qt::ElideRight, 320));
     item->setToolTip(m_paths[m_currentIndex]);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     ui->tableWidget->setItem(row, 0, item);
@@ -173,9 +184,9 @@ void MusicVolumeGainWidget::addFileButtonClicked()
         for(int i=orcount; i<m_paths.count(); ++i)
         {
             m_currentIndex = i;
-            MusicSemaphoreEventLoop loop;
+            QEventLoop loop(this);
             connect(m_process, SIGNAL(finished(int)), &loop, SLOT(quit()));
-            m_process->start(MAKE_GAIN_AL, QStringList() << m_paths[i]);
+            m_process->start(MAKE_GAIN_FULL, QStringList() << m_paths[i]);
             loop.exec();
         }
         setControlEnable(true);
@@ -199,9 +210,9 @@ void MusicVolumeGainWidget::addFilesButtonClicked()
                 m_currentIndex = m_paths.count();
                 m_paths << info.absoluteFilePath();
 
-                MusicSemaphoreEventLoop loop;
+                QEventLoop loop(this);
                 connect(m_process, SIGNAL(finished(int)), &loop, SLOT(quit()));
-                m_process->start(MAKE_GAIN_AL, QStringList() << m_paths.last());
+                m_process->start(MAKE_GAIN_FULL, QStringList() << m_paths.last());
                 loop.exec();
             }
         }
@@ -251,9 +262,9 @@ void MusicVolumeGainWidget::applyButtonClicked()
     ui->progressBarAll->setRange(0, ui->tableWidget->rowCount());
     for(int i=0; i<ui->tableWidget->rowCount(); ++i)
     {
-        MusicSemaphoreEventLoop loop;
+        QEventLoop loop(this);
         connect(m_process, SIGNAL(finished(int)), &loop, SLOT(quit()));
-        m_process->start(MAKE_GAIN_AL, QStringList() << "-g" <<
+        m_process->start(MAKE_GAIN_FULL, QStringList() << "-g" <<
                          ui->tableWidget->item(i, 2)->text() << m_paths[i]);
         ui->progressBarAll->setValue(i + 1);
         loop.exec();
@@ -329,7 +340,7 @@ void MusicVolumeGainWidget::applyOutput()
 
 int MusicVolumeGainWidget::exec()
 {
-    if(!QFile::exists(MAKE_GAIN_AL))
+    if(!QFile::exists(MAKE_GAIN_FULL))
     {
         MusicMessageBox message;
         message.setText(tr("Lack of plugin file!"));
@@ -337,7 +348,7 @@ int MusicVolumeGainWidget::exec()
         return -1;
     }
 
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();
 }

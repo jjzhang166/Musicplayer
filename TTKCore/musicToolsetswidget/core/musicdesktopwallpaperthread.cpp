@@ -34,6 +34,11 @@ MusicDesktopWallpaperThread::~MusicDesktopWallpaperThread()
     }
 }
 
+QString MusicDesktopWallpaperThread::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicDesktopWallpaperThread::start()
 {
     m_run = true;
@@ -57,7 +62,7 @@ void MusicDesktopWallpaperThread::run()
         if(m_paramter["Mode"].toInt() == 2)
         {
             path.clear();
-            QString name = M_BG_MANAGER->getArtPhotoPathByIndex();
+            QString name = M_BACKGROUND_PTR->getArtPhotoPathByIndex();
             !name.isEmpty() ? path << name : path << m_originPath;
         }
         if( func == 1) ///random mode
@@ -73,7 +78,7 @@ void MusicDesktopWallpaperThread::run()
     }
 }
 
-void MusicDesktopWallpaperThread::setParamters(const MStriantMap &p)
+void MusicDesktopWallpaperThread::setParamters(const MusicObject::MStriantMap &p)
 {
     m_paramter = p;
 }

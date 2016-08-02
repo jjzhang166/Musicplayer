@@ -2,6 +2,7 @@
 #include "ui_musictransformwidget.h"
 #include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
+#include "musicutils.h"
 
 #include <QMovie>
 #include <QSound>
@@ -16,7 +17,7 @@ MusicTransformWidget::MusicTransformWidget(QWidget *parent)
     ui->setupUi(this);
     
     m_process = new QProcess(this);
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -56,7 +57,6 @@ MusicTransformWidget::MusicTransformWidget(QWidget *parent)
 
     m_currentType = Music;
     initControlParameter();
-
 }
 
 MusicTransformWidget::~MusicTransformWidget()
@@ -65,6 +65,11 @@ MusicTransformWidget::~MusicTransformWidget()
     delete m_movie;
     delete m_process;
     delete ui;
+}
+
+QString MusicTransformWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicTransformWidget::initControlParameter() const
@@ -102,7 +107,7 @@ void MusicTransformWidget::initInputPath()
             return;
         }
 
-        ui->listWidget->addItem(QFontMetrics(font()).elidedText(path, Qt::ElideLeft, LINE_WIDTH));
+        ui->listWidget->addItem(MusicUtils::UWidget::elidedText(font(), path, Qt::ElideLeft, LINE_WIDTH));
         ui->listWidget->setToolTip(path);
         m_path << path;
     }
@@ -119,7 +124,7 @@ void MusicTransformWidget::initInputPath()
                 if(!m_path.contains(var.absoluteFilePath()) && supportedFormat.contains(var.suffix()))
                 {
                     m_path << var.absoluteFilePath();
-                    ui->listWidget->addItem(QFontMetrics(font()).elidedText(m_path.last(), Qt::ElideLeft, LINE_WIDTH));
+                    ui->listWidget->addItem(MusicUtils::UWidget::elidedText(font(), m_path.last(), Qt::ElideLeft, LINE_WIDTH));
                     ui->listWidget->setToolTip(m_path.last());
                 }
             }
@@ -161,12 +166,7 @@ QString MusicTransformWidget::getTransformSongName() const
     {
         return QString();
     }
-    QString str = m_path[0];
-#ifdef Q_OS_WIN
-    str.replace("\\", "/");
-#endif
-    str = str.split('/').back().split('.').front();
-    return str;
+    return QFileInfo(m_path[0]).completeBaseName();
 }
 
 void MusicTransformWidget::transformFinish()
@@ -179,10 +179,10 @@ void MusicTransformWidget::transformFinish()
     {
         foreach(QString path, m_path)
         {
-            ui->listWidget->addItem(QFontMetrics(font()).elidedText(path, Qt::ElideLeft, LINE_WIDTH));
+            ui->listWidget->addItem(MusicUtils::UWidget::elidedText(font(), path, Qt::ElideLeft, LINE_WIDTH));
             ui->listWidget->setToolTip(path);
         }
-        if(!processTransform((m_currentType == Music) ? MAKE_TRANSFORM_AL : MAKE_KRC2LRC_AL))
+        if(!processTransform((m_currentType == Music) ? MAKE_TRANSFORM_FULL : MAKE_KRC2LRC_FULL))
         {
             return;
         }
@@ -253,14 +253,14 @@ bool MusicTransformWidget::processTransform(const QString &para) const
 
 void MusicTransformWidget::startTransform()
 {
-    QString func = (m_currentType == Music) ? MAKE_TRANSFORM_AL : MAKE_KRC2LRC_AL;
+    QString func = (m_currentType == Music) ? MAKE_TRANSFORM_FULL : MAKE_KRC2LRC_FULL;
     if(!QFile(func).exists() || !processTransform(func))
     {
         return;
     }
     ///////////////////////////////////////////////////////////
     ui->loadingLabel->show();
-    ui->loadingLabel->setMovie(m_movie = new QMovie(":/toolSets/loading", QByteArray(), this));
+    ui->loadingLabel->setMovie(m_movie = new QMovie(":/toolSets/ib_loading", QByteArray(), this));
     m_movie->start();
     setCheckedControl(false);
 }
@@ -301,7 +301,7 @@ void MusicTransformWidget::setCheckedControl(bool enable)
 
 int MusicTransformWidget::exec()
 {
-    if(!QFile::exists(MAKE_TRANSFORM_AL) || !QFile::exists(MAKE_KRC2LRC_AL))
+    if(!QFile::exists(MAKE_TRANSFORM_FULL) || !QFile::exists(MAKE_KRC2LRC_FULL))
     {
         MusicMessageBox message;
         message.setText(tr("Lack of plugin file!"));
@@ -309,7 +309,7 @@ int MusicTransformWidget::exec()
         return -1;
     }
 
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();
 }

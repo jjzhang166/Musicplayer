@@ -14,9 +14,9 @@
 #include "musicuiobject.h"
 #include "musicobject.h"
 #include "musicglobaldefine.h"
+#include "musicnumberdefine.h"
 
 class QLabel;
-class QSlider;
 class QToolButton;
 class QPushButton;
 class MusicMovingLabelSlider;
@@ -34,6 +34,10 @@ public:
      */
     ~MusicVideoControl();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setValue(qint64 position) const;
     /*!
      * Set current video play value.
@@ -68,7 +72,7 @@ Q_SIGNALS:
     /*!
      * Set video widget fullScreen or not.
      */
-    void getMusicMvInfo(MusicSongAttributes &data);
+    void getMusicMvInfo(MusicObject::MusicSongAttributes &data);
     /*!
      * Get music mv information data.
      */
@@ -163,10 +167,9 @@ protected:
      */
 
     bool m_widgetPopup;
-    QMenu m_popupVolume, m_popupQuality, m_popupBarrage;
+    QMenu m_popupQuality, m_popupBarrage;
     MusicMovingLabelSlider *m_timeSlider;
-    QSlider *m_volumeSlider;
-    QToolButton *m_menuButton, *m_volumeButton;
+    QToolButton *m_volumeButton;
     QPushButton *m_playButton, *m_inSideButton, *m_fullButton;
     QPushButton *m_qualityButton, *m_downloadButton;
     QAction *m_mvSd, *m_mvHd, *m_mvSq;

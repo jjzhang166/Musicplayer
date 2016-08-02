@@ -3,7 +3,7 @@
 
 #include <QStyle>
 #if defined Q_OS_WIN && defined MUSIC_WINEXTRAS
-#   include <QtWinExtras>
+#   include <QtWinExtras/QtWinExtras>
 #endif
 
 MusicWindowExtras::MusicWindowExtras(QObject *parent)
@@ -38,6 +38,11 @@ MusicWindowExtras::~MusicWindowExtras()
     delete m_taskbarButton;
     delete m_thumbnailToolBar;
 #endif
+}
+
+QString MusicWindowExtras::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicWindowExtras::disableBlurBehindWindow(bool enable)

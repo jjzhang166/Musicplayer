@@ -2,6 +2,7 @@
 #include "musicplaylist.h"
 #include "musicsettingmanager.h"
 #include "musicconnectionpool.h"
+#include "musicnumberdefine.h"
 ///qmmp incldue
 #include "soundcore.h"
 ///
@@ -10,8 +11,7 @@
 MusicPlayer::MusicPlayer(QObject *parent)
     : QObject(parent)
 {
-    m_playlist = 0;
-    m_music = 0;
+    m_playlist = new MusicPlaylist(this);
     m_state = StoppedState;
     m_musicEnhanced = EnhancedOff;
     m_music = new SoundCore(this);
@@ -22,13 +22,18 @@ MusicPlayer::MusicPlayer(QObject *parent)
 
     setEnaleEffect(false);
 
-    connect(&m_timer, SIGNAL(timeout()), SLOT(setTimeOut()));
-    M_CONNECTION->setValue("MusicPlayer", this);
+    connect(&m_timer, SIGNAL(timeout()), SLOT(update()));
+    M_CONNECTION_PTR->setValue(getClassName(), this);
 }
 
 MusicPlayer::~MusicPlayer()
 {
     delete m_music;
+}
+
+QString MusicPlayer::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 MusicPlayer::State MusicPlayer::state() const
@@ -53,7 +58,7 @@ qint64 MusicPlayer::position() const
 
 int MusicPlayer::volume() const
 {
-    return m_music->volume();
+    return isMuted() ? 0 : m_music->volume();
 }
 
 bool MusicPlayer::isMuted() const
@@ -145,7 +150,7 @@ void MusicPlayer::play()
     if(m_currentMedia == m_playlist->currentMediaString() && state == Qmmp::Paused)
     {
         m_music->pause(); ///When the pause time for recovery
-        m_timer.start(1000);
+        m_timer.start(MT_S2MS);
         return;
     }
 
@@ -158,14 +163,14 @@ void MusicPlayer::play()
     }
 
     m_tryTimes = 0;
-    m_timer.start(1000);
+    m_timer.start(MT_S2MS);
     ///Every second emits a signal change information
     emit positionChanged(0);
     getCurrentDuration();
 
     ////////////////////////////////////////////////
     ///Read the configuration settings for the sound
-    int volume = M_SETTING->value(MusicSettingManager::VolumeChoiced).toInt();
+    int volume = M_SETTING_PTR->value(MusicSettingManager::VolumeChoiced).toInt();
     if(volume != -1)
     {
         setVolume(volume);
@@ -218,10 +223,11 @@ void MusicPlayer::setMuted(bool muted)
 
 void MusicPlayer::setPlaylist(MusicPlaylist *playlist)
 {
+//    delete m_playlist;
     m_playlist = playlist;
 }
 
-void MusicPlayer::setTimeOut()
+void MusicPlayer::update()
 {
     emit positionChanged( position() );
 
@@ -262,16 +268,16 @@ void MusicPlayer::setMusicEnhancedCase()
     switch(m_musicEnhanced)
     {
         case EnhancedOff:
-            setEqEffect(MIntList()<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0);
+            setEqEffect(MusicObject::MIntList()<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0<<  0);
             break;
         case MusicVocal:
-            setEqEffect(MIntList()<<  0<<  0<<  4<<  1<< -5<< -1<<  2<< -2<< -4<< -4<<  0);
+            setEqEffect(MusicObject::MIntList()<<  0<<  0<<  4<<  1<< -5<< -1<<  2<< -2<< -4<< -4<<  0);
             break;
         case MusicNICAM:
-            setEqEffect(MIntList()<<  6<<-12<<-12<< -9<< -6<< -3<<-12<< -9<< -6<< -3<<-12);
+            setEqEffect(MusicObject::MIntList()<<  6<<-12<<-12<< -9<< -6<< -3<<-12<< -9<< -6<< -3<<-12);
             break;
         case MusicSubwoofer:
-            setEqEffect(MIntList()<<  6<<  6<<-10<<-10<<  0<<  0<< -3<< -5<< -7<< -9<<-11);
+            setEqEffect(MusicObject::MIntList()<<  6<<  6<<-10<<-10<<  0<<  0<< -3<< -5<< -7<< -9<<-11);
             break;
         default:
             break;
@@ -292,7 +298,7 @@ void MusicPlayer::getCurrentDuration()
     qint64 dur = duration();
     if( (dur == 0 || m_duration == dur) && m_tryTimes++ < 10 )
     {
-        QTimer::singleShot(50, this, SLOT(getCurrentDuration()));
+        QTimer::singleShot(50*MT_MS, this, SLOT(getCurrentDuration()));
     }
     else
     {
@@ -300,7 +306,7 @@ void MusicPlayer::getCurrentDuration()
     }
 }
 
-void MusicPlayer::setEqEffect(const MIntList &hz)
+void MusicPlayer::setEqEffect(const MusicObject::MIntList &hz)
 {
     if(hz.count() != 11)
     {
@@ -308,7 +314,7 @@ void MusicPlayer::setEqEffect(const MIntList &hz)
     }
 
     EqSettings eq = m_music->eqSettings();
-    eq.setPreamp(hz[0]);
+    eq.setPreamp(15 + hz[0]);
     eq.setEnabled(true);
     for(int i=0; i<EqSettings::EQ_BANDS_10; ++i)
     {
@@ -321,20 +327,20 @@ void MusicPlayer::setEnaleEffect(bool enable)
 {
     if(enable == false)
     {
-        setEqEffect(MIntList()<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0);
+        setEqEffect(MusicObject::MIntList()<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0<< 0);
     }
 }
 
 void MusicPlayer::setEqInformation()
 {
     ///Read the equalizer parameters from a configuration file
-    if(M_SETTING->value(MusicSettingManager::EqualizerEnableChoiced).toInt())
+    if(M_SETTING_PTR->value(MusicSettingManager::EqualizerEnableChoiced).toInt())
     {
         setEnaleEffect(true);
-        QStringList eqValue = M_SETTING->value(MusicSettingManager::EqualizerValueChoiced).toString().split(',');
+        QStringList eqValue = M_SETTING_PTR->value(MusicSettingManager::EqualizerValueChoiced).toString().split(',');
         if(eqValue.count() == 11)
         {
-            MIntList hz;
+            MusicObject::MIntList hz;
             hz << eqValue[0].toInt() << eqValue[1].toInt() << eqValue[2].toInt()
                << eqValue[3].toInt() << eqValue[4].toInt() << eqValue[5].toInt()
                << eqValue[6].toInt() << eqValue[7].toInt() << eqValue[8].toInt()

@@ -12,7 +12,7 @@
 #include <QMap>
 #include "musicsingleton.h"
 
-#define M_CONNECTION (MusicSingleton<MusicConnectionPool>::createInstance())
+#define M_CONNECTION_PTR (MusicSingleton<MusicConnectionPool>::createInstance())
 
 /*! @brief The class of the qt signal and slot connection pool.
  * @author Greedysky <greedysky@163.com>
@@ -21,6 +21,10 @@ class MUSIC_CORE_EXPORT MusicConnectionPool : public QObject
 {
     Q_OBJECT
 public:
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     inline void setValue(const QString &type, QObject *object)
     {
         m_para[type] = object;
@@ -85,6 +89,9 @@ protected:
     QList<QObject*> m_queueList;
 
     MusicConnectionPool();
+    /*!
+     * Object contsructor.
+     */
     ~MusicConnectionPool() = default;
 
     DECLARE_SINGLETON_CLASS(MusicConnectionPool)

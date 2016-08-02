@@ -9,21 +9,23 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QToolBox>
-#include <QContextMenuEvent>
 #include "musicsong.h"
-#include "musicglobaldefine.h"
 #include "musicobject.h"
+#include "musicsongstoolboxwidget.h"
+
+#define MUSIC_NORMAL_LIST   0
+#define MUSIC_LOVEST_LIST   1
+#define MUSIC_NETWORK_LIST  2
+#define MUSIC_OTHER_LIST    3
 
 class QTableWidgetItem;
 class MusicSongsListWidget;
-class MusicSongsToolItemRenamedWidget;
 class MusicSongsSummariziedFloatWidget;
 
 /*! @brief The class of the songs summarizied widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_TOOL_EXPORT MusicSongsSummarizied : public QToolBox
+class MUSIC_TOOL_EXPORT MusicSongsSummarizied : public MusicSongsToolBoxWidget
 {
     Q_OBJECT
 public:
@@ -33,11 +35,15 @@ public:
      */
     virtual ~MusicSongsSummarizied();
 
-    void setMusicLists(const MusicSongsList &names);
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    void setMusicLists(const MusicSongItems &names);
     /*!
      * Set music datas into container.
      */
-    inline const MusicSongsList& getMusicLists() const  { return m_musicFileNames;}
+    inline const MusicSongItems& getMusicLists() const  { return m_songItems;}
     /*!
      * Get music datas from container.
      */
@@ -54,7 +60,7 @@ public:
      * Get music songs file path by index.
      */
 
-    void setMusicSongsSearchedFileName(const MIntList &fileIndexs);
+    void setMusicSongsSearchedFileName(const MusicObject::MIntList &fileIndexs);
     /*!
      * Set current searched file indexs.
      */
@@ -83,6 +89,10 @@ public:
     /*!
      * Set current music song tree index.
      */
+    void playLocation(int index);
+    /*!
+     * Show current play index.
+     */
     void selectRow(int index);
     /*!
      * Select the current play row.
@@ -97,7 +107,7 @@ public:
      */
 
 Q_SIGNALS:
-    void deleteItemAt(const MIntList &list, bool remove);
+    void deleteItemAt(const MusicObject::MIntList &list, bool remove);
     /*!
      * Delete items from indexs if in current stack widget.
      */
@@ -123,25 +133,21 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void addNewItem();
+    void addNewRowItem();
     /*!
      * Add new play list item.
      */
-    void deleteItem();
+    void deleteRowItem(int index);
     /*!
      * Delete selected play list item.
      */
-    void changItemName();
+    void changRowItemName(int index, const QString &name);
     /*!
      * Open rename selected play list item widget.
      */
     void setCurrentIndex();
     /*!
      * Set current play index from config file.
-     */
-    void currentIndexChanged(int index);
-    /*!
-     * Current toolbox index has changed.
      */
     void addMusicSongToLovestListAt(int row);
     /*!
@@ -152,7 +158,7 @@ public Q_SLOTS:
      * Remove music song to lovest list by row.
      */
     void addNetMusicSongToList(const QString &name, const QString &time,
-                               const QString &format);
+                               const QString &format, bool play);
     /*!
      * Add current network music to download to local.
      */
@@ -160,7 +166,7 @@ public Q_SLOTS:
     /*!
      * Add current selected song to play lists.
      */
-    void setDeleteItemAt(const MIntList &del, bool fileRemove);
+    void setDeleteItemAt(const MusicObject::MIntList &del, bool fileRemove);
     /*!
      * Delete items from indexs and check remove file or not.
      */
@@ -176,10 +182,6 @@ public Q_SLOTS:
     /*!
      * Check current list is searched or not.
      */
-    void setChangItemName(const QString &name);
-    /*!
-     * Rename selected play list item.
-     */
     void setTransparent(int alpha);
     /*!
      * Set background transparent.
@@ -192,7 +194,7 @@ public Q_SLOTS:
     /*!
      * Delete the float function widget.
      */
-    void getMusicLists(MusicSongsList &songs, QStringList &names);
+    void getMusicLists(MusicSongItems &songs);
     /*!
      * Get music datas from container.
      */
@@ -202,9 +204,17 @@ public Q_SLOTS:
      */
 
 protected:
-    void changeItemIcon();
+    int foundMappingIndex(int index);
     /*!
-     * Set item icon due to the tool box index changed.
+     * Found mapped index in container.
+     */
+    void addNewRowItem(const QString &name);
+    /*!
+     * Add new play list item by name.
+     */
+    void createWidgetItem(MusicSongItem *item);
+    /*!
+     * Create widget item.
      */
     void clearAllLists();
     /*!
@@ -217,12 +227,10 @@ protected:
      */
 
     int m_currentIndexs;
-    int m_renameIndex;
     int m_searchFileListIndex;
-    MIntsListMap m_searchfileListCache;
-    MusicSongsList m_musicFileNames;
-    QList<MusicSongsListWidget*> m_mainSongLists;
-    MusicSongsToolItemRenamedWidget *m_renameLine;
+    QObject *m_supperClass;
+    MusicSongItems m_songItems;
+    MusicObject::MIntsListMap m_searchfileListCache;
     MusicSongsSummariziedFloatWidget *m_floatWidget;
 
 };

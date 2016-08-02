@@ -13,6 +13,7 @@
 #include "musicglobaldefine.h"
 
 class QLabel;
+class MusicClickedSlider;
 class QWidgetAction;
 class QToolButton;
 
@@ -29,6 +30,10 @@ public:
      */
     ~MusicSystemTrayMenu();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setLabelText(const QString &text) const;
     /*!
      * Set tray menu song text.
@@ -40,6 +45,10 @@ public:
     void showPlayStatus(bool status) const;
     /*!
      * Set current play state button.
+     */
+    void setVolumeValue(int value) const;
+    /*!
+     * Set current play volume.
      */
 
 Q_SIGNALS:
@@ -67,10 +76,14 @@ protected:
     /*!
      * Create play widget actions.
      */
+    void createVolumeWidgetActions();
+    /*!
+     * Create volume widget actions.
+     */
 
-    QWidgetAction *m_widgetAction;
     QLabel *m_showText;
-    QToolButton *m_PlayOrStop;
+    QToolButton *m_PlayOrStop, *m_volumeButton;
+    MusicClickedSlider *m_volumeSlider;
     QAction *m_showLrcAction, *m_lockLrcAction;
 
 };

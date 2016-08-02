@@ -1,6 +1,6 @@
 #include "musicradiochannelthread.h"
 
-#ifdef MUSIC_QT_5
+#ifdef MUSIC_GREATER_NEW
 #   include <QJsonParseError>
 #   include <QJsonDocument>
 #   include <QJsonObject>
@@ -26,17 +26,32 @@ MusicRadioChannelThread::~MusicRadioChannelThread()
     deleteAll();
 }
 
+QString MusicRadioChannelThread::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicRadioChannelThread::startToDownload(const QString &)
 {
     m_manager = new QNetworkAccessManager(this);
-    QNetworkRequest networkRequest;
-    networkRequest.setUrl(QUrl(channelUrl));
+
+    QNetworkRequest request;
+    request.setUrl(QUrl(channelUrl));
+#ifndef QT_NO_SSL
+    connect(m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
+                       SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
+    M_LOGGER_INFO(QString("%1 Support ssl: %2").arg(getClassName()).arg(QSslSocket::supportsSsl()));
+
+    QSslConfiguration sslConfig = request.sslConfiguration();
+    sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
+    request.setSslConfiguration(sslConfig);
+#endif
     if(m_cookJar)
     {
         m_manager->setCookieJar(m_cookJar);
         m_cookJar->setParent(nullptr);
     }
-    m_reply = m_manager->get(networkRequest);
+    m_reply = m_manager->get(request);
     connect(m_reply, SIGNAL(finished()), SLOT(downLoadFinished()));
     connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(replyError(QNetworkReply::NetworkError)));
 
@@ -51,6 +66,7 @@ void MusicRadioChannelThread::downLoadFinished()
 {
     if(m_reply == nullptr)
     {
+        deleteAll();
         return;
     }
 
@@ -58,7 +74,7 @@ void MusicRadioChannelThread::downLoadFinished()
     {
         QByteArray bytes = m_reply->readAll();
         m_channels.clear();
-#ifdef MUSIC_QT_5
+#ifdef MUSIC_GREATER_NEW
         QJsonParseError jsonError;
         QJsonDocument parseDoucment = QJsonDocument::fromJson(bytes, &jsonError);
         ///Put the data into Json
@@ -110,6 +126,6 @@ void MusicRadioChannelThread::downLoadFinished()
         }
 #endif
     }
-    emit networkReplyFinished("query finished!");
+    emit downLoadDataChanged("query finished!");
     deleteAll();
 }

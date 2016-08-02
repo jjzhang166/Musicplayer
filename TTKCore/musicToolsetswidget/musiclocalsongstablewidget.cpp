@@ -4,7 +4,12 @@ MusicLocalSongsTableWidget::MusicLocalSongsTableWidget(QWidget *parent)
     : MusicAbstractTableWidget(parent)
 {
     setSelectionMode(QAbstractItemView::ExtendedSelection);
-    MusicUtils::setTransparent(this, 150);
+    MusicUtils::UWidget::setTransparent(this, 150);
+}
+
+QString MusicLocalSongsTableWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLocalSongsTableWidget::clearShowlist()
@@ -35,4 +40,10 @@ void MusicLocalSongsTableWidget::createShowPath()
     clearShowPath();
     QHeaderView *headerview = horizontalHeader();
     headerview->resizeSection(0, 528);
+}
+
+void MusicLocalSongsTableWidget::listCellClicked(int row, int column)
+{
+    Q_UNUSED(row);
+    Q_UNUSED(column);
 }

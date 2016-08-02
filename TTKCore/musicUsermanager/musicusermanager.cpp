@@ -4,6 +4,7 @@
 #include "musicusermodel.h"
 #include "musicuserconfigmanager.h"
 #include "musicuserrecordwidget.h"
+#include "musicnumberdefine.h"
 
 #include <QMenu>
 
@@ -29,10 +30,15 @@ MusicUserManager::~MusicUserManager()
     {
         m_userModel->updateUser(m_currentUserUID, QString(), QString(), ui->username->text(),
                                 QString::number(m_userModel->getUserLogTime(m_currentUserUID)
-                                .toLongLong() + m_time.elapsed()/(1000*30) ));
+                                .toLongLong() + m_time.elapsed()/(MT_S2MS*30) ));
     }
     delete m_userModel;
     delete ui;
+}
+
+QString MusicUserManager::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicUserManager::setUserUID(const QString &uid)
@@ -63,7 +69,7 @@ void MusicUserManager::musicUserLogoff()
 {
     m_userModel->updateUser(m_currentUserUID, QString(), QString(), ui->username->text(),
                             QString::number(m_userModel->getUserLogTime(m_currentUserUID)
-                            .toLongLong() + m_time.elapsed()/(1000*30) ));
+                            .toLongLong() + m_time.elapsed()/(MT_S2MS*30) ));
 
     MusicUserConfigManager xml;
     if(!xml.readUserXMLConfig())
@@ -97,7 +103,7 @@ void MusicUserManager::leaveEvent(QEvent *event)
 
 void MusicUserManager::popupUserRecordWidget()
 {
-#ifndef MUSIC_QT_5
+#ifndef MUSIC_GREATER_NEW
     close();
 #endif
     MusicUserRecordWidget record;

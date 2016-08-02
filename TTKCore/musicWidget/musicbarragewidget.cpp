@@ -1,6 +1,7 @@
 #include "musicbarragewidget.h"
 #include "musictime.h"
 #include "musicobject.h"
+#include "musicutils.h"
 
 #include <QFile>
 
@@ -20,9 +21,14 @@ MusicBarrageAnimation::MusicBarrageAnimation(QObject *target,
 
 void MusicBarrageAnimation::animationFinished()
 {
-    setDuration(qrand()%10000 + 1000);
+    setDuration(qrand()%10000 + MT_S2MS);
     setSize(m_parentSize);
     start();
+}
+
+QString MusicBarrageAnimation::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicBarrageAnimation::setSize(const QSize &size)
@@ -36,7 +42,7 @@ void MusicBarrageAnimation::setSize(const QSize &size)
 void MusicBarrageAnimation::init()
 {
     MusicTime::timeSRand();
-    setDuration(qrand()%10000 + 1000);
+    setDuration(qrand()%10000 + MT_S2MS);
     setEasingCurve(QEasingCurve::Linear);
 
     connect(this, SIGNAL(finished()), SLOT(animationFinished()));
@@ -58,6 +64,11 @@ MusicBarrageWidget::~MusicBarrageWidget()
 {
     writeBarrage();
     deleteItems();
+}
+
+QString MusicBarrageWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicBarrageWidget::start()
@@ -141,13 +152,14 @@ void MusicBarrageWidget::addBarrage(const QString &string)
 {
     MusicTime::timeSRand();
     QLabel *label = new QLabel(m_parentClass);
+
     createLabel(label);
     createAnimation(label);
     setLabelBackground(label);
-    setLabelTextSize(label);
 
     m_barrageLists << string;
     label->setText(string);
+    setLabelTextSize(label);
 
     if(m_barrageState)
     {
@@ -219,16 +231,14 @@ void MusicBarrageWidget::setLabelBackground(QLabel *label)
 
 void MusicBarrageWidget::setLabelTextSize(QLabel *label)
 {
-    QFont ft = label->font();
-    ft.setPointSize(m_fontSize);
-    label->setFont(ft);
-    QFontMetrics ftMcs(ft);
+    MusicUtils::UWidget::setLabelFontSize(label, m_fontSize);
+    QFontMetrics ftMcs(label->font());
     label->resize(ftMcs.width(label->text()), ftMcs.height());
 }
 
 void MusicBarrageWidget::readBarrage()
 {
-    QFile file(BARRAGEPATH_AL);
+    QFile file(BARRAGEPATH_FULL);
     if(file.open(QIODevice::ReadOnly))
     {
         m_barrageLists << QString(file.readAll()).split("\r\n");
@@ -245,7 +255,7 @@ void MusicBarrageWidget::readBarrage()
 
 void MusicBarrageWidget::writeBarrage()
 {
-    QFile file(BARRAGEPATH_AL);
+    QFile file(BARRAGEPATH_FULL);
     if(file.open(QIODevice::WriteOnly | QFile::Text))
     {
         QByteArray array;
@@ -253,7 +263,9 @@ void MusicBarrageWidget::writeBarrage()
         {
             array.append(var + '\n');
         }
-        file.write(array);
+        QTextStream outstream(&file);
+        outstream.setCodec("utf-8");
+        outstream << array << endl;
     }
     file.close();
 }

@@ -1,4 +1,5 @@
 #include "musictoastlabel.h"
+#include "musicnumberdefine.h"
 
 #include <QPropertyAnimation>
 
@@ -11,7 +12,7 @@ MusicToastLabel::MusicToastLabel(QWidget *parent)
 
     m_font = font();
     connect(&m_timer, SIGNAL(timeout()), SLOT(closeAnimation()));
-    m_timer.setInterval(1500);
+    m_timer.setInterval(2*MT_S2MS);
     m_timer.start();
 }
 
@@ -24,6 +25,11 @@ MusicToastLabel::MusicToastLabel(const QString &text, QWidget *parent)
 MusicToastLabel::~MusicToastLabel()
 {
     m_timer.stop();
+}
+
+QString MusicToastLabel::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicToastLabel::setTimerInterval(int msecond)
@@ -70,7 +76,7 @@ void MusicToastLabel::setText(const QString &text)
 void MusicToastLabel::closeAnimation()
 {
     QPropertyAnimation *animation = new QPropertyAnimation(this, "windowOpacity");
-    animation->setDuration(1000);
+    animation->setDuration(MT_S2MS);
     animation->setStartValue(1);
     animation->setEndValue(0);
     animation->start();

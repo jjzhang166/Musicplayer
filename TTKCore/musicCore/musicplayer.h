@@ -38,9 +38,9 @@ public:
     {
         EnhancedOff,    ///*enhanced off, no any effect*/
         Music3D,        ///*3d music effect*/
-        MusicVocal,     ///*vocal music effect*/
         MusicNICAM,     ///*nicam music effect*/
-        MusicSubwoofer  ///*subwoofer music effect*/
+        MusicSubwoofer, ///*subwoofer music effect*/
+        MusicVocal      ///*vocal music effect*/
     };
 
     explicit MusicPlayer(QObject *parent = 0);
@@ -49,6 +49,10 @@ public:
      */
     ~MusicPlayer();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     State state() const;
     /*!
      * Get current player state.
@@ -158,7 +162,7 @@ public Q_SLOTS:
     /*!
      * Player to stop.
      */
-    void setEqEffect(const MIntList &hz);
+    void setEqEffect(const MusicObject::MIntList &hz);
     /*!
      * Set current equalizer effect.
      */
@@ -176,7 +180,7 @@ public Q_SLOTS:
      */
 
 private Q_SLOTS:
-    void setTimeOut();
+    void update();
     /*!
      * Player one second time out.
      */

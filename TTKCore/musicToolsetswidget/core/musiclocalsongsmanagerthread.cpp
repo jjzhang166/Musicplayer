@@ -1,6 +1,6 @@
 #include "musiclocalsongsmanagerthread.h"
-#include <QDir>
 #include "musicplayer.h"
+#include "musicutils.h"
 
 MusicLocalSongsManagerThread::MusicLocalSongsManagerThread(QObject *parent)
     : QThread(parent)
@@ -13,14 +13,21 @@ MusicLocalSongsManagerThread::~MusicLocalSongsManagerThread()
     stopAndQuitThread();
 }
 
+QString MusicLocalSongsManagerThread::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicLocalSongsManagerThread::run()
 {
     QFileInfoList list;
     foreach(QString path, m_path)
     {
-        list << findFile(path);
+        if(m_run)
+        {
+            list << MusicUtils::UCore::findFile(path, MusicPlayer::supportFormatsFilterString());
+        }
     }
-
     ///The name and path search ended when sending the corresponding
     emit setSongNamePath( list );
 }
@@ -41,25 +48,6 @@ void MusicLocalSongsManagerThread::setFindFilePath(const QStringList &path)
     m_path = path;
 }
 
-QFileInfoList MusicLocalSongsManagerThread::findFile(const QString &path)
-{
-    ///Find the corresponding suffix name
-    QDir dir(path);
-    if(!m_run || !dir.exists())
-    {
-        return QFileInfoList();
-    }
-
-    QFileInfoList fileList = dir.entryInfoList(MusicPlayer::supportFormatsFilterString(),
-                                               QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-    QFileInfoList folderList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-
-    foreach(QFileInfo folder, folderList)
-    {
-        fileList.append( findFile(folder.absoluteFilePath()) );
-    }
-    return fileList;
-}
 
 void MusicLocalSongsManagerThread::stopAndQuitThread()
 {

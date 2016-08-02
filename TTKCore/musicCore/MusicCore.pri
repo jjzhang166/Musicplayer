@@ -11,18 +11,16 @@
 # =================================================
 
 INCLUDEPATH += $$PWD \
-               $$PWD/network \
-               $$PWD/qxtglobalshortcut
+               $$PWD/network
 
 !contains(CONFIG, TTK_NO_MSVC_LINK_NEED){
 HEADERS  += \
-    $$PWD/qxtglobalshortcut/qxtglobal.h \
-    $$PWD/qxtglobalshortcut/qxtglobalshortcut.h \
-    $$PWD/qxtglobalshortcut/qxtglobalshortcut_p.h \
+    $$PWD/network/musicnetworkabstract.h \
     $$PWD/network/musicdownloadthreadabstract.h \
     $$PWD/network/musicdata2downloadthread.h \
     $$PWD/network/musicdatadownloadthread.h \
     $$PWD/network/musictextdownloadthread.h \
+    $$PWD/network/musicsourcedownloadthread.h \
     $$PWD/network/musicnetworkthread.h \
     $$PWD/network/musicnetworkproxy.h \
     $$PWD/network/musicnetworkoperator.h \
@@ -35,10 +33,14 @@ HEADERS  += \
     $$PWD/network/musicradioplaylistthread.h \
     $$PWD/network/musicradiosongsthread.h \
     $$PWD/network/musicradiothreadabstract.h \
+    $$PWD/network/musictranslationthread.h \
+    $$PWD/network/musicvoicettsthread.h \
     $$PWD/musiclogger.h \
     $$PWD/musicobject.h \
     $$PWD/musicuiobject.h \
+    $$PWD/musicttkuiobject.h \
     $$PWD/musicutils.h \
+    $$PWD/musicnumberdefine.h \
     $$PWD/musicglobaldefine.h \
     $$PWD/musicglobalhotkey.h \
     $$PWD/musicversion.h \
@@ -55,20 +57,18 @@ HEADERS  += \
     $$PWD/musicsong.h \
     $$PWD/musiccryptographichash.h \
     $$PWD/musicbackgroundmanager.h \
-    $$PWD/musicsemaphoreeventloop.h
+    $$PWD/musicsystemenvironment.h
 
 }
 
 contains(CONFIG, TTK_BUILD_LIB){
-win32:SOURCES += $$PWD/qxtglobalshortcut/qxtglobalshortcut_win.cpp
-unix:SOURCES += $$PWD/qxtglobalshortcut/qxtglobalshortcut_x11.cpp
-mac:SOURCES += $$PWD/qxtglobalshortcut/qxtglobalshortcut_mac.cpp
 SOURCES += \
-    $$PWD/qxtglobalshortcut/qxtglobalshortcut.cpp \
+    $$PWD/network/musicnetworkabstract.cpp \
     $$PWD/network/musicdownloadthreadabstract.cpp \
     $$PWD/network/musicdata2downloadthread.cpp \
     $$PWD/network/musicdatadownloadthread.cpp \
     $$PWD/network/musictextdownloadthread.cpp \
+    $$PWD/network/musicsourcedownloadthread.cpp \
     $$PWD/network/musicnetworkthread.cpp \
     $$PWD/network/musicnetworkproxy.cpp \
     $$PWD/network/musicnetworkoperator.cpp \
@@ -81,6 +81,8 @@ SOURCES += \
     $$PWD/network/musicradioplaylistthread.cpp \
     $$PWD/network/musicradiosongsthread.cpp \
     $$PWD/network/musicradiothreadabstract.cpp \
+    $$PWD/network/musictranslationthread.cpp \
+    $$PWD/network/musicvoicettsthread.cpp \
     $$PWD/musicutils.cpp \
     $$PWD/musicglobalhotkey.cpp \
     $$PWD/musictime.cpp \
@@ -94,6 +96,6 @@ SOURCES += \
     $$PWD/musicsong.cpp \
     $$PWD/musiccryptographichash.cpp \
     $$PWD/musicbackgroundmanager.cpp \
-    $$PWD/musicsemaphoreeventloop.cpp
+    $$PWD/musicsystemenvironment.cpp
 
 }

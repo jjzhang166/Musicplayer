@@ -31,6 +31,10 @@ public:
      */
     virtual ~MusicSongsListWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setSongsFileName(MusicSongs *songs);
     /*!
      * Set songs file names.
@@ -44,6 +48,10 @@ public:
      * Clear All Items.
      */
 
+    int allRowsHeight() const;
+    /*!
+     * Get all rows height.
+     */
     void selectRow(int index);
     /*!
      * Select the current play row.
@@ -107,7 +115,7 @@ Q_SIGNALS:
     /*!
      * Check is current play stack widget.
      */
-    void deleteItemAt(const MIntList &index, bool fileRemove);
+    void deleteItemAt(const MusicObject::MIntList &index, bool fileRemove);
     /*!
      * Delete items from indexs and check remove file or not.
      */
@@ -180,6 +188,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void leaveEvent(QEvent *event) override;
     virtual void paintEvent(QPaintEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.
@@ -187,6 +196,10 @@ protected:
     void startToDrag();
     /*!
      * Start to drag to play list.
+     */
+    void createContextMenu(QMenu &menu);
+    /*!
+     * Create context menu.
      */
 
     int m_transparent;

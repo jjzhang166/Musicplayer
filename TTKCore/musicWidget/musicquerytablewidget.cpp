@@ -31,6 +31,11 @@ MusicQueryTableWidget::~MusicQueryTableWidget()
     delete m_checkBoxDelegate;
 }
 
+QString MusicQueryTableWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicQueryTableWidget::listCellClicked(int row, int column)
 {
     if(column == 0)
@@ -61,8 +66,13 @@ void MusicQueryTableWidget::setSelectedAllItems(bool all)
 void MusicQueryTableWidget::actionGroupClick(QAction *action)
 {
     int row = currentRow();
-    QString songName = row != -1 && rowCount() > 0 ? item(row, 1)->text() : QString();
-    QString artistName = row != -1 && rowCount() > 0 ? item(row, 2)->text() : QString();
+    if( row < 0)
+    {
+        return;
+    }
+
+    QString songName = (row != -1 && rowCount() > 0) ? item(row, 1)->toolTip() : QString();
+    QString artistName = (row != -1 && rowCount() > 0) ? item(row, 2)->toolTip() : QString();
 
     switch( findActionGroup(action) )
     {
@@ -96,30 +106,17 @@ void MusicQueryTableWidget::createContextMenu(QMenu &menu)
     menu.addSeparator();
 
     QString songName = currentRow() != -1 && rowCount() > 0 ?
-                item(currentRow(), 1)->text() : QString();
+                item(currentRow(), 1)->toolTip() : QString();
     QString artistName = currentRow() != -1 && rowCount() > 0 ?
-                item(currentRow(), 2)->text() : QString();
+                item(currentRow(), 2)->toolTip() : QString();
     m_actionGroup->addAction(menu.addAction(tr("search '%1'").arg(songName)));
     m_actionGroup->addAction(menu.addAction(tr("search '%1'").arg(artistName)));
     m_actionGroup->addAction(menu.addAction(tr("search '%1 - %2'").arg(songName).arg(artistName)));
 }
 
-void MusicQueryTableWidget::paintEvent(QPaintEvent *event)
+MusicObject::MIntList MusicQueryTableWidget::getSelectedItems() const
 {
-    MusicAbstractTableWidget::paintEvent(event);
-    QPainter painter(viewport());
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(QPen(QBrush(QColor(0, 0, 0)), 0.1, Qt::SolidLine));
-    for(int i=0; i<rowCount(); ++i)
-    {
-        painter.drawLine(10, rowHeight(0)*(i + 1),
-                         width() - 15, rowHeight(0)*(i + 1));
-    }
-}
-
-MIntList MusicQueryTableWidget::getSelectedItems() const
-{
-    MIntList list;
+    MusicObject::MIntList list;
     for(int i=0; i<rowCount(); ++i)
     {
         if(item(i, 0)->data(MUSIC_CHECK_ROLE) == true)

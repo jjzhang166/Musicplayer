@@ -31,6 +31,10 @@ public:
      */
     ~MusicLeftAreaWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setupUi(Ui::MusicApplication* ui);
     /*!
      * Set up app ui.
@@ -38,6 +42,10 @@ public:
     void musictLoveStateClicked();
     /*!
      * Reset current music love icon state.
+     */
+    void switchToSelectedItemStyle(int index);
+    /*!
+     * Switch to selected item style.
      */
 
 Q_SIGNALS:
@@ -79,6 +87,10 @@ public Q_SLOTS:
     /*!
      * Change to mobile widget.
      */
+    void musicStackedCloudWidgetChanged();
+    /*!
+     * Change to shared cloud widget.
+     */
     void musicAnalyzerSpectrumWidget();
     /*!
      * Show analyzer spectrum widget.
@@ -89,6 +101,7 @@ public Q_SLOTS:
      */
 
 protected:
+
     QWidget *m_supperClass;
     Ui::MusicApplication *m_ui;
     QWidget *m_stackedWidget;

@@ -25,13 +25,13 @@ HEADERS  += \
     $$PWD/musiclrcartphotoupload.h \
     $$PWD/musiclrcartphotolabel.h \
     $$PWD/musiclrcfloatwidget.h \
-    $$PWD/musiclrcfloatabstractwidget.h \
     $$PWD/musiclrcfloatsettingwidget.h \
     $$PWD/musiclrcfloatphotowidget.h \
     $$PWD/musiclrcmakerwidget.h \
     $$PWD/musiclrcanalysis.h \
     $$PWD/musiclrcerrorwidget.h \
-    $$PWD/musiclrclocallinkwidget.h
+    $$PWD/musiclrclocallinkwidget.h \
+    $$PWD/musiclrcfromkrc.h
 
 }
 
@@ -48,12 +48,12 @@ SOURCES += \
     $$PWD/musiclrcartphotoupload.cpp \
     $$PWD/musiclrcartphotolabel.cpp \
     $$PWD/musiclrcfloatwidget.cpp \
-    $$PWD/musiclrcfloatabstractwidget.cpp \
     $$PWD/musiclrcfloatsettingwidget.cpp \
     $$PWD/musiclrcfloatphotowidget.cpp \
     $$PWD/musiclrcmakerwidget.cpp \
     $$PWD/musiclrcanalysis.cpp \
     $$PWD/musiclrcerrorwidget.cpp \
-    $$PWD/musiclrclocallinkwidget.cpp
+    $$PWD/musiclrclocallinkwidget.cpp \
+    $$PWD/musiclrcfromkrc.cpp
 
 }

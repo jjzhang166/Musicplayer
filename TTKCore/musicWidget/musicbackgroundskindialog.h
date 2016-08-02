@@ -30,11 +30,15 @@ public:
      */
     virtual ~MusicBackgroundSkinDialog();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setCurrentBgTheme(const QString &theme, int alpha, int listAlpha);
     /*!
      * Select current item by name\alpha\listAlpha when the widget show.
      */
-    void updateBackground();
+    void updateBackground(const QString &text);
     /*!
      * Update this bg when user change the current bg.
      */
@@ -43,8 +47,21 @@ public:
      * Get kist bg skin alpha.
      */
 
+    void setSkinTransToolText(int value);
+    /*!
+     * Set skin transparent tool text.
+     */
+    void setListTransToolText(int value);
+    /*!
+     * Set list transparent tool text.
+     */
+
 Q_SIGNALS:
     void currentTextChanged(const QString &text);
+    /*!
+     * Update app bg when user change the current bg emit.
+     */
+    void currentColorChanged(const QString &path);
     /*!
      * Update app bg when user change the current bg emit.
      */
@@ -59,6 +76,10 @@ public Q_SLOTS:
      * Change index to remote skin.
      */
     void showPaletteDialog();
+    /*!
+     * Change index to palette dialog.
+     */
+    void showPaletteDialog(const QString &path);
     /*!
      * Change index to palette dialog.
      */

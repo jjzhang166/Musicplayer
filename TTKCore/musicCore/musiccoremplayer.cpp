@@ -1,6 +1,6 @@
 #include "musiccoremplayer.h"
 #include "musicobject.h"
-#include "musiclogger.h"
+#include "musicnumberdefine.h"
 
 #include <QProcess>
 
@@ -11,7 +11,7 @@ MusicCoreMPlayer::MusicCoreMPlayer(QObject *parent)
     m_playState = StoppedState;
     m_category = NullCategory;
 
-    m_timer.setInterval(1000);
+    m_timer.setInterval(MT_S2MS);
     connect(&m_timer, SIGNAL(timeout()), SLOT(timeout()));
 }
 
@@ -24,6 +24,11 @@ MusicCoreMPlayer::~MusicCoreMPlayer()
     delete m_process;
 }
 
+QString MusicCoreMPlayer::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicCoreMPlayer::setMedia(Category type, const QString &data, int winId)
 {
     m_timer.stop();
@@ -33,7 +38,7 @@ void MusicCoreMPlayer::setMedia(Category type, const QString &data, int winId)
         delete m_process;
         m_process = nullptr;
     }
-    if(!QFile::exists(MAKE_PLAYER_AL))
+    if(!QFile::exists(MAKE_PLAYER_FULL))
     {
         M_LOGGER_ERROR(tr("Lack of plugin file!"));
         return;
@@ -69,7 +74,7 @@ void MusicCoreMPlayer::setVideoMedia(const QString &data, int winId)
     m_process->setProcessChannelMode(QProcess::MergedChannels);
     connect(m_process, SIGNAL(readyReadStandardOutput()), SLOT(durationRecieve()));
     m_process->write("get_time_length\n");
-    m_process->start(MAKE_PLAYER_AL, arguments);
+    m_process->start(MAKE_PLAYER_FULL, arguments);
 }
 
 void MusicCoreMPlayer::setMusicMedia(const QString &data)
@@ -79,7 +84,7 @@ void MusicCoreMPlayer::setMusicMedia(const QString &data)
     QStringList arguments;
     arguments << "-slave" << "-quiet" << "-vo" << "directx:noaccel" << data;
     connect(m_process, SIGNAL(readyReadStandardOutput()), SLOT(dataRecieve()));
-    m_process->start(MAKE_PLAYER_AL, arguments);
+    m_process->start(MAKE_PLAYER_FULL, arguments);
 }
 
 void MusicCoreMPlayer::setRadioMedia(const QString &data)
@@ -89,7 +94,7 @@ void MusicCoreMPlayer::setRadioMedia(const QString &data)
     QStringList arguments;
     arguments << "-slave" << "-quiet" << "-vo" << "directx:noaccel" << data;
     connect(m_process, SIGNAL(readyReadStandardOutput()), SLOT(dataRecieve()));
-    m_process->start(MAKE_PLAYER_AL, arguments);
+    m_process->start(MAKE_PLAYER_FULL, arguments);
 }
 
 void MusicCoreMPlayer::setPosition(qint64 pos)

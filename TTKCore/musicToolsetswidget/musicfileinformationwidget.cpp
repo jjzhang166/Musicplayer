@@ -18,6 +18,11 @@ MusicModifyLineEdit::~MusicModifyLineEdit()
 
 }
 
+QString MusicModifyLineEdit::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicModifyLineEdit::isTextEdited()
 {
     m_isTextEdited = true;
@@ -42,11 +47,13 @@ MusicFileInformationWidget::MusicFileInformationWidget(QWidget *parent)
 {
     ui->setupUi(this);
     
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
+
+    setStyleSheet(MusicUIObject::MLineEditStyle01);
 
     ui->viewButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
     ui->viewButton->setCursor(QCursor(Qt::PointingHandCursor));
@@ -59,9 +66,14 @@ MusicFileInformationWidget::~MusicFileInformationWidget()
     delete ui;
 }
 
+QString MusicFileInformationWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicFileInformationWidget::musicOpenFileDir()
 {
-    if(!MusicUtils::openUrl(QFileInfo(m_path).absoluteFilePath()))
+    if(!MusicUtils::UCore::openUrl(QFileInfo(m_path).absoluteFilePath()))
     {
         MusicMessageBox message;
         message.setText(tr("The origin one does not exist!"));
@@ -77,7 +89,7 @@ void MusicFileInformationWidget::setFileInformation(const QString &name)
     QString check;
     ui->filePathEdit->setText( (check = name).isEmpty() ? "-" : check );
     ui->fileFormatEdit->setText( (check = fin.suffix() ).isEmpty() ? "-" : check );
-    ui->fileSizeEdit->setText( (check = MusicUtils::size2Label(fin.size()) )
+    ui->fileSizeEdit->setText( (check = MusicUtils::UNumber::size2Label(fin.size()) )
                                 .isEmpty() ? "-" : check );
 
     ui->fileAlbumEdit->setText( state ? ((check = tag.getAlbum()).isEmpty() ? "-" : check) : "-" );
@@ -124,7 +136,7 @@ void MusicFileInformationWidget::saveModifyData()
 
 int MusicFileInformationWidget::exec()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();
 }

@@ -2,19 +2,27 @@
 #include "musicuiobject.h"
 
 MusicSongsToolItemRenamedWidget::MusicSongsToolItemRenamedWidget(
-            int offset, const QString &originText, QWidget *parent)
+            const QString &originText, QWidget *parent)
     : QLineEdit(parent)
 {
-    setGeometry(1, offset, 330, 20);
+    setGeometry(1, 0, 330, 20);
     setText(originText);
-    setStyleSheet(MusicUIObject::MCustomStyle04);
+    setStyleSheet(MusicUIObject::MLineEditStyle01);
     setFocus(Qt::MouseFocusReason);
+    setFocusPolicy(Qt::ClickFocus);
     connect(this, SIGNAL(editingFinished()), SLOT(renameFinished()));
 }
 
-void MusicSongsToolItemRenamedWidget::focusOutEvent(QFocusEvent *)
+QString MusicSongsToolItemRenamedWidget::getClassName()
 {
+    return staticMetaObject.className();
+}
+
+void MusicSongsToolItemRenamedWidget::focusOutEvent(QFocusEvent *event)
+{
+    QLineEdit::focusOutEvent(event);
     emit renameFinished(text());
+    close();
 }
 
 void MusicSongsToolItemRenamedWidget::contextMenuEvent(QContextMenuEvent *)

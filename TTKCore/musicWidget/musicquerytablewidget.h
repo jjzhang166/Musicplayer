@@ -35,6 +35,10 @@ public:
      */
     virtual ~MusicQueryTableWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startSearchQuery(const QString &text) = 0;
     /*!
      * Start search query by text.
@@ -45,7 +49,7 @@ public:
      * Data download to local file.
      * Subclass should implement this function.
      */
-    MIntList getSelectedItems() const;
+    MusicObject::MIntList getSelectedItems() const;
     /*!
      * Get selected items.
      */
@@ -92,7 +96,6 @@ public Q_SLOTS:
      */
 
 protected:
-    virtual void paintEvent(QPaintEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *) override {}
     /*!
      * Override the widget event.

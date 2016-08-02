@@ -12,14 +12,14 @@ MusicAbstractTableWidget::MusicAbstractTableWidget(QWidget *parent)
     QHeaderView *headerview = horizontalHeader();
     headerview->setVisible(false);
     headerview->resizeSection(0, 20);
-    headerview->resizeSection(1, 257);
+    headerview->resizeSection(1, 247);
     headerview->resizeSection(2, 45);
     verticalHeader()->setVisible(false);
 
     setMouseTracking(true);  //Open the capture mouse function
     setStyleSheet(MusicUIObject::MTableWidgetStyle01 + \
                   MusicUIObject::MScrollBarStyle01 + \
-                  MusicUIObject::MLineEditStyle02 );
+                  MusicUIObject::MLineEditStyle01 );
 
     QFont f = font();
     f.setBold(false);
@@ -33,7 +33,7 @@ MusicAbstractTableWidget::MusicAbstractTableWidget(QWidget *parent)
     setSelectionMode(QAbstractItemView::SingleSelection);
     setFocusPolicy(Qt::NoFocus);
 
-    MusicUtils::setTransparent(this, 50);
+    MusicUtils::UWidget::setTransparent(this, 50);
     m_previousColorRow = -1;
     m_previousClickRow = -1;
     m_defaultBkColor = QColor(255, 255, 255, 0);
@@ -47,6 +47,11 @@ MusicAbstractTableWidget::~MusicAbstractTableWidget()
 
 }
 
+QString MusicAbstractTableWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicAbstractTableWidget::clear()
 {
     clearContents();
@@ -56,7 +61,7 @@ void MusicAbstractTableWidget::clear()
 void MusicAbstractTableWidget::listCellEntered(int row, int column)
 {
     QTableWidgetItem *it = item(m_previousColorRow, 0);
-    if(it != 0)
+    if(it != nullptr)
     {
        setRowColor(m_previousColorRow, m_defaultBkColor);
     }
@@ -64,7 +69,7 @@ void MusicAbstractTableWidget::listCellEntered(int row, int column)
     it = item(row, column);
     if(it != nullptr)
     {
-       setRowColor(row, QColor(20, 20, 20, 40));
+       setRowColor(row, QColor(20, 20, 20, 20));
     }
 
     m_previousColorRow = row;

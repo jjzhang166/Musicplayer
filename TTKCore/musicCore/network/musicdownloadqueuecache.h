@@ -11,11 +11,11 @@
 
 #include "musicdownloadthreadabstract.h"
 
-typedef struct DownloadData
+typedef struct MUSIC_NETWORK_EXPORT DownloadQueueData
 {
-    QString url;        ///*download url*/
-    QString savePath;   ///*save local path*/
-}DownloadData;
+    QString m_url;        ///*download url*/
+    QString m_savePath;   ///*save local path*/
+}DownloadQueueData;
 
 /*! @brief The class to download data from cache queue.
  * @author Greedysky <greedysky@163.com>
@@ -36,6 +36,10 @@ public:
      */
     ~MusicDownloadQueueCache();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void addImageQueue(const QStringList &url, const QStringList &savePath);
     /*!
      * Add image download url and save path to download queue.
@@ -75,7 +79,7 @@ protected:
 
     bool m_isDownload;
     bool m_isAbort;
-    QList<DownloadData> m_imageQueue;
+    QList<DownloadQueueData> m_imageQueue;
     QNetworkRequest *m_request;
 
 };

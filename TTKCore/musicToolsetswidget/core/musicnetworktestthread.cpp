@@ -34,6 +34,11 @@ MusicNetworkTestThread::~MusicNetworkTestThread()
     stopAndQuitThread();
 }
 
+QString MusicNetworkTestThread::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicNetworkTestThread::stopAndQuitThread()
 {
     if(isRunning())
@@ -59,7 +64,7 @@ void MusicNetworkTestThread::setAvailableNewtworkNames(const QStringList &names)
     connect(m_process, SIGNAL(readyReadStandardOutput()), SLOT(outputRecieved()));
     QStringList arguments;
     arguments << m_names.first() << "1";
-    m_process->start(MAKE_NETS_AL, arguments);
+    m_process->start(MAKE_NETS_FULL, arguments);
 #endif
 }
 
@@ -80,7 +85,7 @@ QStringList MusicNetworkTestThread::getNewtworkNames() const
         return names;
     }
 
-    if (uRetCode == ERROR_INSUFFICIENT_BUFFER)
+    if(uRetCode == ERROR_INSUFFICIENT_BUFFER)
     {
         m_pTable = (PMIB_IFTABLE)new BYTE[65535];
     }
@@ -99,12 +104,12 @@ QStringList MusicNetworkTestThread::getNewtworkNames() const
     delete[] m_pTable;
 #elif defined Q_OS_UNIX
     struct ifaddrs *ifa = nullptr, *ifList;
-    if (getifaddrs(&ifList) < 0)
+    if(getifaddrs(&ifList) < 0)
     {
         return QStringList();
     }
 
-    for (ifa = ifList; ifa != nullptr; ifa = ifa->ifa_next)
+    for(ifa = ifList; ifa != nullptr; ifa = ifa->ifa_next)
     {
         if(ifa->ifa_addr->sa_family == AF_INET)
         {
@@ -150,7 +155,7 @@ void MusicNetworkTestThread::run()
         return;
     }
 
-    if (uRetCode == ERROR_INSUFFICIENT_BUFFER)
+    if(uRetCode == ERROR_INSUFFICIENT_BUFFER)
     {
         m_pTable = (PMIB_IFTABLE)new BYTE[65535];
     }
@@ -184,7 +189,7 @@ void MusicNetworkTestThread::run()
             dwBandIn = 0;
         }
 
-        if (dwLastOut <= 0)
+        if(dwLastOut <= 0)
         {
             dwBandOut = 0;
         }

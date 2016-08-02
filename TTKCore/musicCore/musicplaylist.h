@@ -1,5 +1,5 @@
-#ifndef QMUSICPLAYLIST_H
-#define QMUSICPLAYLIST_H
+#ifndef MUSICPLAYLIST_H
+#define MUSICPLAYLIST_H
 
 /* =================================================
  * This file is part of the TTK Music Player project
@@ -26,6 +26,10 @@ public:
      */
     ~MusicPlaylist() = default;
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     MusicObject::SongPlayType playbackMode() const;
     /*!
      * Get current play mode.
@@ -110,10 +114,10 @@ public Q_SLOTS:
      */
 
 protected:
-    MusicObject::SongPlayType m_playbackMode;
-    QStringList m_mediaList;
     int m_currentIndex;
+    QStringList m_mediaList;
+    MusicObject::SongPlayType m_playbackMode;
 
 };
 
-#endif // QMUSICPLAYLIST_H
+#endif // MUSICPLAYLIST_H

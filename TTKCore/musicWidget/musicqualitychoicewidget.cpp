@@ -2,9 +2,9 @@
 #include "musicuiobject.h"
 #include "musicitemdelegate.h"
 #include "musicconnectionpool.h"
+#include "musicrightareawidget.h"
 
-#include <QMenu>
-#include <QWidgetAction>
+#include <QBoxLayout>
 
 MusicQualityChoiceTableWidget::MusicQualityChoiceTableWidget(QWidget *parent)
     : MusicAbstractTableWidget(parent)
@@ -19,12 +19,16 @@ MusicQualityChoiceTableWidget::MusicQualityChoiceTableWidget(QWidget *parent)
     m_previousClickRow = 1;
 
     createItems();
-    setFixedSize(110, 150);
 }
 
 MusicQualityChoiceTableWidget::~MusicQualityChoiceTableWidget()
 {
     clear();
+}
+
+QString MusicQualityChoiceTableWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicQualityChoiceTableWidget::createItems()
@@ -57,23 +61,23 @@ void MusicQualityChoiceTableWidget::createItems()
     setItem(4, 0, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(":/quality/stQuality"));
+    item->setIcon(QIcon(":/quality/lb_st_quality"));
     setItem(0, 1, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(":/quality/sdQuality"));
+    item->setIcon(QIcon(":/quality/lb_sd_quality"));
     setItem(1, 1, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(":/quality/hdQuality"));
+    item->setIcon(QIcon(":/quality/lb_hd_quality"));
     setItem(2, 1, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(":/quality/sqQuality"));
+    item->setIcon(QIcon(":/quality/lb_sq_quality"));
     setItem(3, 1, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(":/quality/cdQuality"));
+    item->setIcon(QIcon(":/quality/lb_cd_quality"));
     setItem(4, 1, item);
 
                       item = new QTableWidgetItem;
@@ -110,38 +114,39 @@ void MusicQualityChoiceTableWidget::listCellClicked(int row, int)
 
 
 MusicQualityChoiceWidget::MusicQualityChoiceWidget(QWidget *parent)
-    : QToolButton(parent)
+    : MusicToolMenuWidget(parent)
 {
     setText(tr("SD-text"));
     setToolTip(tr("Quality Choice"));
     setFixedSize(45, 20);
-    initWidget();
-    setCursor(Qt::PointingHandCursor);
-    setStyleSheet(MusicUIObject::MToolButtonStyle09);
-    setEnabled(false);
 
-    M_CONNECTION->setValue("MusicQualityChoiceTableWidget", this);
-    M_CONNECTION->poolConnect("MusicSongSearchOnlineTableWidget",
-                          "MusicQualityChoiceTableWidget");
+    initWidget();
+
+    setStyleSheet(MusicUIObject::MToolButtonStyle09);
+
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicRightAreaWidget::getClassName());
 }
 
-MusicQualityChoiceWidget::~MusicQualityChoiceWidget()
+QString MusicQualityChoiceWidget::getClassName()
 {
-    delete m_menu;
+    return staticMetaObject.className();
 }
 
 void MusicQualityChoiceWidget::initWidget()
 {
-    m_menu = new QMenu(this);
     m_menu->setStyleSheet(MusicUIObject::MMenuStyle02);
-    QWidgetAction *actionWidget = new QWidgetAction(m_menu);
-    MusicQualityChoiceTableWidget *containWidget = new MusicQualityChoiceTableWidget(m_menu);
-    connect(containWidget, SIGNAL(cellClicked(int ,int)), SLOT(listCellClicked(int)));
 
-    actionWidget->setDefaultWidget(containWidget);
-    m_menu->addAction(actionWidget);
-    setMenu(m_menu);
-    setPopupMode(QToolButton::InstantPopup);
+    QHBoxLayout *layout = new QHBoxLayout(m_containWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    MusicQualityChoiceTableWidget *table = new MusicQualityChoiceTableWidget(m_containWidget);
+    connect(table, SIGNAL(cellClicked(int ,int)), SLOT(listCellClicked(int)));
+    layout->addWidget(table);
+    m_containWidget->setFixedSize(110, 150);
+
+    m_containWidget->setLayout(layout);
 }
 
 void MusicQualityChoiceWidget::listCellClicked(int row)
@@ -180,11 +185,5 @@ void MusicQualityChoiceWidget::listCellClicked(int row)
                 break;
             }
     }
-    emit researchQueryByQuality();
-}
-
-void MusicQualityChoiceWidget::getQualityString(QString &string)
-{
-    setEnabled(true);
-    string = m_currentQuality;
+    emit researchQueryByQuality(m_currentQuality);
 }

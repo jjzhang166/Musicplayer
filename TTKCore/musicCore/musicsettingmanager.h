@@ -9,10 +9,11 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include "musicsingleton.h"
 #include <QMetaEnum>
+#include "musicobject.h"
+#include "musicsingleton.h"
 
-#define M_SETTING (MusicSingleton<MusicSettingManager>::createInstance())
+#define M_SETTING_PTR (MusicSingleton<MusicSettingManager>::createInstance())
 
 /*! @brief The class of the paramater setting manager.
  * @author Greedysky <greedysky@163.com>
@@ -26,6 +27,8 @@ public:
     {
         Null = -1,                      ///*No Parameter*/
         ScreenSize,                     ///*Screen Size Parameter*/
+        WidgetPosition,                 ///*Widget Position Parameter*/
+        WidgetSize,                     ///*Widget Size Parameter*/
 
         PlayModeChoiced,                ///*Play Mode Parameter*/
         VolumeChoiced,                  ///*Volume Parameter*/
@@ -97,6 +100,13 @@ public:
 
     };
 
+    static QString getClassName()
+    {
+        return staticMetaObject.className();
+    }
+    /*!
+     * Get class object name.
+     */
     inline void setValue(ConfigType type, const QVariant &var)
     {
         m_para[type] = var;
@@ -155,6 +165,9 @@ public:
 
 protected:
     MusicSettingManager(){}
+    /*!
+     * Object contsructor.
+     */
     ~MusicSettingManager(){}
 
     ConfigType typeStringToEnum(const QString &stype) const

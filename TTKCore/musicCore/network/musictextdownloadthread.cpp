@@ -1,6 +1,6 @@
 #include "musictextdownloadthread.h"
 
-#ifdef MUSIC_QT_5
+#ifdef MUSIC_GREATER_NEW
 #   include <QJsonObject>
 #   include <QJsonValue>
 #   include <QJsonParseError>
@@ -16,15 +16,32 @@ MusicTextDownLoadThread::MusicTextDownLoadThread(const QString &url, const QStri
 
 }
 
+QString MusicTextDownLoadThread::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicTextDownLoadThread::startToDownload()
 {
     if( !m_file->exists() || m_file->size() < 4 )
     {
         if( m_file->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text) )
         {
-            m_timer.start(1000);
+            m_timer.start(MT_S2MS);
             m_manager = new QNetworkAccessManager(this);
-            m_reply = m_manager->get( QNetworkRequest(QUrl(m_url)));
+
+            QNetworkRequest request;
+            request.setUrl(m_url);
+#ifndef QT_NO_SSL
+            connect(m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
+                               SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
+            M_LOGGER_INFO(QString("%1 Support ssl: %2").arg(getClassName()).arg(QSslSocket::supportsSsl()));
+
+            QSslConfiguration sslConfig = request.sslConfiguration();
+            sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
+            request.setSslConfiguration(sslConfig);
+#endif
+            m_reply = m_manager->get( request );
             connect(m_reply, SIGNAL(finished()), SLOT(downLoadFinished()));
             connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
                              SLOT(replyError(QNetworkReply::NetworkError)) );
@@ -33,7 +50,7 @@ void MusicTextDownLoadThread::startToDownload()
         }
         else
         {
-            emit musicDownLoadFinished("The text file create failed");
+            emit downLoadDataChanged("The text file create failed");
             M_LOGGER_ERROR("The text file create failed!");
             deleteAll();
         }
@@ -44,6 +61,7 @@ void MusicTextDownLoadThread::downLoadFinished()
 {
     if(m_reply == nullptr)
     {
+        deleteAll();
         return;
     }
     m_timer.stop();
@@ -53,7 +71,7 @@ void MusicTextDownLoadThread::downLoadFinished()
 #ifndef USE_MULTIPLE_QUERY
     if(!bytes.contains("\"code\":2"))
     {
-#ifdef MUSIC_QT_5
+#ifdef MUSIC_GREATER_NEW
         QJsonParseError jsonError;
         QJsonDocument parseDoucment = QJsonDocument::fromJson(bytes, &jsonError);
         ///Put the data into Json
@@ -70,8 +88,9 @@ void MusicTextDownLoadThread::downLoadFinished()
             jsonObject = jsonObject.take("data").toObject();
             if(jsonObject.contains("lrc"))
             {
-                m_file->write(jsonObject.take("lrc").toString().remove("\r").toUtf8());
-                m_file->flush();
+                QTextStream outstream(&m_file);
+                outstream.setCodec("utf-8");
+                outstream << jsonObject.take("lrc").toString().remove("\r").toUtf8() << endl;
                 m_file->close();
                 M_LOGGER_INFO("text download  has finished!");
             }
@@ -84,8 +103,9 @@ void MusicTextDownLoadThread::downLoadFinished()
             sc = sc.property("data");
             if(!sc.property("lrc").isNull())
             {
-                m_file->write(sc.property("lrc").toString().remove("\r").toUtf8());
-                m_file->flush();
+                QTextStream outstream(&m_file);
+                outstream.setCodec("utf-8");
+                outstream << sc.property("lrc").toString().remove("\r").toUtf8() << endl;
                 m_file->close();
                 M_LOGGER_INFO("text download  has finished!");
             }
@@ -101,8 +121,9 @@ void MusicTextDownLoadThread::downLoadFinished()
 #else
     if(!bytes.isEmpty())
     {
-        m_file->write(QString(bytes).remove("\r").toUtf8());
-        m_file->flush();
+        QTextStream outstream(m_file);
+        outstream.setCodec("utf-8");
+        outstream << QString(bytes).remove("\r").toUtf8() << endl;
         m_file->close();
         M_LOGGER_INFO("text download has finished!");
     }
@@ -114,6 +135,6 @@ void MusicTextDownLoadThread::downLoadFinished()
     }
 #endif
 
-    emit musicDownLoadFinished("Lrc");
+    emit downLoadDataChanged("Lrc");
     deleteAll();
 }

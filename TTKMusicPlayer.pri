@@ -37,9 +37,9 @@ QT_VER_PATCH = $$member(QT_VER_STRING, 2)
 win32{
     LIBS += -lIphlpapi -luser32
     equals(QT_MAJOR_VERSION, 5){
-        greaterThan(QT_VER_MINOR, 2):QT  += winextras
+        greaterThan(QT_VER_MINOR, 1):QT  += winextras
         msvc{
-            LIBS += -L../bin -lqmmp1
+            LIBS += -L../bin -lqmmp1 -lMusicExtras -lzlib
             !contains(QMAKE_TARGET.arch, x86_64){
                  #support on windows XP
                  QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
@@ -48,7 +48,7 @@ win32{
         }
 
         gcc{
-            LIBS += -L../bin -lqmmp1
+            LIBS += -L../bin -lqmmp1 -lMusicExtras -lzlib
             QMAKE_CXXFLAGS += -std=c++11
             QMAKE_CXXFLAGS += -Wunused-function
             QMAKE_CXXFLAGS += -Wswitch
@@ -58,7 +58,7 @@ win32{
     equals(QT_MAJOR_VERSION, 4){
         QT  += multimedia
         gcc{
-            LIBS += -L../bin -lqmmp0
+            LIBS += -L../bin -lqmmp0 -lMusicExtras -lzlib
             QMAKE_CXXFLAGS += -std=c++11
             QMAKE_CXXFLAGS += -Wunused-function
             QMAKE_CXXFLAGS += -Wswitch
@@ -76,17 +76,25 @@ unix:!mac{
     QMAKE_CXXFLAGS += -std=c++11
     QMAKE_CXXFLAGS += -Wunused-function
     QMAKE_CXXFLAGS += -Wswitch
-    LIBS += -L../lib -lqmmp
+    LIBS += -L../lib -lqmmp -lMusicExtras -lzlib
 }
 
-TTKMusicPlayer = 2.2.10.0
+TTKMusicPlayer = 2.3.2.0
 
 DEFINES += MUSIC_LIBRARY
 DEFINES += USE_MULTIPLE_QUERY
 
+
+#########################################
+HEADERS += $$PWD/musicglobal.h
+INCLUDEPATH += $$PWD
+#########################################
 contains(CONFIG, TTK_BUILD_LIB){
   include(TTKCore/musicUi/MusicUi.pri)
 }
+#########################################
+include(TTKThirdParty/TTKThirdParty.pri)
+#########################################
 include(TTKCore/musicCore/MusicCore.pri)
 include(TTKCore/musicWidget/MusicWidget.pri)
 include(TTKCore/musicLocalsearch/MusicLocalSearch.pri)

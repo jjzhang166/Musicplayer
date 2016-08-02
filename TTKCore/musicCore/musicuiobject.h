@@ -31,10 +31,7 @@ namespace MusicUIObject
             background:white;border:3px solid rgb(173,216,230);";
 
     const QString MCustomStyle05 = MCustomStyle01 + "\
-            border-image: url(:/share/searchlineleft);";
-
-    const QString MCustomStyle06 = "\
-            border-image: url(:/share/searchclosed);";
+            border-image: url(:/tiny/btn_search_line_normal);";
 
     const QString MCustomStyle07 = "\
             text-align:left; font-weight:bold; font-size:15px;\
@@ -74,300 +71,283 @@ namespace MusicUIObject
             border:none;";
            
     const QString MCustomStyle21 = " \
-            background-image:url(':/lrc/film');";
+            background-image:url(':/lrc/lb_film_bg');";
            
     const QString MCustomStyle22 = " \
             background:rgba(255, 255, 255, 50);" + MCustomStyle20;
            
     const QString MCustomStyle23 = " \
-            color:white;image:url(:/lrc/shadow);text-align:center;";
-
-    const QString MCustomStyle24 = " \
-            border-image: url(:/image/soundmax);";
-
-    const QString MCustomStyle25 = " \
-            border-image: url(:/image/soundmin);";
-
-    const QString MCustomStyle26 = MCustomStyle01 + MCustomStyle24;
+            color:white;image:url(:/lrc/lb_shadow);text-align:center;";
 
     const QString MCustomStyle27 = " \
             background:rgba(0,0,0,35);";
 
     const QString MCustomStyle28 = " \
-            image:url(:/share/defaultArt);";
+            background:rgba(41,41,41);";
           
 ///ToolButton
 //////////////////////////////////////////////////////
     const QString MToolButtonStyle01 = " \
-            QToolButton{background-color:transparent;}";
+            QToolButton{ background-color:transparent;}";
 
     const QString MToolButtonStyle02 = " \
             QToolButton::hover{ border:1px solid #000000;}";
             
     const QString MToolButtonStyle03 = MToolButtonStyle01 + " \
-            QToolButton::hover{background-color:rgba(255,255,255,20)}";
+            QToolButton::hover{ background-color:rgba(255, 255, 255, 20)}";
 
     const QString MToolButtonStyle04 = MToolButtonStyle01 + " \
-            QToolButton::menu-indicator{image:None;}";
-
-    const QString MToolButtonStyle05 = MToolButtonStyle01 + " \
-            QToolButton{border:none;}\
-            QToolButton::hover{ \
-            background:qlineargradient(x1:0,y1:0,x2:0,y2:1,\
-            stop:0 #EEEEEE,stop: 0.5 #EEEEEE,stop: 1.0 #EEEEEE);\
-            border:none;}";
-
-    const QString MToolButtonStyle06 = MToolButtonStyle01 + " \
-            QToolButton::hover{ image:url(:/image/shadow); border:none;}";
+            QToolButton::menu-indicator{ image:None;}";
 
     const QString MToolButtonStyle07 = MToolButtonStyle01 + MToolButtonStyle02 + " \
-            QToolButton{image: url(:/share/autionplay);}";
+            QToolButton{ image:url(:/contextMenu/btn_audition);}";
 
     const QString MToolButtonStyle08 = MToolButtonStyle01 + MToolButtonStyle02 + " \
-            QToolButton{image: url(:/image/addtoplaylist);}";
+            QToolButton{ image:url(:/contextMenu/btn_add);}";
 
     const QString MToolButtonStyle09 = MToolButtonStyle04 + " \
-            QToolButton{background-image:url(':/quality/bg');border:none; \
+            QToolButton{ background-image:url(':/quality/lb_background'); border:none; \
             font-weight:bold; color:white}";
-           
-///ToolBox
-//////////////////////////////////////////////////////
-    const QString MToolBoxStyle01 = " \
-            QToolBox::tab:selected {font: italic; font-weight:bold; color: white;}\
-            QToolBox::tab{ font-weight:bold; background-color:rgba(255,255,255,100);}";
+
+    const QString MToolButtonStyle10 = " \
+            QToolButton{ border:1px solid #777777; background:#EEEEEE; color:#555555;} \
+            QToolButton::hover{ border:1px solid #444444; color:#222222;} \
+            QToolButton::disabled{ color:#999999;}";
 
 ///PushButton
 //////////////////////////////////////////////////////
-    const QString MPushButtonStyle01 = "\
-            QPushButton::hover{image:url(:/image/shadow);}";
+    const QString MPushButtonStyle02 = " \
+            QPushButton::hover{ image:url(:/lrc/lb_shadow);}";
 
-    const QString MPushButtonStyle02 = "\
-            QPushButton::hover{image:url(:/lrc/shadow);}";
+    const QString MPushButtonStyle03 = " \
+            QPushButton{ background-color:transparent;}";
 
-    const QString MPushButtonStyle03 = "\
-            QPushButton{background-color:transparent;}";
-
-    const QString MPushButtonStyle04 = MPushButtonStyle03 + "\
-            QPushButton{border-none;}";
+    const QString MPushButtonStyle04 = MPushButtonStyle03 + " \
+            QPushButton{ border-none;}";
             
     const QString MPushButtonStyle05 = " \
-            QPushButton{border-radius:3px; background-color:#80B7F1; color:white;}";
+            QPushButton{ border-radius:3px; background-color:#80B7F1; color:white;}";
 
     const QString MPushButtonStyle06 = " \
-            QPushButton{border-style: outset;  \
-            border-width: 1px;  \
-            border-radius: 2px;  \
-            border-color: #3BA1E6;  \
-            padding: 1px;}";
-
-    const QString MPushButtonStyle07 =  MPushButtonStyle04 + " \
-            QPushButton{font-size:17px; font-weight:bold; color:#FFFFFF;}\
-            QPushButton::hover{ background:rgba(255,255,255,50); border:none;}";
+            QPushButton{ border-style:outset; border-width: 1px; border-radius: 2px; \
+            border-color: #3BA1E6; padding: 1px;}";
 
     const QString MPushButtonStyle08 = " \
-            QPushButton{ border: 1px solid gray;background:#EEEEEE;}\
-            QPushButton::hover{ border: 2px solid #AAAAFF;}";
+            QPushButton{ border:1px solid #777777; background:#EEEEEE; color:#555555;} \
+            QPushButton::hover{ border:1px solid #444444; color:#222222;} \
+            QPushButton::disabled{ color:#999999;}";
 
     const QString MPushButtonStyle09 = " \
-            QPushButton{ border:none;color: #3333FF;} \
-            QPushButton::hover{ color: #7777FF;}";
+            QPushButton{ border:none; color:#3333FF;} \
+            QPushButton::hover{ color:#7777FF;}";
 
     const QString MPushButtonStyle10 = MPushButtonStyle05 + " \
             QPushButton{ font-size:17px; font-weight:bold; }";
 
     const QString MPushButtonStyle11 = MPushButtonStyle04 + " \
-            QPushButton{font-size:17px; font-weight:bold; color:#BFBFBF;}";
+            QPushButton{ font-size:17px; font-weight:bold; color:#FFFFFF;}";
 
-    const QString MPushButtonStyle12 = MPushButtonStyle01 + "\
-            QPushButton{background-color:rgba(0, 0, 0, 50);border-none;}";
-
-    const QString MPushButtonStyle13 = MPushButtonStyle01 + MPushButtonStyle03 + "\
-            QPushButton::hover{border:none;}";
-
-    const QString MPushButtonStyle14 = MPushButtonStyle02 + MPushButtonStyle04 + "\
-            QPushButton{color:white;font-size:15px;}";
+    const QString MPushButtonStyle14 = MPushButtonStyle02 + MPushButtonStyle04 + " \
+            QPushButton{ color:white; font-size:15px;}";
            
-    const QString MPushButtonStyle15 = MPushButtonStyle02 + MPushButtonStyle03 + "\
-            QPushButton{text-align:left;color:white;}";
+    const QString MPushButtonStyle15 = MPushButtonStyle02 + MPushButtonStyle03 + " \
+            QPushButton{ text-align:left; color:white;}";
            
-    const QString MPushButtonStyle16 = MPushButtonStyle07 + "\
-            QPushButton{ border-image:url(':/quality/bg');}";
+    const QString MPushButtonStyle17 = MPushButtonStyle06 + " \
+            QPushButton{ color:#3BA1E6;}";
 
-    const QString MPushButtonStyle17 = MPushButtonStyle06 + "\
-            QPushButton{ color: #3BA1E6;}";
+    const QString MPushButtonStyle18 = MPushButtonStyle06 + " \
+            QPushButton{ font-size:13px; color:white; font-weight:bold;}";
 
-    const QString MPushButtonStyle18 = MPushButtonStyle06 + "\
-            QPushButton{font-size:13px; color:white; font-weight:bold;}";
 
 ///RadioButton
 //////////////////////////////////////////////////////
     const QString MRadioButtonStyle01 = " \
-            QRadioButton{ background-color:transparent; } \
-            QRadioButton::indicator::unchecked{ image: url(:/control/radiobutton_unchecked); } \
-            QRadioButton::checked { color: rgb(230,115,0); } \
-            QRadioButton::indicator:checked { image: url(:/control/radiobutton_checked); }";
+            QRadioButton{ background-color:transparent;} \
+            QRadioButton::indicator::unchecked{ image:url(:/control/btn_radioButton_unchecked);} \
+            QRadioButton::checked { color:rgb(230, 115, 0);} \
+            QRadioButton::indicator:checked { image:url(:/control/btn_radiobutton_checked);}";
+
 
 ///CheckBox
 //////////////////////////////////////////////////////
     const QString MCheckBoxStyle01 = " \
-            QCheckBox{ background-color:transparent; } \
-            QCheckBox::indicator::unchecked{ image: url(:/control/checkbox_unchecked); } \
-            QCheckBox::checked { color: rgb(230,115,0); } \
-            QCheckBox::indicator:checked { image: url(:/control/checkbox_checked); }";
+            QCheckBox{ background-color:transparent;} \
+            QCheckBox::indicator::unchecked{ image:url(:/control/btn_checkBox_unchecked);} \
+            QCheckBox::checked{ color:rgb(230, 115, 0);} \
+            QCheckBox::indicator:checked { image:url(:/control/btn_checkBox_checked);}";
            
     const QString MCheckBoxStyle02 = MCheckBoxStyle01 + " \
-            QCheckBox::checked { color: rgb(0,169,236); }";
+            QCheckBox::checked{ color:rgb(0, 169, 236);}";
 
-    const QString MCheckBoxStyle03 = " \
-            QCheckBox{ background-color:transparent; } \
-            QCheckBox::indicator::unchecked{ image: url(:/control/lrc_checkBox_unchecked); } \
-            QCheckBox::indicator:checked { image: url(:/control/lrc_checkBox_checked); }";
 
 ///ScrollBar
 //////////////////////////////////////////////////////
     const QString MScrollBarStyle01 = " \
-            QScrollBar{ background: #F0F0F0;width: 8px; padding-top:10px; padding-bottom:10px;}\
-            QScrollBar::handle{background: #CFCFCF; min-width: 20px;min-height: 20px;}\
-            QScrollBar::handle:vertical::disabled{ background:#DBDBDB;}\
-            QScrollBar::handle:vertical:hover{ background:#DBDBDB; border:1px solid rgb(230,115,0);}\
-            QScrollBar::add-line, QScrollBar::sub-line { background: none; border: none;}\
-            QScrollBar::add-page, QScrollBar::sub-page { background: none; }\
-            QScrollBar::up-arrow:vertical{border-image: url(':/usermanager/uparrow');}\
-            QScrollBar::down-arrow:vertical{border-image: url(':/usermanager/downarrow');}";
+            QScrollBar{ background:#F0F0F0; width:8px; padding-top:0px; padding-bottom:0px;} \
+            QScrollBar::handle:vertical{ border-radius:4px; background:#CFCFCF;} \
+            QScrollBar::handle:vertical::disabled{ background:#DBDBDB;} \
+            QScrollBar::handle:vertical:hover{ background:#BBBBBB;} \
+            QScrollBar::add-line, QScrollBar::sub-line{ background:none; border:none;} \
+            QScrollBar::add-page, QScrollBar::sub-page{ background:none;}";
+
 
 ///LineEdit
 //////////////////////////////////////////////////////
     const QString MLineEditStyle01 = " \
-            QLineEdit{ border: 1px solid gray;} \
-            QLineEdit::hover{ border: 1px solid #AAAAFF;}";
+            QLineEdit{ font-size:12px; color:#666666; font-weight:normal; border:1px solid gray;} \
+            QLineEdit::hover{ border:1px solid rgb(22, 154, 243);} \
+            QLineEdit::disabled{ color:#BBBBBB;}";
 
     const QString MLineEditStyle02 = " \
-            QLineEdit{ border: 3px solid gray; font-size:14px; color:#AAAAFF;} \
-            QLineEdit::hover{ border: 3px solid #AAAAFF;}";
+            QLineEdit{ border-image:url(:/tiny/lb_transparent);}";
 
-    const QString MLineEditStyle03 = " \
-            QLineEdit{border-image: url(:/image/searchline); \
-            font-size:15px; color:#333333;}";
+    const QString MLineEditStyle03 = MLineEditStyle02 + " \
+            QLineEdit{ font-size:15px; color:#333333;}";
+
+    const QString MLineEditStyle04 = MLineEditStyle02 + " \
+            QLineEdit{ color:#6495ED;}";
+
 
 ///Menu
 //////////////////////////////////////////////////////
     const QString MMenuStyle01 = " \
-            QMenu {border: 1px solid gray; padding: 5px; }\
-            QMenu::item {padding: 4px 25px 4px 30px;border: 1px solid transparent; }\
-            QMenu::item:disabled {color: #666666;}\
-            QMenu::item:selected { color: white; background: #BBBBBB;}\
-            QMenu::separator {height: 1px;background: #BBBBBB;margin-top: 5px; margin-bottom: 5px;}";
+            QMenu{ padding: 5px;} \
+            QMenu::icon{ margin-left: 10px;} \
+            QMenu::right-arrow{ background: url(:/tiny/lb_arrow_up_normal);} \
+            QMenu::item{ color:#666666; padding:6px 30px 6px 30px; border:1px solid transparent;} \
+            QMenu::item:disabled{ color:#AAAAAA;} \
+            QMenu::item:selected{ color:white; background: rgb(22, 154, 243);} \
+            QMenu::separator{ height:1px; background:#DDDDDD; margin-top:5px; margin-bottom:5px;}";
 
     const QString MMenuStyle02 = MMenuStyle01 + " \
-            QMenu { background-color: rgba(255, 255, 255, 235);}";
+            QMenu{ background:rgba(255, 255, 255, 235);}";
 
     const QString MMenuStyle03 = MMenuStyle01 + " \
-            QMenu { color:white; background-color: rgba(0, 0, 0, 50);}";
+            QMenu{ border:none; background:rgba(0, 0, 0, 210); border-radius:4px;} \
+            QMenu::item{ color:#BBBBBB;} \
+            QMenu::item:disabled{ color:#555555;} \
+            QMenu::item:selected{ background:rgba(0, 0, 0, 200);} \
+            QMenu::separator{ background:#BBBBBB;}";
+
 
 ///Slider
 //////////////////////////////////////////////////////
     const QString MSliderStyle01 = " \
-            QSlider::groove:horizontal{ border: 1px solid #4A708B;\
-            background: #C0C0C0;height: 5px;border-radius: 1px;\
-            padding-left:-1px;padding-right:-1px;}\
-            QSlider::sub-page:horizontal{\
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,\
-            stop:0 #B1B1B1, stop:1 #c4c4c4);\
-            background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,\
-            stop: 0 #5DCCFF, stop: 1 #1874CD);\
-            border: 1px solid #4A708B;height: 10px;border-radius: 2px;}\
-            QSlider::add-page:horizontal{background-color:white;\
-            border: 0px solid #777;height: 10px;border-radius: 2px;}\
-            QSlider::handle:horizontal{\
-            background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,\
-            stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));\
-            width: 11px;margin-top: -3px;\
-            margin-bottom: -3px;border-radius: 5px;}\
-            QSlider::handle:horizontal:hover{\
-            background: qradialgradient(spread:pad, cx:0.5, cy:0.5, \
-            radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,\
-            stop:0.778409 rgba(255, 255, 255, 255));\
-            width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}\
-            QSlider::sub-page:horizontal:disabled{background-color:white;border-color: #999;}\
-            QSlider::add-page:horizontal:disabled{background: #eee;border-color: #999;}\
-            QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;border-radius: 4px;}";
+            QSlider::groove:horizontal{ \
+            background:#FFFEA1; height:3px; border-radius:1px;} \
+            QSlider::sub-page:horizontal{ background:#FFFEA1;} \
+            QSlider::add-page:horizontal{ background:#4E4F4F;} \
+            QSlider::handle:horizontal{ background:#FFFEA1; \
+            width:9px; margin-top:-3px; margin-bottom:-3px; border-radius:4px;}";
 
     const QString MSliderStyle02 = " \
-            QSlider::groove:vertical {border: 1px solid #4A708B; \
-            background: #C0C0C0;  width: 5px;  border-radius: 1px;\
-            padding-left:-1px;padding-right:-1px;  padding-top:-1px;  padding-bottom:-1px;}  \
-            QSlider::sub-page:vertical {background: #575757;border:1px solid #4A708B;border-radius: 2px;}\
-            QSlider::add-page:vertical {  \
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,  \
-            stop:0 #c4c4c4, stop:1 #B1B1B1);  \
-            background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  \
-            stop: 0 #5DCCFF, stop: 1 #1874CD);  \
-            border: 0px solid #777;  width: 10px;border-radius: 2px;}  \
-            QSlider::handle:vertical{\
-            background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, \
-            fx:0.5, fy:0.5, stop:0.6 #45ADED,stop:0.778409 rgba(255, 255, 255, 255));\
-            height: 11px;margin-left: -3px;margin-right: -3px;border-radius: 5px;}\
-            QSlider::handle:vertical:disabled {background: #eee;border: 1px solid #aaa;border-radius: 4px;}";
+            QSlider::groove:vertical{ \
+            background: #FFFEA1; width:3px; border-radius:1px;} \
+            QSlider::sub-page:vertical{ background:#4E4F4F;} \
+            QSlider::add-page:vertical{ background:#FFFEA1;} \
+            QSlider::handle:vertical{ background:#FFFEA1; \
+            height:9px; margin-left:-3px; margin-right:-3px; border-radius:4px;}";
 
-    const QString MSliderStyle03 =  MSliderStyle02 + "\
-            QSlider::sub-page:vertical { \
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,  \
-            stop:0 #c4c4c4, stop:1 #B1B1B1);  \
-            background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  \
-            stop: 0 #5DCCFF, stop: 1 #1874CD);  \
-            border: 0px solid #777;  width: 10px;border-radius: 2px;} \
-            QSlider::handle:vertical:hover{ image:url(:/image/shadow);border:none;}";
+    const QString MSliderStyle03 = " \
+            QSlider::groove:vertical{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, \
+            stop:0 #B5B4B4, stop:1 #FCFCFC); width:3px;} \
+            QSlider::handle:vertical{ border-image:url(:/control/lb_slider_handle_normal); \
+            height:21px; margin-left:-8px; margin-right:-8px;} \
+            QSlider::handle:vertical:disabled{ border-image:url(:/control/lb_slider_disable);} \
+            QSlider::handle:vertical:hover{ border-image:url(:/control/lb_slider_handle_hover); border:none;}";
 
-    const QString MSliderStyle04 = "\
-            QSlider::groove:horizontal{background:#C0C0C0; height:8px;}\
-            QSlider::sub-page:horizontal{background:#F7F66C;}\
-            QSlider::add-page:horizontal{background:#4E4E4E;}\
-            QSlider::handle:horizontal{background:#FFFFFF; width:10px;}";
+    const QString MSliderStyle04 = MSliderStyle03 + " \
+            QSlider::groove:vertical{ background:white;} \
+            QSlider::sub-page:vertical{ background:#AFC7F8;} \
+            QSlider::add-page:vertical{ background:white; border:1px solid #ACF;}";
 
-    const QString MSliderStyle05 = "\
-            QSlider::add-page:Horizontal{background-color: rgb(87, 97, 106);height:4px;}\
-            QSlider::sub-page:Horizontal{background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:1,\
-            y2:0, stop:0 rgba(231,80,229, 255), stop:1 rgba(7,208,255, 255));height:4px;}\
-            QSlider::groove:Horizontal{background:transparent;height:4px;} \
-            QSlider::handle:Horizontal{border-image:url(':/image/musicslider');\
-            width:8px;height: 6px;margin: -2px -3px -2px 0px;}";
+    const QString MSliderStyle05 = " \
+            QSlider::add-page:Horizontal{ background-color:rgb(87, 97, 106); height:4px;} \
+            QSlider::sub-page:Horizontal{ background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:1, \
+            y2:0, stop:0 rgba(231, 80, 229, 255), stop:1 rgba(7, 208, 255, 255)); height:4px;} \
+            QSlider::groove:Horizontal{ background:transparent;height:4px;} \
+            QSlider::handle:Horizontal{ border-image:url(':/image/lb_slider'); \
+            width:8px;height:6px; margin:-2px -3px -2px 0px;}";
+
+    const QString MSliderStyle06 = " \
+            QSlider::groove:horizontal{ background-image:url(:/control/lb_volume_back);} \
+            QSlider::sub-page:horizontal{ border-image:url(:/control/lb_volume_fore);} \
+            QSlider::add-page:horizontal{ background-image:url(:/control/lb_volume_back);} \
+            QSlider::handle:horizontal{ margin:0px -2px 0px -2px; \
+            background-image:url(:/control/lb_volume_handle_normal); width:13px;} \
+            QSlider::handle:horizontal:hover{ background-image:url(:/control/lb_volume_handle_hover);}";
+
 
 ///ComboBox
 //////////////////////////////////////////////////////
     const QString MComboBoxStyle01 = " \
             QComboBox{ border: 1px solid gray;} \
-            QComboBox::hover{ border: 1px solid #AAAAFF;} \
-            QComboBox::drop-down { subcontrol-origin: padding; \
-            subcontrol-position: top right;width: 20px;border-left-width: 1px;\
-            border-left-color: darkgray; border-left-style: solid;}\
-            QComboBox::down-arrow {image:url(:/usermanager/downarrow);}";
+            QComboBox::hover{ border: 1px solid rgb(22, 154, 243);} \
+            QComboBox::drop-down{ subcontrol-origin:padding; \
+            subcontrol-position:top right; width:20px; border-left-width:1px; \
+            border-left-color:darkgray; border-left-style:solid;} \
+            QComboBox::down-arrow{ image:url(:/usermanager/btn_down_arrow);}";
+
 
 ///TableWidget
 //////////////////////////////////////////////////////
     const QString MTableWidgetStyle01 = " \
-            QTableWidget{selection-background-color: rgba(20,20,20,100);}";
-           
+            QTableWidget{ selection-background-color:rgba(20, 20, 20, 40);}";
+
+    const QString MTableWidgetStyle02 = " \
+            QTableWidget{ background:rgba(0, 0, 0, 255);}";
+
+
 ///TextEdit
 //////////////////////////////////////////////////////
     const QString MTextEditStyle01 = " \
-            QTextEdit{ border: 1px solid gray;} \
-            QTextEdit::hover{ border: 1px solid #AAAAFF;}";
-           
+            QTextEdit{ border:1px solid gray; color:#666666;} \
+            QTextEdit::hover{ border:1px solid rgb(22, 154, 243);} \
+            QTextEdit::disabled{ color:#BBBBBB;}";
+
+
 ///Widget
 //////////////////////////////////////////////////////
     const QString MWidgetStyle01 = " \
-            QWidget{ background:rgba(255,255,255,50); color:white; font-weight:bold; }";
+            QWidget{ background:rgba(255, 255, 255, 50); color:white; font-weight:bold;}";
+
+
+///DateEdit
+//////////////////////////////////////////////////////
+    const QString MDateEditStyle01 = " \
+            QDateEdit{ font-size:12px; color:#666666; font-weight:normal; border: 1px solid gray;} \
+            QDateEdit::hover{ border:1px solid rgb(22, 154, 243);} \
+            QDateEdit::up-button{ image:url(:/usermanager/btn_up_arrow);} \
+            QDateEdit::down-button{ image:url(:/usermanager/btn_down_arrow);} \
+            QDateEdit::disabled{ color:#BBBBBB;}";
+
+
+///SpinBox
+//////////////////////////////////////////////////////
+    const QString MSpinBoxStyle01 = " \
+            QSpinBox{ font-size:12px; color:#666666; font-weight:normal; border: 1px solid gray;} \
+            QSpinBoxt::hover{ border:1px solid rgb(22, 154, 243);} \
+            QSpinBox::up-button{ image:url(:/usermanager/btn_up_arrow);} \
+            QSpinBox::down-button{ image:url(:/usermanager/btn_down_arrow);} \
+            QSpinBox::disabled{ color:#BBBBBB;}";
+
 
 ///ProgressBar
 //////////////////////////////////////////////////////
     const QString MProgressBar01 = " \
-            QProgressBar{ border:none; background:rgb(210, 225, 240); text-align:center;}\
+            QProgressBar{ border:none; background:rgb(210, 225, 240); text-align:center;} \
             QProgressBar::chunk{ background:rgb(60, 140, 220);}";
+
+    const QString MProgressBar02 = " \
+            QProgressBar{ border:2px solid grey; border-radius: 5px;} \
+            QProgressBar::chunk{ background-color: #05B8CC;}";
+
 
 ///ItemView
 //////////////////////////////////////////////////////
     const QString MItemView01 = " \
-            QAbstractItemView::item { height: 20px; }";
+            QAbstractItemView::item { height:20px; }";
 
 }
 

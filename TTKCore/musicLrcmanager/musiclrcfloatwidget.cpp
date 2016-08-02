@@ -5,7 +5,7 @@
 #include <QPushButton>
 
 MusicLrcFloatWidget::MusicLrcFloatWidget(QWidget *parent)
-    : MusicLrcFloatAbstractWidget(parent)
+    : MusicFloatAbstractWidget(parent)
 {
     setStyleSheet(MusicUIObject::MCustomStyle03);
 
@@ -14,18 +14,18 @@ MusicLrcFloatWidget::MusicLrcFloatWidget(QWidget *parent)
     m_floatSettingWidget = new MusicLrcFloatSettingWidget(parent);
     m_floatSettingWidget->hide();
 
-    resizeWidth(0);
+    resizeWindow(0, 0);
     m_update = new QPushButton(tr(" Update"), this);
     m_search = new QPushButton(tr(" Search"), this);
     m_more = new QPushButton(tr(" More"), this);
     m_wallp = new QPushButton(tr(" Wallp"), this);
     m_photo = new QPushButton(tr(" Photo"), this);
 
-    m_update->setIcon(QIcon(":/lrc/update"));
-    m_search->setIcon(QIcon(":/lrc/search"));
-    m_more->setIcon(QIcon(":/lrc/more"));
-    m_wallp->setIcon(QIcon(":/lrc/wallpaper"));
-    m_photo->setIcon(QIcon(":/share/showMV2"));
+    m_update->setIcon(QIcon(":/lrc/lb_lrc_update"));
+    m_search->setIcon(QIcon(":/lrc/lb_lrc_search"));
+    m_more->setIcon(QIcon(":/lrc/lb_lrc_more"));
+    m_wallp->setIcon(QIcon(":/lrc/lb_lrc_wallpaper"));
+    m_photo->setIcon(QIcon(":/lrc/lb_lrc_photo"));
 
     m_update->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
     m_search->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
@@ -63,14 +63,19 @@ MusicLrcFloatWidget::~MusicLrcFloatWidget()
     delete m_floatSettingWidget;
 }
 
-void MusicLrcFloatWidget::resizeWidth(int width)
+QString MusicLrcFloatWidget::getClassName()
 {
-    m_rectIn = QRect(425 + width, 120, 115, 210);
-    m_rectOut = QRect(535 + width, 171, 115, 105);
+    return staticMetaObject.className();
+}
+
+void MusicLrcFloatWidget::resizeWindow(int width, int height)
+{
+    m_rectIn = QRect(548 + width, 120 + height/2, 115, 210);
+    m_rectOut = QRect(658 + width, 171 + height/2, 115, 105);
     setGeometry( m_rectOut );
 
-    m_floatSettingWidget->resizeWidth(width);
-    m_floatPhotoWidget->resizeWidth(width);
+    m_floatSettingWidget->resizeWindow(width, height);
+    m_floatPhotoWidget->resizeWindow(width, height);
 }
 
 void MusicLrcFloatWidget::showFloatSettingWidget()

@@ -10,93 +10,81 @@
    =================================================*/
 
 #include <QDir>
-#include <QMap>
-#include <QSet>
 #include <QApplication>
-
-#ifdef Q_CC_GNU
-#  pragma GCC diagnostic ignored "-Wunused-function"
-#endif
-
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-#  define MUSIC_QT_5
-#  if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
-#    define MUSIC_WINEXTRAS
-#  endif
-#endif
-
+#include "musicglobal.h"
 
 ///////////////////////////////////////
-#define LRC_DOWNLOAD       "MLrc/"
-#define MUSIC_DOWNLOAD     "Music/"
-#define MOVIE_DOWNLOAD     "Movie/"
-#define THEME_DOWNLOAD     "MTheme/"
-#define DATA_CACHED        "MCached/"
-#define ART_DOWNLOAD       "MArt/"
-#define TRANS_PLUGINS      "MPlugins/"
-#define ART_BG             "MArt/background/"
-#define TR_LANGUAGE        "MLanguage/"
-#define TMP_DOWNLOAD       "temporary"
+#define LRC_DIR                 "MLrc/"
+#define MUSIC_DIR               "Music/"
+#define MOVIE_DIR               "Movie/"
+#define THEME_DIR               "MTheme/"
+#define CACHE_DIR               "MCached/"
+#define ART_DIR                 "MArt/"
+#define PLUGINS_DIR             "MPlugins/"
+#define BACKGROUND_DIR          "MArt/background/"
+#define LANGUAGE_DIR            "MLanguage/"
+#define TEMPORARY_DIR           "temporary"
 
-#define SKN_FILE           ".skn"
-#define JPG_FILE           ".jpg"
-#define BMP_FILE           ".bmp"
-#define PNG_FILE           ".png"
-#define LRC_FILE           ".lrc"
-#define KRC_FILE           ".krc"
-#define MP3_FILE           ".mp3"
+#define SKN_FILE                ".skn"
+#define JPG_FILE                ".jpg"
+#define BMP_FILE                ".bmp"
+#define PNG_FILE                ".png"
+#define LRC_FILE                ".lrc"
+#define KRC_FILE                ".krc"
+#define MP3_FILE                ".mp3"
+#define TMP_FILE                ".ttk"
 
-#define MAKE_TRANSFORM     "MPlugins/avconv.dll"
-#define MAKE_KRC2LRC       "MPlugins/avk2l.dll"
-#define MAKE_RING          "MPlugins/avring.dll"
-#define MAKE_PLAYER        "MPlugins/avplayer.dll"
-#define MAKE_GAIN          "MPlugins/avgain.dll"
+#define MAKE_TRANSFORM          "MPlugins/avconv.dll"
+#define MAKE_KRC2LRC            "MPlugins/avk2l.dll"
+#define MAKE_PLAYER             "MPlugins/avplayer.dll"
+#define MAKE_GAIN               "MPlugins/avgain.dll"
+#define MAKE_SOUNDTOUCH         "MPlugins/avm2v.dll"
 #ifdef Q_OS_UNIX
-#define MAKE_NETS          "MPlugins/avnets.dll"
+#define MAKE_NETS               "MPlugins/avnets.dll"
 #endif
 
-#define COFIGPATH          "musicconfig.xml"
-#define NETDADIOPATH       "musicradio.dll"
-#define MUSICPATH          "music.dll"
-#define DOWNLOADINFO       "music_1.dll"
-#define MUSICSEARCH        "music_2.dll"
-#define DARABASEPATH       "musicuser_1.dll"
-#define USERPATH           "musicuser_2.dll"
-#define BARRAGEPATH        "musicbarrage"
+#define COFIGPATH               "musicconfig.xml"
+#define NETDADIOPATH            "musicradio.dll"
+#define MUSICPATH               "music.dll"
+#define DOWNLOADINFO            "music_1.dll"
+#define MUSICSEARCH             "music_2.dll"
+#define DARABASEPATH            "musicuser_1.dll"
+#define USERPATH                "musicuser_2.dll"
+#define BARRAGEPATH             "musicbarrage"
 
-#define SQLITE_DATABASE    "QSQLITE"
-#define MYSQL_DATABASE     "QMYSQL"
-#define OCI_DATABASE       "QOCI"
+#define SQLITE_DATABASE         "QSQLITE"
+#define MYSQL_DATABASE          "QMYSQL"
+#define OCI_DATABASE            "QOCI"
 
 ///////////////////////////////////////
-#define LRC_DOWNLOAD_AL    MusicObject::getAppDir() + LRC_DOWNLOAD
-#define MUSIC_DOWNLOAD_AL  MusicObject::getAppDir() + MUSIC_DOWNLOAD
-#define MOVIE_DOWNLOAD_AL  MusicObject::getAppDir() + MOVIE_DOWNLOAD
-#define THEME_DOWNLOAD_AL  MusicObject::getAppDir() + THEME_DOWNLOAD
-#define DATA_CACHED_AL     MusicObject::getAppDir() + DATA_CACHED
-#define ART_DOWNLOAD_AL    MusicObject::getAppDir() + ART_DOWNLOAD
-#define TRANS_PLUGINS_AL   MusicObject::getAppDir() + TRANS_PLUGINS
-#define ART_BG_AL          MusicObject::getAppDir() + ART_BG
-#define TR_LANGUAGE_AL     MusicObject::getAppDir() + TR_LANGUAGE
-#define TMP_DOWNLOAD_AL    MusicObject::getAppDir() + TMP_DOWNLOAD
+#define LRC_DIR_FULL            MusicObject::getAppDir() + LRC_DIR
+#define MUSIC_DIR_FULL          MusicObject::getAppDir() + MUSIC_DIR
+#define MOVIE_DIR_FULL          MusicObject::getAppDir() + MOVIE_DIR
+#define THEME_DIR_FULL          MusicObject::getAppDir() + THEME_DIR
+#define CACHE_DIR_FULL          MusicObject::getAppDir() + CACHE_DIR
+#define ART_DIR_FULL            MusicObject::getAppDir() + ART_DIR
+#define PLUGINS_DIR_FULL        MusicObject::getAppDir() + PLUGINS_DIR
+#define BACKGROUND_DIR_FULL     MusicObject::getAppDir() + BACKGROUND_DIR
+#define LANGUAGE_DIR_FULL       MusicObject::getAppDir() + LANGUAGE_DIR
+#define TEMPORARY_DIR_FULL      MusicObject::getAppDir() + TEMPORARY_DIR
 
-#define MAKE_TRANSFORM_AL  MusicObject::getAppDir() + MAKE_TRANSFORM
-#define MAKE_KRC2LRC_AL    MusicObject::getAppDir() + MAKE_KRC2LRC
-#define MAKE_RING_AL       MusicObject::getAppDir() + MAKE_RING
-#define MAKE_PLAYER_AL     MusicObject::getAppDir() + MAKE_PLAYER
-#define MAKE_GAIN_AL       MusicObject::getAppDir() + MAKE_GAIN
+#define MAKE_TRANSFORM_FULL     MusicObject::getAppDir() + MAKE_TRANSFORM
+#define MAKE_KRC2LRC_FULL       MusicObject::getAppDir() + MAKE_KRC2LRC
+#define MAKE_PLAYER_FULL        MusicObject::getAppDir() + MAKE_PLAYER
+#define MAKE_GAIN_FULL          MusicObject::getAppDir() + MAKE_GAIN
+#define MAKE_SOUNDTOUCH_FULL    MusicObject::getAppDir() + MAKE_SOUNDTOUCH
 #ifdef Q_OS_UNIX
-#define MAKE_NETS_AL       MusicObject::getAppDir() + MAKE_NETS
+#define MAKE_NETS_FULL          MusicObject::getAppDir() + MAKE_NETS
 #endif
 
-#define COFIGPATH_AL       MusicObject::getAppDir() + COFIGPATH
-#define NETDADIOPATH_AL    MusicObject::getAppDir() + NETDADIOPATH
-#define MUSICPATH_AL       MusicObject::getAppDir() + MUSICPATH
-#define DOWNLOADINFO_AL    MusicObject::getAppDir() + DOWNLOADINFO
-#define MUSICSEARCH_AL     MusicObject::getAppDir() + MUSICSEARCH
-#define DARABASEPATH_AL    MusicObject::getAppDir() + DARABASEPATH
-#define USERPATH_AL        MusicObject::getAppDir() + USERPATH
-#define BARRAGEPATH_AL     MusicObject::getAppDir() + BARRAGEPATH
+#define COFIGPATH_FULL          MusicObject::getAppDir() + COFIGPATH
+#define NETDADIOPATH_FULL       MusicObject::getAppDir() + NETDADIOPATH
+#define MUSICPATH_FULL          MusicObject::getAppDir() + MUSICPATH
+#define DOWNLOADINFO_FULL       MusicObject::getAppDir() + DOWNLOADINFO
+#define MUSICSEARCH_FULL        MusicObject::getAppDir() + MUSICSEARCH
+#define DARABASEPATH_FULL       MusicObject::getAppDir() + DARABASEPATH
+#define USERPATH_FULL           MusicObject::getAppDir() + USERPATH
+#define BARRAGEPATH_FULL        MusicObject::getAppDir() + BARRAGEPATH
 
 ///////////////////////////////////////
 #define USERID             20
@@ -106,67 +94,43 @@
 #define LOGINTIME          20
 ///////////////////////////////////////
 
-typedef signed char        MInt8;         /* 8 bit signed */
-typedef unsigned char      MUint8;        /* 8 bit unsigned */
-typedef short              MInt16;        /* 16 bit signed */
-typedef unsigned short     MUint16;       /* 16 bit unsigned */
-typedef int                MInt32;        /* 32 bit signed */
-typedef unsigned int       MUint32;       /* 32 bit unsigned */
-typedef long long          MInt64;        /* 64 bit signed */
-typedef unsigned long long MUint64;       /* 64 bit unsigned */
-
-typedef double             MDouble;       /* double */
-typedef float              MFloat;        /* float */
-typedef bool               MBool;         /* bool */
-
-
-typedef QList<QStringList>                 MStringLists;      /* stringlists */
-typedef QList<int>                         MIntList;          /* intlist */
-typedef QList<MIntList>                    MIntLists;         /* intlists */
-typedef QSet<int>                          MIntSet;           /* intset */
-typedef QSet<MIntSet>                      MIntSets;          /* intsets */
-typedef QMap<QString, QVariant>            MStriantMap;       /* stringVariantMap */
-typedef QMap<QString, QStringList>         MStringsListMap;   /* stringStrlistsMap */
-typedef QMap<int, MIntList>                MIntsListMap;      /* intIntlistMap */
-typedef QMap<qint64, QString>              MIntStringMap;     /* intStrMap */
-typedef QMapIterator<QString, QVariant>    MStriantMapIt;     /* stringVariantMapIt */
-typedef QMapIterator<QString, QStringList> MStringsListMapIt; /* stringStrlistsMapIt */
-typedef QMapIterator<int, MIntList>        MIntsListMapIt;    /* intIntlistMapIt */
-typedef QMapIterator<qint64, QString>      MIntStringMapIt;   /* intStrMapIt */
-
-
-typedef struct MusicSongAttribute
-{
-    int m_bitrate;
-    QString m_format;
-    QString m_url;
-    QString m_size;
-}MusicSongAttribute;
-typedef QList<MusicSongAttribute> MusicSongAttributes;
-
-
-typedef struct MusicSongInfomation
-{
-    MusicSongAttributes m_songAttrs;
-    QString m_lrcUrl;
-    QString m_smallPicUrl;
-    QString m_singerName;
-    QString m_songName;
-}MusicSongInfomation;
-typedef QList<MusicSongInfomation> MusicSongInfomations;
+#define WINDOW_WIDTH_MIN    1033
+#define WINDOW_HEIGHT_MIN   660
 
 /*! @brief The namespace of the application object.
  * @author Greedysky <greedysky@163.com>
  */
 namespace MusicObject
 {
+    typedef struct MusicSongAttribute
+    {
+        int m_bitrate;
+        QString m_format;
+        QString m_url;
+        QString m_size;
+    }MusicSongAttribute;
+    typedef QList<MusicSongAttribute> MusicSongAttributes;
+    ///////////////////////////////////////
+
+    typedef struct MusicSongInfomation
+    {
+        MusicSongAttributes m_songAttrs;
+        QString m_lrcUrl;
+        QString m_smallPicUrl;
+        QString m_singerName;
+        QString m_songName;
+        QString m_timeLength;
+    }MusicSongInfomation;
+    typedef QList<MusicSongInfomation> MusicSongInfomations;
+    ///////////////////////////////////////
+
     enum DownLoadType
     {
-        Null,           ///*network null*/
-        DisConnection,  ///*network disable*/
-        DownLoading,    ///*network download*/
-        Buffing,        ///*network buffing*/
-        Waiting         ///*network waiting*/
+        DW_Null,           ///*network null*/
+        DW_DisConnection,  ///*network disable*/
+        DW_DownLoading,    ///*network download*/
+        DW_Buffing,        ///*network buffing*/
+        DW_Waiting         ///*network waiting*/
     };
 
     enum SongPlayType
@@ -178,10 +142,25 @@ namespace MusicObject
         MC_PlayOnce         ///*play just once*/
     };
 
+    enum FontStyleType
+    {
+        FT_Bold =       0x00001,   ///*font bold*/
+        FT_Italic =     0x00002,   ///*font italic*/
+        FT_Underline =  0x00004,   ///*font underline*/
+        FT_Overline =   0x00008,   ///*font overline*/
+        FT_StrikeOut =  0x00010,   ///*font strikeOut*/
+        FT_FixedPitch = 0x00020,   ///*font fixedPitch*/
+        FT_Kerningt =   0x00040    ///*font kerningt*/
+    };
+
     static QString getAppDir()
     {
         return QApplication::applicationDirPath() + "/";
     }
+    /*!
+     * Get application dir.
+     */
+
 }
 
 #endif // MUSICOBJECT_H

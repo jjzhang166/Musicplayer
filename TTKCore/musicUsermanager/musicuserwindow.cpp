@@ -26,7 +26,7 @@ MusicUserWindow::MusicUserWindow(QWidget *parent)
     connect(m_userManager, SIGNAL(userStateChanged(QString,QString)),
                            SLOT(userStateChanged(QString,QString)));
 
-    QTimer::singleShot(1, this, SLOT(checkToAutoLogin()));
+    QTimer::singleShot(MT_MS, this, SLOT(checkToAutoLogin()));
 }
 
 MusicUserWindow::~MusicUserWindow()
@@ -34,6 +34,11 @@ MusicUserWindow::~MusicUserWindow()
     delete m_userManager;
     delete ui;
     disConnectDatabase();
+}
+
+QString MusicUserWindow::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 bool MusicUserWindow::isUserLogin() const
@@ -73,7 +78,7 @@ bool MusicUserWindow::connectDatabase()
         {
             data = QSqlDatabase::addDatabase(SQLITE_DATABASE, "user-data");
         }
-        data.setDatabaseName(DARABASEPATH_AL);
+        data.setDatabaseName(DARABASEPATH_FULL);
         if( !data.isDriverAvailable(SQLITE_DATABASE) )
         {
             throw QString("The driver name is not available!");
@@ -110,7 +115,7 @@ void MusicUserWindow::userStateChanged(const QString &uid, const QString &icon)
     if(uid.isEmpty())
     {
         QSize size = ui->userIconU->size();
-        ui->userIconU->setPixmap(MusicUtils::pixmapToRound(QPixmap(":/image/windowicon"), size, size.width()/2, size.height()/2));
+        ui->userIconU->setPixmap(MusicUtils::UWidget::pixmapToRound(QPixmap(":/image/lb_player_logo"), size, size.width()/2, size.height()/2));
         ui->userNameU->setText(tr("L|R"));
         setCurrentIndex(0);
     }
@@ -118,8 +123,8 @@ void MusicUserWindow::userStateChanged(const QString &uid, const QString &icon)
     {
         QSize size = ui->userIconL->size();
         m_userManager->setUserUID(uid);
-        ui->userIconL->setPixmap(MusicUtils::pixmapToRound(icon, size, size.width()/2, size.height()/2));
-        ui->userNameL->setText(QFontMetrics(font()).elidedText(uid, Qt::ElideRight, 44));
+        ui->userIconL->setPixmap(MusicUtils::UWidget::pixmapToRound(icon, size, size.width()/2, size.height()/2));
+        ui->userNameL->setText(MusicUtils::UWidget::elidedText(font(), uid, Qt::ElideRight, 44));
         setCurrentIndex(1);
     }
 }
@@ -139,7 +144,7 @@ void MusicUserWindow::musicUserContextLogin()
         m_userManager->musicUserLogoff();
         return;
     }
-    QTimer::singleShot(1, this, SLOT(musicUserLogin()));
+    QTimer::singleShot(MT_MS, this, SLOT(musicUserLogin()));
 }
 
 void MusicUserWindow::checkToAutoLogin()

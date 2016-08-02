@@ -21,7 +21,7 @@ MusicNetworkTestWidget::MusicNetworkTestWidget(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -48,7 +48,7 @@ MusicNetworkTestWidget::MusicNetworkTestWidget(QWidget *parent)
 
     settingButton();
 
-    m_testTimer.setInterval(5*1000);
+    m_testTimer.setInterval(5*MT_S2MS);
     connect(&m_testTimer, SIGNAL(timeout()), SLOT(networkTestStop()));
 }
 
@@ -59,6 +59,11 @@ MusicNetworkTestWidget::~MusicNetworkTestWidget()
     delete m_thread;
     delete m_testDownload;
     delete ui;
+}
+
+QString MusicNetworkTestWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicNetworkTestWidget::settingButton()
@@ -82,14 +87,14 @@ void MusicNetworkTestWidget::networkData(ulong upload, ulong download)
     m_totalUp += upload;
     m_totalDown += download;
 
-    ui->uploadSpeedValue->setText(MusicUtils::speed2Label(upload));
-    ui->downloadSpeedValue->setText(MusicUtils::speed2Label(download));
-    ui->uploadAllSpeedValue->setText(MusicUtils::speed2Label(m_totalUp));
-    ui->downloadAllSpeedValue->setText(MusicUtils::speed2Label(m_totalDown));
+    ui->uploadSpeedValue->setText(MusicUtils::UNumber::speed2Label(upload));
+    ui->downloadSpeedValue->setText(MusicUtils::UNumber::speed2Label(download));
+    ui->uploadAllSpeedValue->setText(MusicUtils::UNumber::speed2Label(m_totalUp));
+    ui->downloadAllSpeedValue->setText(MusicUtils::UNumber::speed2Label(m_totalDown));
 
     if(m_testTimer.isActive())
     {
-        int value = MusicUtils::sizeByte2KByte(download);
+        int value = MusicUtils::UNumber::sizeByte2KByte(download);
         if(value > 100*ui->speedWidget->ratio())
         {
             value = 100*ui->speedWidget->ratio();
@@ -122,7 +127,7 @@ void MusicNetworkTestWidget::actionTriggered(QAction *action)
 {
     if(action->icon().isNull())
     {
-        action->setIcon(QIcon(":/share/selected"));
+        action->setIcon(QIcon(":/contextMenu/btn_selected"));
     }
     else
     {
@@ -142,7 +147,7 @@ void MusicNetworkTestWidget::actionTriggered(QAction *action)
 #elif defined Q_OS_UNIX
         action->setIcon(QIcon());
     }
-    action->setIcon(QIcon(":/share/selected"));
+    action->setIcon(QIcon(":/contextMenu/btn_selected"));
     selected << action->text();
 #endif
     m_thread->setAvailableNewtworkNames(selected);
@@ -169,7 +174,7 @@ void MusicNetworkTestWidget::networkTestStop()
 
 void MusicNetworkTestWidget::show()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveWidget::show();
 }

@@ -14,7 +14,7 @@ MusicMessageBox::MusicMessageBox(QWidget *parent)
 
     m_status = 0;
     ////////////////////////////////////////////////
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -50,6 +50,11 @@ MusicMessageBox::~MusicMessageBox()
     delete ui;
 }
 
+QString MusicMessageBox::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicMessageBox::setTitle(const QString &text) const
 {
     ui->topTitleName->setText(text);
@@ -83,7 +88,7 @@ void MusicMessageBox::buttonClicked(int index)
 
 int MusicMessageBox::exec()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     MusicAbstractMoveDialog::exec();
     return m_status;
@@ -91,7 +96,7 @@ int MusicMessageBox::exec()
 
 void MusicMessageBox::show()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     MusicAbstractMoveDialog::show();
 }

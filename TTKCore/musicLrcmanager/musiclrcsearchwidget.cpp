@@ -11,11 +11,12 @@ MusicLrcSearchWidget::MusicLrcSearchWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
 
+    ui->label_checkBox->setStyleSheet(MusicUIObject::MCheckBoxStyle01);
     ui->songSearchEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->lrcSearchButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
     ui->lrcSearchDownload->setStyleSheet(MusicUIObject::MPushButtonStyle08);
@@ -43,10 +44,14 @@ MusicLrcSearchWidget::~MusicLrcSearchWidget()
     delete ui;
 }
 
+QString MusicLrcSearchWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicLrcSearchWidget::setCurrentSongName(const QString &name) const
 {
     ui->songSearchEdit->setText(name);
-    ui->tableWidget->setCurrentSongName(name);
     lrcSearchButtonClicked();
 }
 
@@ -61,13 +66,13 @@ void MusicLrcSearchWidget::lrcSearchButtonClicked() const
     QString text = ui->songSearchEdit->text().trimmed();
     ui->tableWidget->startSearchQuery( text );
     ui->functionTopLabel->setText(tr("&nbsp;find <font color=red> %1 </font> result")
-                                  .arg(QFontMetrics(font()).elidedText(text, Qt::ElideRight, 245)));
+                                  .arg(MusicUtils::UWidget::elidedText(font(), text, Qt::ElideRight, 245)));
 }
 
 void MusicLrcSearchWidget::lrcSearchDownloadClicked()
 {
     ui->stateLabel->setText(tr("lrc is downloading now!"));
-    MIntList list = ui->tableWidget->getSelectedItems();
+    MusicObject::MIntList list = ui->tableWidget->getSelectedItems();
     if(list.isEmpty())
     {
         MusicMessageBox message;
@@ -91,7 +96,7 @@ void MusicLrcSearchWidget::lrcDownloadStateChanged(const QString &string)
 
 int MusicLrcSearchWidget::exec()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();
 }

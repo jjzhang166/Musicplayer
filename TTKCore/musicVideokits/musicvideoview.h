@@ -28,6 +28,11 @@ public:
      * Object contsructor.
      */
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
 Q_SIGNALS:
     void setFullScreen();
     /*!
@@ -37,14 +42,18 @@ Q_SIGNALS:
     /*!
      * Widget clicked.
      */
+    void mediaIsPlaying(bool &play);
+    /*!
+     * Current media is playing.
+     */
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.
      */
-
 };
 
 /*! @brief The class of the video view widget.
@@ -60,11 +69,15 @@ public:
      */
     ~MusicVideoView();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setMedia(const QString &data);
     /*!
      * Set video play data.
      */
-    void resizeWindow(bool resize, const QSize &size);
+    void resizeWindow(int width, int height);
     /*!
      * Resize widget size or not.
      */
@@ -103,6 +116,10 @@ private Q_SLOTS:
     void mediaChanged(const QString &data);
     /*!
      * Current media changed.
+     */
+    void mediaIsPlaying(bool &play);
+    /*!
+     * Current media is playing.
      */
 
     void addBarrageChanged(const QString &string);

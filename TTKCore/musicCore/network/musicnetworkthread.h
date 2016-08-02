@@ -13,7 +13,7 @@
 
 #include <QTimer>
 
-#define M_NETWORK (MusicSingleton<MusicNetworkThread>::createInstance())
+#define M_NETWORK_PTR (MusicSingleton<MusicNetworkThread>::createInstance())
 
 #define NETWORK_DETECT_INTERVAL 5000             // second
 #define NETWORK_REQUEST_ADDRESS "www.baidu.com"  // ip
@@ -25,6 +25,10 @@ class MUSIC_NETWORK_EXPORT MusicNetworkThread : public QObject
 {
     Q_OBJECT
 public:
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void start();
     /*!
      * Strat thread now.
@@ -56,6 +60,9 @@ private:
     bool m_networkState;
 
     MusicNetworkThread();
+    /*!
+     * Object contsructor.
+     */
     ~MusicNetworkThread();
 
     DECLARE_SINGLETON_CLASS(MusicNetworkThread)

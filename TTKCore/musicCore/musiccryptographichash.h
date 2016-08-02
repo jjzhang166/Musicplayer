@@ -11,6 +11,8 @@
 
 #include "musicglobaldefine.h"
 
+#define DOWNLOAD_KEY "5024FRSDF40"
+
 #ifdef Q_CC_GNU
     #pragma GCC diagnostic ignored "-Wparentheses"
 #endif
@@ -47,6 +49,10 @@ public:
      * Object contsructor.
      */
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     QString encrypt(const QString &data, const QString &key, Priority p = Lower);
     /*!
      * encrypt by QString data.

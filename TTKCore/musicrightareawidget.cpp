@@ -7,14 +7,20 @@
 #include "musicsettingwidget.h"
 #include "musicmessagebox.h"
 #include "musicconnectionpool.h"
+#include "musicsimilarfoundwidget.h"
+#include "musicsongsearchonlinewidget.h"
+#include "musicttkuiobject.h"
+
+#include "kugouwindow.h"
 
 #include <QPropertyAnimation>
 
 MusicRightAreaWidget::MusicRightAreaWidget(QWidget *parent)
-    : QWidget(parent), m_videoPlayer(nullptr)
+    : QWidget(parent)
 {
     m_supperClass = parent;
-    m_lrcDisplayAll = false;
+    m_stackedFuncWidget = nullptr;
+
     m_musiclrcfordesktop = new MusicLrcContainerForDesktop(parent);
     m_downloadStatusLabel = new MusicDownloadStatusLabel(parent);
     m_setting = new MusicSettingWidget(this);
@@ -23,56 +29,44 @@ MusicRightAreaWidget::MusicRightAreaWidget(QWidget *parent)
     connect(m_setting, SIGNAL(soundEqualizerClicked()), parent,
                        SLOT(musicSetEqualizer()));
 
-    M_CONNECTION->setValue("MusicRightAreaWidget", this);
-    M_CONNECTION->poolConnect("MusicSongSearchOnlineTableWidget", "MusicRightAreaWidget");
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(MusicSongSearchOnlineTableWidget::getClassName(), getClassName());
+    M_CONNECTION_PTR->poolConnect(MusicLrcContainerForInline::getClassName(), getClassName());
 }
 
 MusicRightAreaWidget::~MusicRightAreaWidget()
 {
     delete m_setting;
-    delete m_videoPlayer;
     delete m_downloadStatusLabel;
     delete m_musiclrcfordesktop;
+}
+
+QString MusicRightAreaWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicRightAreaWidget::setupUi(Ui::MusicApplication* ui)
 {
     m_ui = ui;
-    ui->musiclrccontainerforinline->resize(ui->SurfaceStackedWidget->size());
-
-    m_downloadStatusLabel->setMovieLabel(m_ui->showDownloadGif);
+    ui->musiclrccontainerforinline->resize(ui->surfaceStackedWidget->size());
 
     ui->lrcDisplayAllButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->lrcDisplayAllButton->setIconSize(QSize(15, 56));
     connect(ui->lrcDisplayAllButton, SIGNAL(clicked()), SLOT(musicLrcDisplayAllButtonClicked()));
+    ///////////////////////////////////////////////////////
 
-    ui->musicSearchBackButton->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->musicSearchBackButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    ui->musicSearchBackButton->setIconSize(QSize(20, 20));
-    ui->musicSearchBackButton->setIcon(QIcon(QString::fromUtf8(":/image/back")));
-//    connect(ui->musicSearchBackButton, SIGNAL(clicked()), SLOT(musicSearchRefreshButtonRefreshed()));
+    QButtonGroup *group = new QButtonGroup(this);
+    group->addButton(ui->musicSongWidgetButton, 0);
+    group->addButton(ui->musicRadioWidgetButton, 1);
+    group->addButton(ui->musicListWidgetButton, 2);
+    group->addButton(ui->musicVideoWidgetButton, 3);
+    group->addButton(ui->musicLiveWidgetButton, 4);
+    group->addButton(ui->musicLrcWidgetButton, 5);
+    group->addButton(ui->musicSearchButton, 6);
+    group->addButton(ui->musicSearchRefreshButton, 6);
+    connect(group, SIGNAL(buttonClicked(int)), SLOT(musicFunctionClicked(int)));
 
-    ui->musicSearchRefreshButton->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->musicSearchRefreshButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    ui->musicSearchRefreshButton->setIconSize(QSize(20, 20));
-    ui->musicSearchRefreshButton->setIcon(QIcon(QString::fromUtf8(":/image/flash")));
-    connect(ui->musicSearchRefreshButton, SIGNAL(clicked()), SLOT(musicSearchRefreshButtonRefreshed()));
-
-    ui->musicIndexWidgetButton->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->musicIndexWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-    connect(ui->musicIndexWidgetButton, SIGNAL(clicked()), SLOT(musicIndexWidgetButtonSearched()));
-
-    ui->musicSearchWidgetButton->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->musicSearchWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    connect(ui->musicSearchWidgetButton, SIGNAL(clicked()), SLOT(musicSearchWidgetButtonSearched()));
-
-    ui->musicLrcWidgetButton->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->musicLrcWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    connect(ui->musicLrcWidgetButton, SIGNAL(clicked()), SLOT(musicLrcWidgetButtonSearched()));
-
-    ui->vedioWidgetButton->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->vedioWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    connect(ui->vedioWidgetButton, SIGNAL(clicked()), SLOT(musicVideoWidgetButtonSearched()));
     ///////////////////////////////////////////////////////
     connect(m_musiclrcfordesktop, SIGNAL(theCurrentLrcUpdated()), m_supperClass,
                  SLOT(musicCurrentLrcUpdated()));
@@ -96,6 +90,8 @@ void MusicRightAreaWidget::setupUi(Ui::MusicApplication* ui)
     connect(ui->musicSongSearchLine, SIGNAL(enterFinished(QString)),
                  SLOT(songResearchButtonSearched(QString)));
     ///////////////////////////////////////////////////////
+
+    QTimer::singleShot(MT_MS, this, SLOT(musicLoadSongIndexWidget()));
 }
 
 void MusicRightAreaWidget::stopLrcMask() const
@@ -144,8 +140,8 @@ void MusicRightAreaWidget::setSettingParameter() const
 
 bool MusicRightAreaWidget::checkSettingParameterValue() const
 {
-    return ( M_SETTING->value(MusicSettingManager::ShowInlineLrcChoiced).toBool() ||
-             M_SETTING->value(MusicSettingManager::ShowDesktopLrcChoiced).toBool() );
+    return ( M_SETTING_PTR->value(MusicSettingManager::ShowInlineLrcChoiced).toBool() ||
+             M_SETTING_PTR->value(MusicSettingManager::ShowDesktopLrcChoiced).toBool() );
 }
 
 void MusicRightAreaWidget::updateCurrentLrc(qint64 current, qint64 total, bool playStatus) const
@@ -174,8 +170,14 @@ void MusicRightAreaWidget::loadCurrentSongLrc(const QString &name, const QString
     {
         m_ui->musiclrccontainerforinline->stopLrcMask();
         m_ui->musiclrccontainerforinline->setCurrentSongName( name );
-        m_ui->musiclrccontainerforinline->transLrcFileToTime( path.trimmed() );
+
+        m_musiclrcfordesktop->stopLrcMask();
         m_musiclrcfordesktop->setCurrentSongName( name );
+
+        if(!m_ui->musiclrccontainerforinline->transLyricFileToTime( path ))
+        {
+            m_musiclrcfordesktop->updateCurrentLrc(tr("unFoundLrc"), QString(), 0);
+        }
     }
 }
 
@@ -198,11 +200,140 @@ void MusicRightAreaWidget::showSettingWidget() const
 void MusicRightAreaWidget::getParameterSetting() const
 {
     setSettingParameter();
-    bool config = M_SETTING->value(MusicSettingManager::ShowInlineLrcChoiced).toBool();
+    bool config = M_SETTING_PTR->value(MusicSettingManager::ShowInlineLrcChoiced).toBool();
     m_ui->musiclrccontainerforinline->setVisible(config);
-         config = M_SETTING->value(MusicSettingManager::ShowDesktopLrcChoiced).toBool();
+         config = M_SETTING_PTR->value(MusicSettingManager::ShowDesktopLrcChoiced).toBool();
     m_musiclrcfordesktop->setVisible(config);
     m_ui->musicDesktopLrc->setChecked(config);
+}
+
+void MusicRightAreaWidget::musicFunctionClicked(int index)
+{
+    if(index == 5) ///lrc option
+    {
+        musicButtonStyleClear(false);
+        m_ui->stackedFunctionWidget->setStyleSheet("#stackedFunctionWidget{ background:transparent;}");
+        m_ui->musicSearchBackButton->setStyleSheet(MusicTTKUIObject::MKGBtnBackBack);
+        m_ui->musicSearchRefreshButton->setStyleSheet(MusicTTKUIObject::MKGBtnBackFresh);
+    }
+    else
+    {
+        musicButtonStyleClear(true);
+        m_ui->stackedFunctionWidget->setStyleSheet("#stackedFunctionWidget{ background:white;}");
+        m_ui->musicSearchBackButton->setStyleSheet(MusicTTKUIObject::MKGBtnForeBack);
+        m_ui->musicSearchRefreshButton->setStyleSheet(MusicTTKUIObject::MKGBtnForeFresh);
+    }
+
+    deleteStackedFuncWidget();
+    m_ui->lrcDisplayAllButton->setVisible(false);
+    if(m_ui->musiclrccontainerforinline->lrcDisplayExpand())
+    {
+        musicLrcDisplayAllButtonClicked();
+    }
+
+    switch(index)
+    {
+        case 0: //insert kugou song widget
+            {
+                m_stackedFuncWidget = new KugouWindow(KugouWindow::KuGouSong, this);
+                m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
+                m_ui->musicSongWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncSongForeClicked);
+                emit updateBackgroundTheme();
+                break;
+            }
+        case 1: //insert kugou radio widget
+            {
+                m_stackedFuncWidget = new KugouWindow(KugouWindow::KuGouRadio, this);
+                m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
+                m_ui->musicRadioWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncRadioForeClicked);
+                emit updateBackgroundTheme();
+                break;
+            }
+        case 2: //insert kugou list widget
+            {
+                m_stackedFuncWidget = new KugouWindow(KugouWindow::KuGouList, this);
+                m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
+                m_ui->musicListWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncListForeClicked);
+                emit updateBackgroundTheme();
+                break;
+            }
+        case 3: //insert video widget
+            {
+                MusicVideoPlayWidget *videoPlayer = new MusicVideoPlayWidget(false);
+                videoPlayer->setObjectToClose(this);
+                videoPlayer->blockMoveOption(true);
+                connect(videoPlayer, SIGNAL(freshButtonClicked(bool)), SLOT(musicVideoSetPopup(bool)));
+
+                m_stackedFuncWidget = videoPlayer;
+                m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
+                m_ui->musicVideoWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncMVForeClicked);
+                emit updateBackgroundTheme();
+                break;
+            }
+        case 4: //insert kugou live widget
+            {
+                m_stackedFuncWidget = new KugouWindow(KugouWindow::KugouMv, this);
+                m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
+                m_ui->musicLiveWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncLiveForeClicked);
+                emit updateBackgroundTheme();
+                break;
+            }
+        case 5: //insert lrc display widget
+            {
+                m_ui->musicLrcWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncLrcForeClicked);
+
+                m_ui->surfaceStackedWidget->setCurrentIndex(1);
+                m_ui->lrcDisplayAllButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnLrcCollapse);
+                m_ui->lrcDisplayAllButton->setVisible(true);
+                emit updateBgThemeDownload();
+                break;
+            }
+        case 6: //insert search display widget
+            {
+                QString searchedQString = m_ui->musicSongSearchLine->text().trimmed();
+                m_ui->surfaceStackedWidget->setCurrentIndex(0);
+                emit updateBackgroundTheme();
+                //The string searched wouldn't allow to be none
+                if( !searchedQString.isEmpty() && searchedQString != tr("please input search text") )
+                {
+                    m_ui->songSearchWidget->startSearchQuery(searchedQString);
+                }
+                else
+                {
+                    MusicMessageBox message;
+                    message.setText(tr("please input search text"));
+                    message.exec();
+                }
+                break;
+            }
+        case 7: //insert similar found widget
+            {
+                MusicSimilarFoundWidget *similarFoundWidget = new MusicSimilarFoundWidget(this);
+                m_ui->surfaceStackedWidget->addWidget(similarFoundWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(similarFoundWidget);
+                similarFoundWidget->setSongName(m_ui->showCurrentSong->text().trimmed());
+                m_stackedFuncWidget = similarFoundWidget;
+                emit updateBackgroundTheme();
+                break;
+            }
+        default: break;
+    }
+}
+
+void MusicRightAreaWidget::musicLoadSongIndexWidget()
+{
+    musicFunctionClicked(0);
+}
+
+void MusicRightAreaWidget::deleteStackedFuncWidget()
+{
+    delete m_stackedFuncWidget;
+    m_stackedFuncWidget = nullptr;
 }
 
 void MusicRightAreaWidget::setDestopLrcVisible(bool visible) const
@@ -210,7 +341,7 @@ void MusicRightAreaWidget::setDestopLrcVisible(bool visible) const
     m_ui->musicDesktopLrc->setChecked(visible);
     m_musiclrcfordesktop->setVisible(visible);
     m_musiclrcfordesktop->initCurrentLrc();
-    M_SETTING->setValue(MusicSettingManager::ShowDesktopLrcChoiced, visible);
+    M_SETTING_PTR->setValue(MusicSettingManager::ShowDesktopLrcChoiced, visible);
 }
 
 void MusicRightAreaWidget::setWindowLockedChanged()
@@ -218,125 +349,41 @@ void MusicRightAreaWidget::setWindowLockedChanged()
     m_musiclrcfordesktop->setWindowLockedChanged();
 }
 
-void MusicRightAreaWidget::deleteVideoWidget()
-{
-    delete m_videoPlayer;
-    m_videoPlayer = nullptr;
-}
-
-void MusicRightAreaWidget::musicSearchButtonSearched()
-{
-    QString searchedQString = m_ui->musicSongSearchLine->text().trimmed();
-    //The string searched wouldn't allow to be none
-    if( !searchedQString.isEmpty() &&
-         searchedQString != tr("please input search text") )
-    {
-        musicButtonStyleClear();
-        m_ui->musicSearchWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-        m_ui->SurfaceStackedWidget->setCurrentIndex(1);
-        createVideoWidget(false);
-        m_ui->songSearchWidget->startSearchQuery(searchedQString);
-    }
-    else
-    {
-        MusicMessageBox message;
-        message.setText(tr("please input search text"));
-        message.exec();
-    }
-}
-
 void MusicRightAreaWidget::songResearchButtonSearched(const QString &name)
 {
     m_ui->musicSongSearchLine->setText(name);
-    musicSearchButtonSearched();
+    musicFunctionClicked(6);
 }
 
-void MusicRightAreaWidget::musicIndexWidgetButtonSearched()
+void MusicRightAreaWidget::researchQueryByQuality(const QString &quality)
 {
-    musicButtonStyleClear();
-    m_ui->musicIndexWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-    //Show the first index of widget
-    m_ui->SurfaceStackedWidget->setCurrentIndex(0);
-    createVideoWidget(false);
-}
-
-void MusicRightAreaWidget::musicSearchWidgetButtonSearched()
-{
-    musicButtonStyleClear();
-    m_ui->musicSearchWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-    //Show searched song lists
-    m_ui->SurfaceStackedWidget->setCurrentIndex(1);
-    createVideoWidget(false);
-}
-
-void MusicRightAreaWidget::musicLrcWidgetButtonSearched()
-{
-    musicButtonStyleClear();
-    m_ui->musicLrcWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-    //Show lrc display widget
-    m_ui->SurfaceStackedWidget->setCurrentIndex(2);
-    createVideoWidget(false);
-    m_ui->lrcDisplayAllButton->setIcon(QIcon(":/lrc/lrcDisplayAll"));
-    m_ui->lrcDisplayAllButton->setVisible(true);
-    emit updateBgThemeDownload();
-}
-
-void MusicRightAreaWidget::musicVideoWidgetButtonSearched()
-{
-    musicButtonStyleClear();
-    m_ui->vedioWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-    createVideoWidget(true);
-}
-
-void MusicRightAreaWidget::musicSearchRefreshButtonRefreshed()
-{
-    createVideoWidget(false);
-    //Refresh the search music song
-    musicSearchButtonSearched();
-}
-
-void MusicRightAreaWidget::createVideoWidget(bool create)
-{
-    if(create)
-    {
-        if(m_videoPlayer)
-        {
-            return;
-        }
-        deleteVideoWidget();
-        m_videoPlayer = new MusicVideoPlayWidget(false);
-        m_videoPlayer->setObjectToClose(this);
-        m_videoPlayer->blockMoveOption(true);
-        m_ui->SurfaceStackedWidget->addWidget(m_videoPlayer);
-        m_ui->SurfaceStackedWidget->setCurrentIndex(3);
-    }
-    else if(m_videoPlayer)
-    {
-        m_ui->SurfaceStackedWidget->removeWidget(m_videoPlayer);
-        deleteVideoWidget();
-    }
-    m_ui->lrcDisplayAllButton->setVisible(false);
-    if(m_lrcDisplayAll)
-    {
-        musicLrcDisplayAllButtonClicked();
-    }
+    m_ui->songSearchWidget->researchQueryByQuality(m_ui->showCurrentSong->text().trimmed(), quality);
+    m_ui->surfaceStackedWidget->setCurrentIndex(0);
     emit updateBackgroundTheme();
 }
 
-void MusicRightAreaWidget::musicButtonStyleClear()
+void MusicRightAreaWidget::musicButtonStyleClear(bool fore)
 {
-    m_ui->musicIndexWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    m_ui->musicSearchWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    m_ui->musicLrcWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
-    m_ui->vedioWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle07);
+    m_ui->musicSongWidgetButton->setStyleSheet(fore ? MusicTTKUIObject::MKGFuncSongFore :
+                                                      MusicTTKUIObject::MKGFuncSongBack);
+    m_ui->musicRadioWidgetButton->setStyleSheet(fore ?MusicTTKUIObject::MKGFuncRadioFore :
+                                                      MusicTTKUIObject::MKGFuncRadioBack);
+    m_ui->musicListWidgetButton->setStyleSheet(fore ? MusicTTKUIObject::MKGFuncListFore :
+                                                      MusicTTKUIObject::MKGFuncListBack);
+    m_ui->musicVideoWidgetButton->setStyleSheet(fore ? MusicTTKUIObject::MKGFuncMVFore :
+                                                       MusicTTKUIObject::MKGFuncMVBack);
+    m_ui->musicLiveWidgetButton->setStyleSheet(fore ? MusicTTKUIObject::MKGFuncLiveFore :
+                                                      MusicTTKUIObject::MKGFuncLiveBack);
+    m_ui->musicLrcWidgetButton->setStyleSheet(MusicTTKUIObject::MKGFuncLrcFore);
 }
 
 void MusicRightAreaWidget::musicVideoButtonSearched(const QString &name)
 {
-    musicVideoWidgetButtonSearched();
-    if(m_videoPlayer)
+    musicFunctionClicked(3);
+    MusicVideoPlayWidget *video = MStatic_cast(MusicVideoPlayWidget*, m_stackedFuncWidget);
+    if(video)
     {
-        m_videoPlayer->videoResearchButtonSearched(name);
+        video->videoResearchButtonSearched(name);
     }
 }
 
@@ -344,39 +391,45 @@ void MusicRightAreaWidget::musicVideoSetPopup(bool popup)
 {
     if(popup)
     {
-        createVideoWidget(false);
-        musicButtonStyleClear();
-        m_ui->vedioWidgetButton->setStyleSheet(MusicUIObject::MPushButtonStyle16);
-        m_videoPlayer = new MusicVideoPlayWidget(true);
-        m_videoPlayer->setObjectToClose(this);
-        m_videoPlayer->show();
+        musicFunctionClicked(5);
+
+        MusicVideoPlayWidget *videoPlayer = new MusicVideoPlayWidget(true);
+        videoPlayer->setObjectToClose(this);
+        videoPlayer->show();
+        m_stackedFuncWidget = videoPlayer;
+        connect(videoPlayer, SIGNAL(freshButtonClicked(bool)), SLOT(musicVideoSetPopup(bool)));
     }
     else
     {
-        createVideoWidget(false);
-        createVideoWidget(true);
+        musicFunctionClicked(3);
     }
 }
 
 void MusicRightAreaWidget::musicVideoFullscreen(bool full)
 {
-    m_videoPlayer->resizeWindow(full);
-    m_videoPlayer->blockMoveOption(full);
+    MusicVideoPlayWidget *video = MStatic_cast(MusicVideoPlayWidget*, m_stackedFuncWidget);
+    if(video)
+    {
+        video->resizeWindow(full);
+        video->blockMoveOption(full);
+    }
 }
 
 void MusicRightAreaWidget::musicLrcDisplayAllButtonClicked()
 {
-    m_lrcDisplayAll = !m_lrcDisplayAll;
-    m_ui->songsContainer->setHidden(m_lrcDisplayAll);
+    bool lrcDisplayAll = !m_ui->musiclrccontainerforinline->lrcDisplayExpand();
+    m_ui->musiclrccontainerforinline->setLrcDisplayExpand(lrcDisplayAll);
+    m_ui->songsContainer->setHidden(lrcDisplayAll);
+
+    int height = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().height() - WINDOW_HEIGHT_MIN;
 
     QPropertyAnimation *lrcDisplayAllAnimation = new QPropertyAnimation(m_ui->lrcDisplayAllButton, "pos", this);
     lrcDisplayAllAnimation->setDuration(100);
-    lrcDisplayAllAnimation->setStartValue(QPoint(m_lrcDisplayAll ? 392 : 61, 300));
-    lrcDisplayAllAnimation->setEndValue(QPoint(m_lrcDisplayAll ? 61 : 392, 300));
+    lrcDisplayAllAnimation->setStartValue(QPoint(lrcDisplayAll ? 350 : -370, 220 + height/2));
+    lrcDisplayAllAnimation->setEndValue(QPoint(0, 220 + height/2));
     lrcDisplayAllAnimation->start();
-//    m_ui->lrcDisplayAllButton->move(m_lrcDisplayAll ? 61 : 392, 320);
-    m_ui->SurfaceStackedWidget->setGeometry(m_lrcDisplayAll ? 60 : 390, 100, m_lrcDisplayAll ? 871: 541, 455);
-    m_ui->musiclrccontainerforinline->resizeWidth(m_lrcDisplayAll ? 330 : 0);
-    m_ui->lrcDisplayAllButton->setIcon(QIcon(m_lrcDisplayAll ? ":/lrc/lrcDisplayNor" : ":/lrc/lrcDisplayAll"));
-    m_ui->musicWindowConcise->setEnabled(!m_lrcDisplayAll);
+
+    m_ui->lrcDisplayAllButton->setStyleSheet(lrcDisplayAll ? MusicTTKUIObject::MKGTinyBtnLrcExpand :
+                                                             MusicTTKUIObject::MKGTinyBtnLrcCollapse);
+    m_ui->musicWindowConcise->setEnabled(!lrcDisplayAll);
 }

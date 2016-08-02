@@ -1,11 +1,11 @@
 #include "musicsongssummariziedfloatwidget.h"
-#include "musicuiobject.h"
-#include "musicutils.h"
 #include "musicconnectionpool.h"
+#include "musicnumberdefine.h"
+#include "musicbottomareawidget.h"
+#include "musicapplication.h"
+#include "musicttkuiobject.h"
+#include "musicutils.h"
 
-#include <QBitmap>
-#include <QPainter>
-#include <QBoxLayout>
 #include <QToolButton>
 #include <QPropertyAnimation>
 
@@ -14,48 +14,45 @@ MusicSongsSummariziedFloatWidget::MusicSongsSummariziedFloatWidget(QWidget *pare
 {
     setWindowFlags( Qt::Window | Qt::FramelessWindowHint );
     setObjectName("MainWidget");
-    setStyleSheet("#MainWidget{background:rgba(0, 0, 0, 60);}");
+    setStyleSheet("#MainWidget{background:rgba(255, 255, 255, 180);}");
 
-    resize(60, 25);
-    MusicUtils::widgetToRound(this, 10, 10);
+    resize(55, 26);
+    MusicUtils::UWidget::widgetToRound(this, 10, 10);
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
     QToolButton *locationButton = new QToolButton(this);
     QToolButton *searchButton = new QToolButton(this);
-    layout->addWidget(locationButton);
-    layout->addWidget(searchButton);
-
-    locationButton->setIcon(QIcon(QString::fromUtf8(":/appTools/location")));
-    locationButton->setIconSize(QSize(20, 20));
-    locationButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    locationButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnLocation);
     locationButton->setCursor(QCursor(Qt::PointingHandCursor));
-    searchButton->setIcon(QIcon(QString::fromUtf8(":/appTools/search")));
-    searchButton->setIconSize(QSize(20, 20));
-    searchButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    locationButton->setGeometry(0, 1, 24, 24);
+    searchButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnLocalSearch);
     searchButton->setCursor(QCursor(Qt::PointingHandCursor));
+    searchButton->setGeometry(30, 1, 24, 24);
     connect(locationButton, SIGNAL(clicked()), SIGNAL(musicCurrentPlayLocation()));
     connect(searchButton, SIGNAL(clicked()), SIGNAL(musicSearch()));
 
     m_currentAnimationValue = 1;
-    m_timer.setInterval(3*1000);
+    m_timer.setInterval(3*MT_S2MS);
     connect(&m_timer, SIGNAL(timeout()), SLOT(leaveTimeout()));
 
     m_animation = new QPropertyAnimation(this, "windowOpacity");
-    m_animation->setDuration(1000);
+    m_animation->setDuration(MT_S2MS);
     connect(m_animation, SIGNAL(finished()), SLOT(animationFinished()));
 
-    M_CONNECTION->setValue("MusicSongsSummariziedFloatWidget", this);
-    M_CONNECTION->poolConnect("MusicSongsSummariziedFloatWidget", "MusicBottomAreaWidget");
-    M_CONNECTION->poolConnect("MusicSongsSummariziedFloatWidget", "MusicApplication");
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicBottomAreaWidget::getClassName());
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicApplication::getClassName());
     m_timer.start();
 }
 
 MusicSongsSummariziedFloatWidget::~MusicSongsSummariziedFloatWidget()
 {
-    M_CONNECTION->poolDisConnect("MusicSongsSummariziedFloatWidget");
+    M_CONNECTION_PTR->poolDisConnect(getClassName());
     delete m_animation;
+}
+
+QString MusicSongsSummariziedFloatWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicSongsSummariziedFloatWidget::setGeometry(QObject *object)
@@ -63,7 +60,7 @@ void MusicSongsSummariziedFloatWidget::setGeometry(QObject *object)
     QWidget *parent = MStatic_cast(QWidget*, object);
     QPoint global(parent->size().width(), parent->size().height());
     global = parent->mapToGlobal( global );
-    move(global.x() - width() - height(), global.y() - 4*height());
+    move(global.x() - width() - height(), global.y() - 2*height());
 }
 
 void MusicSongsSummariziedFloatWidget::start(bool play, int end)
@@ -90,7 +87,7 @@ void MusicSongsSummariziedFloatWidget::animationFinished()
     m_currentAnimationValue = m_animation->currentValue().toFloat();
     if(m_currentAnimationValue == 0)
     {
-        QTimer::singleShot(100, this, SIGNAL(deleteObject()));
+        QTimer::singleShot(MT_MS*100, this, SIGNAL(deleteObject()));
     }
 }
 

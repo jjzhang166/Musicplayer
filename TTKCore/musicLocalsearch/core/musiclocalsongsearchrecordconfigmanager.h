@@ -11,7 +11,7 @@
 
 #include "musicabstractxml.h"
 
-typedef struct MusicSearchRecord
+typedef struct MUSIC_SEARCH_EXPORT MusicSearchRecord
 {
     QStringList m_names;
     QStringList m_times;
@@ -29,7 +29,11 @@ public:
      * Object contsructor.
      */
 
-    inline bool readSearchXMLConfig(){ return readConfig(MUSICSEARCH_AL); }
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    inline bool readSearchXMLConfig(){ return readConfig(MUSICSEARCH_FULL); }
     /*!
      * Read history search datas from xml file by given name.
      */

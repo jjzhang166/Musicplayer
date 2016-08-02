@@ -11,7 +11,7 @@
 
 #include "musiclrcmanager.h"
 
-#define LRC_PER_WIDTH 542
+#define LRC_PER_WIDTH 670
 
 /*! @brief The class of the inline lrc manager.
  * @author Greedysky <greedysky@163.com>
@@ -26,6 +26,10 @@ public:
      */
     virtual ~MusicLRCManagerForInline();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     inline void setLrcPerWidth(int width){ m_lrcPerWidth = width + LRC_PER_WIDTH;}
     /*!
      * Set lrc per width.

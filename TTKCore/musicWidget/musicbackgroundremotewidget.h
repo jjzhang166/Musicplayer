@@ -31,6 +31,10 @@ public:
      */
     ~MusicBackgroundRemoteWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
 Q_SIGNALS:
     void showCustomSkin(const QString &path);
     /*!
@@ -66,7 +70,7 @@ protected:
      */
 
     int m_currentIndex;
-    MStringLists m_urls;
+    MusicObject::MStringLists m_urls;
     MusicBackgroundListWidget *m_listWidget;
     MusicDownloadQueueCache *m_downloadQueue;
     QButtonGroup *m_group;

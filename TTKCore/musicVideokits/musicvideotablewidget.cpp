@@ -9,24 +9,29 @@ MusicVideoTableWidget::MusicVideoTableWidget(QWidget *parent)
     : MusicQueryTableWidget(parent)
 {
     setColumnCount(8);
-    resizeWindow(1.0f);
-    MusicUtils::setTransparent(this, 255);
+    resizeWindow(0);
+    MusicUtils::UWidget::setTransparent(this, 255);
 
     MusicTime::timeSRand();
-    M_CONNECTION->setValue("MusicVideoTableWidget", this);
+    M_CONNECTION_PTR->setValue(getClassName(), this);
 }
 
 MusicVideoTableWidget::~MusicVideoTableWidget()
 {
-    M_CONNECTION->poolDisConnect("MusicVideoTableWidget");
+    M_CONNECTION_PTR->poolDisConnect(getClassName());
     clearAllItems();
+}
+
+QString MusicVideoTableWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicVideoTableWidget::startSearchQuery(const QString &text)
 {
-    if(!M_NETWORK->isOnline())
+    if(!M_NETWORK_PTR->isOnline())
     {   //no network connection
-        emit showDownLoadInfoFor(MusicObject::DisConnection);
+        emit showDownLoadInfoFor(MusicObject::DW_DisConnection);
         return;
     }
     m_downLoadManager->startSearchSong(MusicDownLoadQueryThreadAbstract::MovieQuery, text);
@@ -64,16 +69,16 @@ void MusicVideoTableWidget::createSearchedItems(const QString &songname,
     setItem(count - 1, 0, item);
 
                       item = new QTableWidgetItem;
-    item->setText(QFontMetrics(font()).elidedText(songname, Qt::ElideRight,
-                                                  headerview->sectionSize(1) - 5));
+    item->setText(MusicUtils::UWidget::elidedText(font(), songname, Qt::ElideRight,
+                                                 headerview->sectionSize(1) - 5));
     item->setTextColor(QColor(50, 50, 50));
     item->setTextAlignment(Qt::AlignCenter);
     item->setToolTip(songname);
     setItem(count - 1, 1, item);
 
                       item = new QTableWidgetItem;
-    item->setText(QFontMetrics(font()).elidedText(artistname, Qt::ElideRight,
-                                                  headerview->sectionSize(2) - 5));
+    item->setText(MusicUtils::UWidget::elidedText(font(), artistname, Qt::ElideRight,
+                                                 headerview->sectionSize(2) - 5));
     item->setTextColor(QColor(50, 50, 50));
     item->setTextAlignment(Qt::AlignCenter);
     item->setToolTip(artistname);
@@ -89,22 +94,22 @@ void MusicVideoTableWidget::createSearchedItems(const QString &songname,
     setItem(count - 1, 4, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/share/showMV")));
+    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_mv")));
     setItem(count - 1, 5, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/share/autionplay")));
+    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_audition")));
     setItem(count - 1, 6, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/share/musicdownload")));
+    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_download")));
     setItem(count - 1, 7, item);
 }
 
-void MusicVideoTableWidget::listCellClicked(int row, int col)
+void MusicVideoTableWidget::listCellClicked(int row, int column)
 {
-    MusicQueryTableWidget::listCellClicked(row, col);
-    switch(col)
+    MusicQueryTableWidget::listCellClicked(row, column);
+    switch(column)
     {
         case 5:
         case 6:
@@ -144,27 +149,27 @@ void MusicVideoTableWidget::downloadLocalMovie(int row)
                      MusicDownLoadQueryThreadAbstract::MovieQuery);
 }
 
-void MusicVideoTableWidget::resizeWindow(float delta)
+void MusicVideoTableWidget::resizeWindow(int delta)
 {
     QHeaderView *headerview = horizontalHeader();
-    headerview->resizeSection(0, 30*delta);
-    headerview->resizeSection(1, 210*delta);
-    headerview->resizeSection(2, 136*delta);
-    headerview->resizeSection(3, 30*delta);
-    headerview->resizeSection(4, 55*delta);
-    headerview->resizeSection(5, 24*delta);
-    headerview->resizeSection(6, 24*delta);
-    headerview->resizeSection(7, 24*delta);
+    headerview->resizeSection(0, 30);
+    headerview->resizeSection(1, 305 + delta*0.4);
+    headerview->resizeSection(2, 160 + delta*0.4);
+    headerview->resizeSection(3, 31 + delta*0.1);
+    headerview->resizeSection(4, 55 + delta*0.1);
+    headerview->resizeSection(5, 24);
+    headerview->resizeSection(6, 24);
+    headerview->resizeSection(7, 24);
 
     //resize row
     for(int i=0; i<rowCount(); ++i)
     {
         QTableWidgetItem *it = item(i, 1);
-        it->setText(QFontMetrics(font()).elidedText(it->toolTip(), Qt::ElideRight,
-                                                    headerview->sectionSize(1) - 5));
+        it->setText(MusicUtils::UWidget::elidedText(font(), it->toolTip(), Qt::ElideRight,
+                                                   headerview->sectionSize(1) - 5));
         it = item(i, 2);
-        it->setText(QFontMetrics(font()).elidedText(it->toolTip(), Qt::ElideRight,
-                                                    headerview->sectionSize(2) - 5));
+        it->setText(MusicUtils::UWidget::elidedText(font(), it->toolTip(), Qt::ElideRight,
+                                                   headerview->sectionSize(2) - 5));
     }
 }
 
@@ -174,16 +179,16 @@ void MusicVideoTableWidget::itemDoubleClicked(int row, int column)
     {
         return;
     }
-    MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
+    MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
     emit mvURLNameChanged(item(row, 2)->toolTip() + " - " + item(row, 1)->toolTip(),
                           musicSongInfos[row].m_songAttrs.first().m_url);
 }
 
-void MusicVideoTableWidget::getMusicMvInfo(MusicSongAttributes &data)
+void MusicVideoTableWidget::getMusicMvInfo(MusicObject::MusicSongAttributes &data)
 {
-    MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
+    MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
     data = (!musicSongInfos.isEmpty() && m_previousClickRow != -1) ?
-            musicSongInfos[m_previousClickRow].m_songAttrs : MusicSongAttributes();
+            musicSongInfos[m_previousClickRow].m_songAttrs : MusicObject::MusicSongAttributes();
 }
 
 void MusicVideoTableWidget::contextMenuEvent(QContextMenuEvent *event)

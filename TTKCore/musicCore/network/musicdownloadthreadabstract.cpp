@@ -8,16 +8,17 @@
 #if defined Q_OS_UNIX || defined Q_CC_MINGW
 # include <unistd.h>
 #endif
+#include <QSslError>
 
 MusicDownLoadThreadAbstract::MusicDownLoadThreadAbstract(const QString &url,
                 const QString &save, Download_Type type, QObject *parent)
-    : QObject(parent), m_manager(nullptr), m_reply(nullptr)
+    : MusicNetworkAbstract(parent)
 {
     m_url = url;
     m_savePathName = save;
     m_downloadType = type;
-    m_hasRecevied = -1;
-    m_currentRecevied = -1;
+    m_hasReceived = -1;
+    m_currentReceived = -1;
 
     if(QFile::exists(save))
     {
@@ -25,66 +26,72 @@ MusicDownLoadThreadAbstract::MusicDownLoadThreadAbstract(const QString &url,
     }
     m_file = new QFile(save, this);
 
-    M_CONNECTION->setNetworkMultiValue(this);
-    m_timer.setInterval(1000);
+    M_CONNECTION_PTR->setNetworkMultiValue(this);
+    m_timer.setInterval(MT_S2MS);
     connect(&m_timer, SIGNAL(timeout()), SLOT(updateDownloadSpeed()));
 }
 
 MusicDownLoadThreadAbstract::~MusicDownLoadThreadAbstract()
 {
-    M_CONNECTION->removeNetworkMultiValue(this);
+    M_CONNECTION_PTR->removeNetworkMultiValue(this);
+}
+
+QString MusicDownLoadThreadAbstract::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicDownLoadThreadAbstract::deleteAll()
 {
+    MusicNetworkAbstract::deleteAll();
     if(m_file)
     {
         delete m_file;
         m_file = nullptr;
-    }
-    if(m_manager)
-    {
-        m_manager->deleteLater();;
-        m_manager = nullptr;
-    }
-    if(m_reply)
-    {
-        m_reply->deleteLater();
-        m_reply = nullptr;
     }
     deleteLater();
 }
 
 void MusicDownLoadThreadAbstract::replyError(QNetworkReply::NetworkError)
 {
-    emit musicDownLoadFinished("The file create failed");
+    M_LOGGER_ERROR("Abnormal network connection");
+    emit downLoadDataChanged("The file create failed");
     deleteAll();
 }
+
+#ifndef QT_NO_SSL
+void MusicDownLoadThreadAbstract::sslErrors(QNetworkReply* reply, const QList<QSslError> &errors)
+{
+    sslErrorsString(reply, errors);
+    emit downLoadDataChanged("The file create failed");
+    deleteAll();
+}
+#endif
 
 void MusicDownLoadThreadAbstract::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     Q_UNUSED(bytesTotal);
-    m_currentRecevied = bytesReceived;
+    m_currentReceived = bytesReceived;
 }
 
 void MusicDownLoadThreadAbstract::updateDownloadSpeed()
 {
-    int delta = m_currentRecevied - m_hasRecevied;
+    int delta = m_currentReceived - m_hasReceived;
     //////////////////////////////////////
     ///limit speed
-    if(M_SETTING->value(MusicSettingManager::DownloadLimitChoiced).toInt() == 0)
+    if(M_SETTING_PTR->value(MusicSettingManager::DownloadLimitChoiced).toInt() == 0)
     {
-        int limitValue = M_SETTING->value(MusicSettingManager::DownloadDLoadLimitChoiced).toInt();
-        if(limitValue != 0 && delta > limitValue*1024)
+        int limitValue = M_SETTING_PTR->value(MusicSettingManager::DownloadDLoadLimitChoiced).toInt();
+        if(limitValue != 0 && delta > limitValue*MH_KB)
         {
-#if defined Q_OS_WIN && defined MUSIC_QT_5
-            QThread::msleep(1000 - limitValue*1024*1000/delta);
+#if defined Q_OS_WIN && defined MUSIC_GREATER_NEW
+            QThread::msleep(MT_S2MS - limitValue*MH_KB*MT_S2MS/delta);
 #else
-            usleep( (1000 - limitValue*1024*1000/delta)*1000 );
+            usleep( (MT_S2MS - limitValue*MH_KB*MT_S2MS/delta)*MT_S2MS );
 #endif
-            delta = limitValue*1024;
+            delta = limitValue*MH_KB;
         }
     }
     //////////////////////////////////////
-    m_hasRecevied = m_currentRecevied;
+    m_hasReceived = m_currentReceived;
 }

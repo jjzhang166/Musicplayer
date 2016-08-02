@@ -23,7 +23,12 @@ public:
     /*!
      * Object contsructor provide download URL\ save local path and download type.
      */
-    void deleteAll();
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    virtual void deleteAll() override;
     /*!
      * Release the network object.
      */
@@ -47,6 +52,12 @@ public Q_SLOTS:
     /*!
      * Download reply error.
      */
+#ifndef QT_NO_SSL
+    void dataSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
+    /*!
+     * Download ssl reply error.
+     */
+#endif
 
 protected:
     QNetworkAccessManager *m_dataManager;

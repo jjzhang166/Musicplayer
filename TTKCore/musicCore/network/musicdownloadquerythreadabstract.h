@@ -9,17 +9,39 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QObject>
-#include <QNetworkReply>
-#include "musicglobaldefine.h"
 #include "musicobject.h"
+#include "musicnetworkabstract.h"
 
-class QNetworkAccessManager;
+typedef struct MUSIC_NETWORK_EXPORT DownloadData
+{
+    QString m_songName;
+    QString m_songArtist;
+    QString m_songUrl;
+    QString m_picUrl;
+    QString m_time;
+    QString m_format;
+
+    void clear()
+    {
+        m_songName.clear();
+        m_songArtist.clear();
+        m_songUrl.clear();
+        m_picUrl.clear();
+        m_time.clear();
+        m_format.clear();
+    }
+
+    bool isValid() const
+    {
+        return !(m_songName.isEmpty() && m_time.isEmpty() && m_format.isEmpty());
+    }
+
+}DownloadData;
 
 /*! @brief The class to abstract query download data from net.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_NETWORK_EXPORT MusicDownLoadQueryThreadAbstract : public QObject
+class MUSIC_NETWORK_EXPORT MusicDownLoadQueryThreadAbstract : public MusicNetworkAbstract
 {
     Q_OBJECT
 public:
@@ -34,9 +56,13 @@ public:
     /*!
      * Object contsructor.
      */
-    ~MusicDownLoadQueryThreadAbstract();
+    virtual ~MusicDownLoadQueryThreadAbstract();
 
-    void deleteAll();
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    virtual void deleteAll() override;
     /*!
      * Release the network object.
      */
@@ -45,28 +71,40 @@ public:
      * Start to search data from name and type.
      * Subclass should implement this function.
      */
-    void setSearchQuality(const QString &qual) { m_searchQuality = qual;}
+    inline void setSearchQuality(const QString &qual) { m_searchQuality = qual;}
     /*!
      * Set search data quality.
      */
-    void setQueryAllRecords(bool state) { m_queryAllRecords = state;}
+    inline QString getSearchQuality() const { return m_searchQuality;}
+    /*!
+     * Get search data quality.
+     */
+    inline void setQueryAllRecords(bool state) { m_queryAllRecords = state;}
     /*!
      * Set wheather query all quality of records.
+     */
+    inline bool getQueryAllRecords() const { return m_queryAllRecords;}
+    /*!
+     * Get query all records flag.
+     */
+    inline QueryType getQueryType() const { return m_currentType;}
+    /*!
+     * Return the current song query type.
+     */
+    inline QString getSearchedText() const { return m_searchText;}
+    /*!
+     * Return the current song name.
      */
     inline int getSongIdIndex() const { return m_musicSongInfos.size() + 1;}
     /*!
      * Return the current song container size.
      */
-    inline const MusicSongInfomations& getMusicSongInfos(){ return m_musicSongInfos;}
+    inline const MusicObject::MusicSongInfomations& getMusicSongInfos(){ return m_musicSongInfos;}
     /*!
      * Return the current song container.
      */
 
 Q_SIGNALS:
-    void resolvedSuccess();
-    /*!
-     * Query data finished.
-     */
     void clearAllItems();
     /*!
      * Clear all items before the new query start.
@@ -77,21 +115,8 @@ Q_SIGNALS:
      * Create the current items by song name\ artist name and time.
      */
 
-public Q_SLOTS:
-    virtual void searchFinshed() = 0;
-    /*!
-     * Download data from net finished.
-     * Subclass should implement this function.
-     */
-    void replyError(QNetworkReply::NetworkError error);
-    /*!
-     * Download reply error.
-     */
-
 protected:
-    QNetworkAccessManager *m_manager;
-    QNetworkReply *m_reply;
-    MusicSongInfomations m_musicSongInfos;
+    MusicObject::MusicSongInfomations m_musicSongInfos;
     QString m_searchText, m_searchQuality;
     QueryType m_currentType;
     bool m_queryAllRecords;

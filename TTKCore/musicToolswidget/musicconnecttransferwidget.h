@@ -16,6 +16,7 @@
 namespace Ui {
 class MusicConnectTransferWidget;
 }
+class MusicFileSenderServer;
 
 /*! @brief The class of the transfer file to mobile widget.
  * @author Greedysky <greedysky@163.com>
@@ -30,8 +31,17 @@ public:
      */
     virtual ~MusicConnectTransferWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    void openTransferFiles(int mode);
+    /*!
+     * Open transfer files by mode.
+     */
+
 Q_SIGNALS:
-    void getMusicLists(MusicSongsList &songs, QStringList &names);
+    void getMusicLists(MusicSongItems &songs);
     /*!
      * Get music datas from container.
      */
@@ -45,9 +55,21 @@ public Q_SLOTS:
     /*!
      * Select all items.
      */
-    void startToTransferFiles();
+    void startToTransferUSBFiles();
     /*!
-     * Start to transfer files.
+     * Start to transfer usb files.
+     */
+    void startToTransferWIFIFiles();
+    /*!
+     * Start to transfer wifi files.
+     */
+    void reflashRemovableDir();
+    /*!
+     * Reflash removable dir.
+     */
+    void switchDiffDevice();
+    /*!
+     * Switch to different device.
      */
     void musicSearchIndexChanged(int row, int col);
     /*!
@@ -67,11 +89,20 @@ protected:
     /*!
      * Create all items.
      */
+    QStringList getSelectedFiles();
+    /*!
+     * Get selected files.
+     */
+    QString getRemovableDrive();
+    /*!
+     * Get removable drive name.
+     */
 
     Ui::MusicConnectTransferWidget *ui;
     int m_currentIndex;
     MusicSongs m_currentSongs;
-    MIntsListMap m_searchfileListCache;
+    MusicObject::MIntsListMap m_searchfileListCache;
+    MusicFileSenderServer *m_sendServer;
 
 };
 

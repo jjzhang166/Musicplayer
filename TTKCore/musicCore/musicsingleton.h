@@ -21,9 +21,19 @@ class MUSIC_CORE_EXPORT MusicSingleton
 {
 public:
     static T* createInstance();
+    /*!
+     * Get object instance ptr.
+     */
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
 
 private:
-    MusicSingleton(){}
+    MusicSingleton(){}   
+    /*!
+     * Object contsructor.
+     */
     ~MusicSingleton(){}
 
     static QMutex m_mutex;
@@ -54,6 +64,12 @@ T* MusicSingleton<T>::createInstance()
         m_mutex.unlock();
     }
     return m_instance.data();
+}
+
+template<typename T>
+QString MusicSingleton<T>::getClassName()
+{
+    return "MusicSingleton";
 }
 
     ////////////////////////////////////////////////////////////////

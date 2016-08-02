@@ -12,8 +12,10 @@
 #include "musicobject.h"
 #include "musicglobaldefine.h"
 
-#define MIN_LRCCONTAIN_COUNT 11
-#define CURRENT_LRC_PAINT 5
+#define LRC_LINEMAX_COUNT 11
+#define LRC_CURRENT_LINR 5
+
+class MusicTranslationThread;
 
 /*! @brief The class of the core lrc analysis.
  * @author Greedysky <greedysky@163.com>
@@ -53,9 +55,17 @@ public:
      */
     ~MusicLrcAnalysis();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     State transLrcFileToTime(const QString &lrcFileName);
     /*!
      * Analysis lrc file to map return the state.
+     */
+    State transKrcFileToTime(const QString &krcFileName);
+    /*!
+     * Analysis krc file to map return the state.
      */
     qint64 setSongSpeedAndSlow(qint64 time);
     /*!
@@ -64,6 +74,10 @@ public:
     void revertLrcTime(qint64 pos);
     /*!
      * Revert lrc time by pos, both + or - the same pos.
+     */
+    void saveLrcTimeChanged();
+    /*!
+     * Save lrc time changed to current lrc file.
      */
 
     void setCurrentIndex(int index) { m_currentLrcIndex = index;}
@@ -109,6 +123,12 @@ public:
      * Get all lrcs from container.
      */
 
+public Q_SLOTS:
+    void getTranslatedLrc();
+    /*!
+     * Get all lrcs from tr container.
+     */
+
 protected:
     void matchLrcLine(const QString &oneLine);
     /*!
@@ -132,9 +152,10 @@ protected:
      */
 
     int m_currentLrcIndex;
-    QStringList m_currentShowLrcContainer;
     QString m_currentLrcFileName;
-    MIntStringMap m_lrcContainer;
+    MusicObject::MIntStringMap m_lrcContainer;
+    QStringList m_currentShowLrcContainer;
+    MusicTranslationThread *m_translationThread;
 
 };
 

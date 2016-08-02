@@ -2,19 +2,17 @@
 #include "musicutils.h"
 #include "musicxmlconfigmanager.h"
 #include "musicnetworkthread.h"
-#include "musiclogger.h"
 #include "musicmessagebox.h"
 
 #include <QApplication>
 #include <QTranslator>
-//#include <vld.h>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-#ifndef MUSIC_QT_5
-    MusicUtils::setLocalCodec();
+#ifndef MUSIC_GREATER_NEW
+    MusicUtils::UCore::setLocalCodec();
 #endif
 #ifdef Q_OS_UNIX
     QFont font;
@@ -22,12 +20,12 @@ int main(int argc, char *argv[])
     qApp->setFont(font);
 #endif
 
-    MusicUtils::checkTheDirectoryExist();
-    if(!MusicUtils::checkTheFileExist())
+    MusicUtils::UCore::checkTheDirectoryExist();
+    if(!MusicUtils::UCore::checkTheFileExist())
     {
         M_LOGGER_INFO("Load Translation");
         QTranslator translator;
-        translator.load(MusicUtils::getLanguageName(0));
+        translator.load(MusicUtils::UCore::getLanguageName(0));
         a.installTranslator(&translator);
 
         MusicMessageBox(QObject::tr("TTKMusicPlayer"),
@@ -43,18 +41,18 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("TTKMusicPlayer");
 
     //detect the current network state
-    M_NETWORK->start();
+    M_NETWORK_PTR->start();
 
     M_LOGGER_INFO("Load Translation");
     MusicXMLConfigManager *xml = new MusicXMLConfigManager;
     xml->readXMLConfig();
     QTranslator translator;
-    translator.load(MusicUtils::getLanguageName(xml->readLanguageIndex()));
+    translator.load(MusicUtils::UCore::getLanguageName(xml->readLanguageIndex()));
     a.installTranslator(&translator);
 
-    MusicUtils::checkCacheSize(xml->readDownloadCacheSize()*1024*1024,
-                              xml->readDownloadCacheLimit(), MUSIC_DOWNLOAD_AL);
-    M_NETWORK->setBlockNetWork(xml->readCloseNetworkConfig());
+    MusicUtils::UCore::checkCacheSize(xml->readDownloadCacheSize()*MH_MB2B,
+                                      xml->readDownloadCacheLimit(), MUSIC_DIR_FULL);
+    M_NETWORK_PTR->setBlockNetWork(xml->readCloseNetworkConfig());
     delete xml;
     M_LOGGER_INFO("End load translation");
 
@@ -66,7 +64,7 @@ int main(int argc, char *argv[])
         if( QString(argv[1]) == "-Open" )
         {
             w.musicImportSongsSettingPath(QStringList() << argv[2]);
-            QTimer::singleShot(1, &w, SLOT(musicImportPlay()));
+            QTimer::singleShot(MT_MS, &w, SLOT(musicImportPlay()));
         }
         if( QString(argv[1]) == "-List" )
         {

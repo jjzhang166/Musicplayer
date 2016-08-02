@@ -12,7 +12,6 @@
 #include <QWidget>
 #include "musicglobaldefine.h"
 
-class MusicVideoPlayWidget;
 class MusicSettingWidget;
 class MusicDownloadStatusLabel;
 class MusicLrcContainerForDesktop;
@@ -34,6 +33,10 @@ public:
      */
     ~MusicRightAreaWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setupUi(Ui::MusicApplication* ui);
     /*!
      * Set up app ui.
@@ -115,9 +118,17 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void deleteVideoWidget();
+    void musicFunctionClicked(int index);
     /*!
-     * Delete current video player widget.
+     * Music function button clicked.
+     */
+    void musicLoadSongIndexWidget();
+    /*!
+     * Music load song index widget.
+     */
+    void deleteStackedFuncWidget();
+    /*!
+     * Delete current stacked widget.
      */
     void setDestopLrcVisible(bool visible) const;
     /*!
@@ -127,33 +138,13 @@ public Q_SLOTS:
     /*!
      * Lock current desktop lrc state changed.
      */
-    void musicSearchButtonSearched();
-    /*!
-     * Search current music song from net.
-     */
     void songResearchButtonSearched(const QString &name);
     /*!
      * Music song research button searched by name.
      */
-    void musicIndexWidgetButtonSearched();
+    void researchQueryByQuality(const QString &quality);
     /*!
-     * Change to index widget.
-     */
-    void musicSearchWidgetButtonSearched();
-    /*!
-     * Change to search songs widget.
-     */
-    void musicLrcWidgetButtonSearched();
-    /*!
-     * Change to display lrc widget.
-     */
-    void musicSearchRefreshButtonRefreshed();
-    /*!
-     * Research button clicked.
-     */
-    void musicVideoWidgetButtonSearched();
-    /*!
-     * Change to video player widget.
+     * Research query by quality it changed.
      */
     void musicVideoButtonSearched(const QString &name);
     /*!
@@ -173,22 +164,16 @@ public Q_SLOTS:
      */
 
 protected:
-    void createVideoWidget(bool create);
-    /*!
-     * To create video widgte or not.
-     */
-    void musicButtonStyleClear();
+    void musicButtonStyleClear(bool fore);
     /*!
      * Function button style clear.
      */
 
-    bool m_lrcDisplayAll;
-    QWidget *m_supperClass;
+    QWidget *m_supperClass, *m_stackedFuncWidget;
     Ui::MusicApplication *m_ui;
     MusicSettingWidget *m_setting;
     MusicLrcContainerForDesktop *m_musiclrcfordesktop;
     MusicDownloadStatusLabel *m_downloadStatusLabel;
-    MusicVideoPlayWidget *m_videoPlayer;
 
 };
 

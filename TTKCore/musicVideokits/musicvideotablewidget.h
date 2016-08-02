@@ -25,6 +25,10 @@ public:
      */
     virtual ~MusicVideoTableWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startSearchQuery(const QString &text) override;
     /*!
      * Start search query by text.
@@ -33,7 +37,7 @@ public:
     /*!
      * Data download to local file.
      */
-    void resizeWindow(float delta);
+    void resizeWindow(int delta);
     /*!
      * Resize widget size by delta.
      */
@@ -45,25 +49,24 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void listCellClicked(int row, int col) override;
+    virtual void listCellClicked(int row, int column) override;
     /*!
      * Table widget list cell click.
      */
-    void clearAllItems() override;
+    virtual void clearAllItems() override;
     /*!
      * Clear All Items.
      */
-    void createSearchedItems(const QString &songname,
-                             const QString &artistname,
-                             const QString &time) override;
+    virtual void createSearchedItems(const QString &songname, const QString &artistname,
+                                     const QString &time) override;
     /*!
      * Create searched items.
      */
-    void itemDoubleClicked(int row, int column) override;
+    virtual void itemDoubleClicked(int row, int column) override;
     /*!
      * Item has double clicked.
      */
-    void getMusicMvInfo(MusicSongAttributes &data);
+    void getMusicMvInfo(MusicObject::MusicSongAttributes &data);
     /*!
      * Get music mv information data.
      */

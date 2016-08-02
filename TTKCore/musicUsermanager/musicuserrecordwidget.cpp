@@ -17,10 +17,10 @@ MusicUserRecordWidget::MusicUserRecordWidget(QWidget *parent)
     ui->setupUi(this);
 
 #ifdef Q_OS_UNIX
-    MusicUtils::setLabelFont(ui->label_5T, 9);
-    MusicUtils::setLabelFont(ui->label_6T, 9);
+    MusicUtils::UWidget::setLabelFontSize(ui->label_5T, 9);
+    MusicUtils::UWidget::setLabelFontSize(ui->label_6T, 9);
 #endif
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -30,6 +30,11 @@ MusicUserRecordWidget::MusicUserRecordWidget(QWidget *parent)
 MusicUserRecordWidget::~MusicUserRecordWidget()
 {
     delete ui;
+}
+
+QString MusicUserRecordWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicUserRecordWidget::setUserModel(MusicUserModel *model, const QString &uid)
@@ -62,7 +67,12 @@ void MusicUserRecordWidget::initTabF()
     ui->nicknameEdit->setText(m_userModel->getUserName(uid));
     ui->userIDLabel_F->setText(uid);
 
+    ui->nicknameEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
+    ui->birthDateEdit_F->setStyleSheet(MusicUIObject::MDateEditStyle01);
+
     QString string(m_userModel->getUserSex(uid));
+    ui->maleRadioButton_F->setStyleSheet(MusicUIObject::MRadioButtonStyle01);
+    ui->femaleRadioButton_F->setStyleSheet(MusicUIObject::MRadioButtonStyle01);
     ui->maleRadioButton_F->setChecked(string.isEmpty() || string == "0");
     ui->femaleRadioButton_F->setChecked(string == "1");
 
@@ -73,23 +83,16 @@ void MusicUserRecordWidget::initTabF()
     string = m_userModel->getUserCity(uid);
     if(!string.isEmpty())
     {
-#ifdef MUSIC_QT_5
-        ui->cityComboBox_F->setCurrentText(string);
-#else
-        MusicUtils::setComboboxText(ui->cityComboBox_F, string);
-#endif
+        MusicUtils::UWidget::setComboboxText(ui->cityComboBox_F, string);
     }
 
     string = m_userModel->getUserCountry(uid);
     if(!string.isEmpty())
     {
-#ifdef MUSIC_QT_5
-        ui->countryComboBox_F->setCurrentText(string);
-#else
-        MusicUtils::setComboboxText(ui->countryComboBox_F, string);
-#endif
+        MusicUtils::UWidget::setComboboxText(ui->countryComboBox_F, string);
     }
     ui->signatureEdit_F->setText(m_userModel->getUserSignature(uid));
+    ui->confirmButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle10);
 
     connect(ui->confirmButton_F, SIGNAL(clicked()), SLOT(confirmButtonClickedF()));
 }
@@ -99,11 +102,13 @@ void MusicUserRecordWidget::initTabS()
     QString path = m_userModel->getUserIcon(ui->userIDLabel_F->text());
     ui->bigPixmapLabel_S->setPixmap(QPixmap(path).scaled(ui->bigPixmapLabel_S->size()));
     ui->smlPixmapLabel_S->setPixmap(QPixmap(path).scaled(ui->smlPixmapLabel_S->size()));
+    ui->openFileButton_S->setStyleSheet(MusicUIObject::MPushButtonStyle10);
     connect(ui->openFileButton_S, SIGNAL(clicked()), SLOT(openFileButtonClickedS()));
 }
 
 void MusicUserRecordWidget::initTabT()
 {
+    ui->tab_3->setStyleSheet(MusicUIObject::MLineEditStyle01 + "QWidget{ color:#666666;}");
     ui->labelRighT1->hide();
     ui->labelRighT2->hide();
     ui->labelRighT3->hide();
@@ -113,6 +118,7 @@ void MusicUserRecordWidget::initTabT()
     connect(ui->newPwdEdit_T, SIGNAL(checkPwdStrength(int)), SLOT(checkPwdStrength(int)));
 
     changeVerificationCodeT();
+    ui->confirmButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle10);
     connect(ui->verificationCode, SIGNAL(clicked()), SLOT(changeVerificationCodeT()));
     connect(ui->confirmButton_T, SIGNAL(clicked()), SLOT(confirmButtonClickedT()));
 }
@@ -157,7 +163,7 @@ void MusicUserRecordWidget::openFileButtonClickedS()
     {
         name = QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md5);
     }
-    path = QString("%1%2").arg(DATA_CACHED_AL)
+    path = QString("%1%2").arg(CACHE_DIR_FULL)
                           .arg(QString(name.toHex().toUpper()));
     file.copy( path );
     file.close();
@@ -248,7 +254,7 @@ void MusicUserRecordWidget::checkPwdStrength(int code)
 
 int MusicUserRecordWidget::exec()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();;
 }

@@ -16,7 +16,7 @@
 
 class MusicSystemTrayMenu;
 class MusicWindowExtras;
-class MusicLocalSongSearch;
+class MusicLocalSongSearchDialog;
 
 namespace Ui {
     class MusicApplication;
@@ -35,6 +35,10 @@ public:
      */
     ~MusicBottomAreaWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setupUi(Ui::MusicApplication* ui);
     /*!
      * Set up app ui.
@@ -46,6 +50,10 @@ public:
     void showPlayStatus(bool status) const;
     /*!
      * Set current play state button.
+     */
+    void setVolumeValue(int value) const;
+    /*!
+     * Set current play volume.
      */
     void setLabelText(const QString &name) const;
     /*!
@@ -68,12 +76,8 @@ public:
     /*!
      * Set system tray message show title and context.
      */
-    void setVolumeValue(int value) const;
-    /*!
-     * Set current volume value by index.
-     */
 
-#if defined MUSIC_DEBUG && defined Q_OS_WIN && defined MUSIC_QT_5
+#if defined MUSIC_DEBUG && defined Q_OS_WIN && defined MUSIC_GREATER_NEW
     void setValue(int value) const;
     /*!
      * Set current value.
@@ -91,6 +95,11 @@ public:
     QString getSearchedText() const;
     /*!
      * Get the search text that the user searched.
+     */
+
+    void resizeWindow();
+    /*!
+     * Resize window bound by widgte resize called.
      */
 
 Q_SIGNALS:
@@ -138,7 +147,7 @@ protected:
     QSystemTrayIcon *m_systemTray;
     MusicSystemTrayMenu *m_systemTrayMenu;
     MusicWindowExtras *m_musicWindowExtras;
-    MusicLocalSongSearch *m_musicLocalSongSearch;
+    MusicLocalSongSearchDialog *m_musicLocalSongSearch;
 
 };
 

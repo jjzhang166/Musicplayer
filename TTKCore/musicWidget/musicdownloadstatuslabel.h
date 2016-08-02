@@ -16,7 +16,6 @@
 #endif
 #include "musicglobaldefine.h"
 
-class QLabel;
 class MusicApplication;
 
 /*! @brief The class of the show download state.
@@ -32,9 +31,9 @@ public:
      */
     ~MusicDownloadStatusLabel();
 
-    void setMovieLabel(QLabel *label) { m_movieLabel = label;}
+    static QString getClassName();
     /*!
-     * Set current movie label object.
+     * Get class object name.
      */
     void musicCheckHasLrcAlready();
     /*!
@@ -69,7 +68,6 @@ public Q_SLOTS:
 protected:
     MusicApplication *m_parentWidget;
     MusicDownLoadQueryThreadAbstract *m_downloadLrcThread;
-    QLabel *m_movieLabel;
 
 };
 

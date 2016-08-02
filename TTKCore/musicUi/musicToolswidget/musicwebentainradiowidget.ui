@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>515</width>
-    <height>375</height>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MusicWebEntainRadioWidget</string>
+   <string>网络电台播放窗口</string>
   </property>
   <widget class="QLabel" name="background">
    <property name="geometry">
@@ -19,7 +19,7 @@
      <x>20</x>
      <y>20</y>
      <width>475</width>
-     <height>335</height>
+     <height>320</height>
     </rect>
    </property>
    <property name="text">
@@ -53,19 +53,6 @@
    </property>
    <property name="text">
     <string>...</string>
-   </property>
-  </widget>
-  <widget class="Line" name="line_2">
-   <property name="geometry">
-    <rect>
-     <x>29</x>
-     <y>335</y>
-     <width>455</width>
-     <height>5</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
    </property>
   </widget>
   <widget class="QListWidget" name="listWidget">
@@ -107,7 +94,7 @@
     <string/>
    </property>
   </widget>
-  <widget class="QSlider" name="volumeSlider">
+  <widget class="MusicClickedSlider" name="volumeSlider">
    <property name="geometry">
     <rect>
      <x>270</x>
@@ -191,7 +178,7 @@
      <x>20</x>
      <y>45</y>
      <width>475</width>
-     <height>310</height>
+     <height>295</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -202,7 +189,6 @@
   <zorder>backgroundMask</zorder>
   <zorder>topTitleName</zorder>
   <zorder>topTitleCloseButton</zorder>
-  <zorder>line_2</zorder>
   <zorder>listWidget</zorder>
   <zorder>movieLabel</zorder>
   <zorder>playButton</zorder>
@@ -213,6 +199,13 @@
   <zorder>label_2</zorder>
   <zorder>stateLabel</zorder>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MusicClickedSlider</class>
+   <extends>QSlider</extends>
+   <header>musicclickedslider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

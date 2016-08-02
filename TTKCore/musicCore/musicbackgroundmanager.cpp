@@ -5,9 +5,9 @@ MusicBackgroundManager::MusicBackgroundManager()
     m_currentIndex = 0;
 }
 
-void MusicBackgroundManager::clearArtName()
+QString MusicBackgroundManager::getClassName()
 {
-    m_currentArtName.clear();
+    return staticMetaObject.className();
 }
 
 void MusicBackgroundManager::setArtName(const QString &name)
@@ -19,7 +19,7 @@ void MusicBackgroundManager::setArtName(const QString &name)
     }
 
     m_photos.clear();
-    QString filter = ART_BG_AL + (m_currentArtName = sName) + "%1" + SKN_FILE;
+    QString filter = BACKGROUND_DIR_FULL + (m_currentArtName = sName) + "%1" + SKN_FILE;
     for(int i=0; i<MAX_INDEX; ++i)
     {
         if(QFile::exists(filter.arg(i)))
@@ -28,6 +28,11 @@ void MusicBackgroundManager::setArtName(const QString &name)
         }
     }
     emit artHasChanged();
+}
+
+void MusicBackgroundManager::clearArtName()
+{
+    m_currentArtName.clear();
 }
 
 QString MusicBackgroundManager::getArtPhotoPath()

@@ -17,9 +17,14 @@ MusicSongsListItemInfoWidget::~MusicSongsListItemInfoWidget()
     delete ui;
 }
 
+QString MusicSongsListItemInfoWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 bool MusicSongsListItemInfoWidget::showArtPicture(const QString &name)
 {
-    QPixmap originPath(QString(ART_DOWNLOAD_AL + name + SKN_FILE));
+    QPixmap originPath(QString(ART_DIR_FULL + name + SKN_FILE));
     if(!originPath.isNull())
     {
         ui->artPicture->setPixmap(originPath.scaled(60, 60));
@@ -31,21 +36,19 @@ bool MusicSongsListItemInfoWidget::showArtPicture(const QString &name)
 void MusicSongsListItemInfoWidget::setMusicSongInformation(const MusicSong &info)
 {
     QString musicArt = info.getMusicArtistFront();
-    QFontMetrics str(font());
     ui->songNameValue->setText( info.getMusicName().isEmpty() ? "-" :
-                str.elidedText( info.getMusicName(), Qt::ElideRight, ui->songNameValue->width()) );
+                MusicUtils::UWidget::elidedText(font(), info.getMusicName(), Qt::ElideRight, ui->songNameValue->width()) );
     ui->artlistValue->setText( musicArt.isEmpty() ? "-" :
-               str.elidedText( musicArt, Qt::ElideRight, ui->artlistValue->width()) );
-    ui->sizeValue->setText( str.elidedText( QString::number(MusicUtils::sizeByte2MByte(
+                MusicUtils::UWidget::elidedText(font(), musicArt, Qt::ElideRight, ui->artlistValue->width()) );
+    ui->sizeValue->setText( MusicUtils::UWidget::elidedText(font(), QString::number(MusicUtils::UNumber::sizeByte2MByte(
                             info.getMusicSize())).left(4) + "M", Qt::ElideRight, ui->sizeValue->width()) );
     ui->typeValue->setText( info.getMusicType().isEmpty() ? "-" :
-            str.elidedText( info.getMusicType(), Qt::ElideRight, ui->typeValue->width()) );
+                MusicUtils::UWidget::elidedText(font(), info.getMusicType(), Qt::ElideRight, ui->typeValue->width()) );
     ui->timeValue->setText(
-            str.elidedText( QString::number(info.getMusicPlayCount()), Qt::ElideRight, ui->timeValue->width()) );
-
+                MusicUtils::UWidget::elidedText(font(), QString::number(info.getMusicPlayCount()), Qt::ElideRight, ui->timeValue->width()) );
 
     if(!showArtPicture(musicArt) && !showArtPicture(info.getMusicArtistBack()))
     {
-        ui->artPicture->setPixmap(QPixmap(":/share/defaultArt").scaled(60, 60));
+        ui->artPicture->setPixmap(QPixmap(":/image/lb_defaultArt").scaled(60, 60));
     }
 }

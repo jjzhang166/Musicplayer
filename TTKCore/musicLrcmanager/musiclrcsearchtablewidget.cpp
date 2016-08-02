@@ -13,8 +13,8 @@ MusicLrcSearchTableWidget::MusicLrcSearchTableWidget(QWidget *parent)
     headerview->resizeSection(2, 193);
     headerview->resizeSection(3, 55);
     headerview->resizeSection(4, 24);
-    MusicUtils::setTransparent(this, 255);
-    connect(m_downLoadManager, SIGNAL(resolvedSuccess()), SIGNAL(resolvedSuccess()));
+    MusicUtils::UWidget::setTransparent(this, 255);
+    connect(m_downLoadManager, SIGNAL(downLoadDataChanged(QString)), SIGNAL(resolvedSuccess()));
 }
 
 MusicLrcSearchTableWidget::~MusicLrcSearchTableWidget()
@@ -22,14 +22,18 @@ MusicLrcSearchTableWidget::~MusicLrcSearchTableWidget()
     clearAllItems();
 }
 
+QString MusicLrcSearchTableWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicLrcSearchTableWidget::startSearchQuery(const QString &text)
 {
-    if(!M_NETWORK->isOnline())
+    if(!M_NETWORK_PTR->isOnline())
     {   //no network connection
-        emit showDownLoadInfoFor(MusicObject::DisConnection);
+        emit showDownLoadInfoFor(MusicObject::DW_DisConnection);
         return;
     }
-    m_currentSongName = text;
     m_downLoadManager->startSearchSong(MusicDownLoadQueryThreadAbstract::LrcQuery, text);
 }
 
@@ -50,14 +54,14 @@ void MusicLrcSearchTableWidget::createSearchedItems(const QString &songname,
     setItem(count - 1, 0, item);
 
                       item = new QTableWidgetItem;
-    item->setText(QFontMetrics(font()).elidedText(songname, Qt::ElideRight, 170));
+    item->setText(MusicUtils::UWidget::elidedText(font(), songname, Qt::ElideRight, 170));
     item->setTextColor(QColor(50, 50, 50));
     item->setTextAlignment(Qt::AlignCenter);
     item->setToolTip(songname);
     setItem(count - 1, 1, item);
 
                       item = new QTableWidgetItem;
-    item->setText(QFontMetrics(font()).elidedText(artistname, Qt::ElideRight, 144));
+    item->setText(MusicUtils::UWidget::elidedText(font(), artistname, Qt::ElideRight, 144));
     item->setTextColor(QColor(50, 50, 50));
     item->setTextAlignment(Qt::AlignCenter);
     item->setToolTip(artistname);
@@ -69,7 +73,7 @@ void MusicLrcSearchTableWidget::createSearchedItems(const QString &songname,
     setItem(count - 1, 3, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/radio/collect")));
+    item->setIcon(QIcon(QString::fromUtf8(":/tiny/lb_star")));
     setItem(count - 1, 4, item);
 }
 
@@ -82,12 +86,12 @@ void MusicLrcSearchTableWidget::musicDownloadLocal(int row)
         message.exec();
         return;
     }
-    MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
 
+    MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
     MusicTextDownLoadThread* lrcDownload = new MusicTextDownLoadThread(musicSongInfos[row].m_lrcUrl,
-                             LRC_DOWNLOAD_AL + m_currentSongName + LRC_FILE,
+                             LRC_DIR_FULL + m_downLoadManager->getSearchedText() + LRC_FILE,
                              MusicDownLoadThreadAbstract::Download_Lrc, this);
-    connect(lrcDownload, SIGNAL(musicDownLoadFinished(QString)),
+    connect(lrcDownload, SIGNAL(downLoadDataChanged(QString)),
                          SIGNAL(lrcDownloadStateChanged(QString)));
     lrcDownload->startToDownload();
 }

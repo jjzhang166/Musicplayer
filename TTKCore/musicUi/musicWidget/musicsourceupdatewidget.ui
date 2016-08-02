@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>软件升级精灵</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -86,7 +86,7 @@
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap resource="../../../TTKQrc/MusicPlayer.qrc">:/toolSets/upgradeMain</pixmap>
+     <pixmap resource="../../../TTKQrc/MusicPlayer.qrc">:/toolSets/lb_upgradeMain</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -108,10 +108,10 @@
      <widget class="QLabel" name="titleLable_F">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>80</y>
-        <width>231</width>
-        <height>20</height>
+        <x>10</x>
+        <y>0</y>
+        <width>220</width>
+        <height>175</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -134,7 +134,7 @@
        </rect>
       </property>
       <property name="pixmap">
-       <pixmap resource="../../../TTKQrc/MusicPlayer.qrc">:/toolSets/upgrade</pixmap>
+       <pixmap resource="../../../TTKQrc/MusicPlayer.qrc">:/toolSets/lb_upgrade</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -159,12 +159,12 @@
        <string>更新</string>
       </property>
      </widget>
-     <widget class="QLabel" name="upgradeFailedLabel">
+     <widget class="MusicClickedLabel" name="upgradeFailedLabel">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>45</x>
         <y>183</y>
-        <width>55</width>
+        <width>75</width>
         <height>20</height>
        </rect>
       </property>
@@ -225,7 +225,7 @@ QProgressBar::chunk {
         </rect>
        </property>
        <property name="text">
-        <string>文档大小: 1802.5KB</string>
+        <string>文档大小: --</string>
        </property>
       </widget>
       <widget class="QLabel" name="speedLabel">
@@ -238,7 +238,7 @@ QProgressBar::chunk {
         </rect>
        </property>
        <property name="text">
-        <string>传送速率: 801KB/s</string>
+        <string>传送速率: --</string>
        </property>
       </widget>
       <widget class="QLabel" name="timeLabel">
@@ -251,7 +251,7 @@ QProgressBar::chunk {
         </rect>
        </property>
        <property name="text">
-        <string>估计剩余时间: 0:00:02</string>
+        <string>估计剩余时间: --</string>
        </property>
       </widget>
      </widget>
@@ -305,6 +305,13 @@ QProgressBar::chunk {
   <zorder>topTitleName</zorder>
   <zorder>topTitleCloseButton</zorder>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MusicClickedLabel</class>
+   <extends>QLabel</extends>
+   <header>musicclickedlabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../TTKQrc/MusicPlayer.qrc"/>
  </resources>

@@ -15,7 +15,7 @@
 /*! @brief The class of the transfer file list table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicConnectTransferTableWidget : public MusicAbstractTableWidget
+class MUSIC_TOOL_EXPORT MusicConnectTransferTableWidget : public MusicAbstractTableWidget
 {
     Q_OBJECT
 public:
@@ -25,13 +25,21 @@ public:
      */
     virtual ~MusicConnectTransferTableWidget();
 
-    MIntList getSelectedItems() const;
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    void cancelAllSelectedItems();
+    /*!
+     * Cancel all selected items.
+     */
+    MusicObject::MIntList getSelectedItems() const;
     /*!
      * Get selected items.
      */
 
 public Q_SLOTS:
-    virtual void listCellClicked(int row, int col) override;
+    virtual void listCellClicked(int row, int column) override;
     /*!
      * Table widget list cell click.
      */

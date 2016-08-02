@@ -34,6 +34,10 @@ public:
      */
     ~MusicTopAreaWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void setupUi(Ui::MusicApplication* ui);
     /*!
      * Set up app ui.
@@ -105,17 +109,25 @@ public Q_SLOTS:
     /*!
      * Current background transparent changed by index.
      */
-    void musicBackgroundSkinChanged(const QString &filename);
+    void musicBgTransparentChanged(const QString &fileName);
+    /*!
+     * Current background transparent changed by string.
+     */
+    void musicBackgroundSkinChanged(const QString &fileName);
     /*!
      * Current background skin changed by new path.
      */
     void musicBackgroundChanged();
     /*!
-     * Changed Current background skin.
+     * Changed current background skin.
      */
     void musicBgThemeDownloadFinished();
     /*!
      * Current background skin download is finished.
+     */
+    void musicBgThemeChangedByResize();
+    /*!
+     * Resize current background skin when geometry changed.
      */
     void musicPlayListTransparent(int index);
     /*!
@@ -150,10 +162,6 @@ public Q_SLOTS:
     /*!
      * Delete current remote.
      */
-    void musicVolumeChangedFromRemote(int value);
-    /*!
-     * Set current play volume by value.
-     */
     void musicRemoteTypeChanged(QAction *type);
     /*!
      * Switch to diff remote type.
@@ -175,7 +183,7 @@ protected:
 
     QWidget *m_supperClass;
     Ui::MusicApplication *m_ui;
-    MusicUserWindow *m_msuicUserWindow;
+    MusicUserWindow *m_musicUserWindow;
     MusicBackgroundSkinDialog *m_musicbgskin;
     MusicRemoteWidget *m_musicRemoteWidget;
 

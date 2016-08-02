@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>用户设置 </string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -111,9 +111,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>110</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -143,9 +143,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_2F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>70</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -172,9 +172,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_3F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>30</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -188,9 +188,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_4F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>150</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -204,9 +204,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_5F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>190</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -220,9 +220,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_6F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>230</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -236,9 +236,9 @@ QTabBar::tab:selected {
      <widget class="QLabel" name="label_7F">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>270</y>
-        <width>30</width>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -261,9 +261,6 @@ QTabBar::tab:selected {
       <property name="cursor">
        <cursorShape>PointingHandCursor</cursorShape>
       </property>
-      <property name="styleSheet">
-       <string notr="true">QPushButton{border-radius:5px;background-color:#80B7F1;color:white;font-size:17px;font-weight:bold;}</string>
-      </property>
       <property name="text">
        <string>保存</string>
       </property>
@@ -277,16 +274,13 @@ QTabBar::tab:selected {
         <height>25</height>
        </rect>
       </property>
-      <property name="styleSheet">
-       <string notr="true">QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border: 1px solid gray;}QLineEdit::hover{ border: 1px solid #AAAAFF;}</string>
-      </property>
      </widget>
      <widget class="QRadioButton" name="maleRadioButton_F">
       <property name="geometry">
        <rect>
         <x>90</x>
         <y>153</y>
-        <width>40</width>
+        <width>50</width>
         <height>15</height>
        </rect>
       </property>
@@ -297,9 +291,9 @@ QTabBar::tab:selected {
      <widget class="QRadioButton" name="femaleRadioButton_F">
       <property name="geometry">
        <rect>
-        <x>135</x>
+        <x>145</x>
         <y>153</y>
-        <width>40</width>
+        <width>60</width>
         <height>15</height>
        </rect>
       </property>
@@ -350,8 +344,7 @@ QTabBar::tab:selected {
     </widget>
     <widget class="QWidget" name="tab_2">
      <property name="styleSheet">
-      <string notr="true">
-	color:#666666;</string>
+      <string notr="true">color:#666666;</string>
      </property>
      <attribute name="title">
       <string>修改头像</string>
@@ -433,9 +426,6 @@ QTabBar::tab:selected {
       <property name="cursor">
        <cursorShape>PointingHandCursor</cursorShape>
       </property>
-      <property name="styleSheet">
-       <string notr="true">QPushButton{border-radius:5px;background-color:#80B7F1;color:white;font-size:17px;font-weight:bold;}</string>
-      </property>
       <property name="text">
        <string>选择头像</string>
       </property>
@@ -443,8 +433,7 @@ QTabBar::tab:selected {
     </widget>
     <widget class="QWidget" name="tab_3">
      <property name="styleSheet">
-      <string notr="true">QWidget{color:#666666;}
-QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray;}QLineEdit::hover{ border: 1px solid #AAAAFF;}</string>
+      <string notr="true"/>
      </property>
      <attribute name="title">
       <string>修改密码</string>
@@ -574,9 +563,6 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
       <property name="cursor">
        <cursorShape>PointingHandCursor</cursorShape>
       </property>
-      <property name="styleSheet">
-       <string notr="true">QPushButton{border-radius:5px;background-color:#80B7F1;color:white;font-size:17px;font-weight:bold;}</string>
-      </property>
       <property name="text">
        <string>保存</string>
       </property>
@@ -680,7 +666,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">image:url(:/usermanager/right)</string>
+       <string notr="true">image:url(:/tiny/lb_right)</string>
       </property>
       <property name="text">
        <string/>
@@ -696,7 +682,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">image:url(:/usermanager/right)</string>
+       <string notr="true">image:url(:/tiny/lb_right)</string>
       </property>
       <property name="text">
        <string/>
@@ -712,7 +698,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">image:url(:/usermanager/right)</string>
+       <string notr="true">image:url(:/tiny/lb_right)</string>
       </property>
       <property name="text">
        <string/>
@@ -847,7 +833,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        <string notr="true">color:#80B7F1;font-size:15px;font-weight:bold</string>
       </property>
       <property name="text">
-       <string>180******48</string>
+       <string>159******49</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_FF5">
@@ -855,7 +841,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        <rect>
         <x>360</x>
         <y>70</y>
-        <width>81</width>
+        <width>90</width>
         <height>20</height>
        </rect>
       </property>
@@ -868,7 +854,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        <rect>
         <x>360</x>
         <y>180</y>
-        <width>81</width>
+        <width>90</width>
         <height>20</height>
        </rect>
       </property>
@@ -881,7 +867,7 @@ QLineEdit{font-size:12px;color:#BFBFBF; font-weight:normal;border:1px solid gray
        <rect>
         <x>360</x>
         <y>285</y>
-        <width>81</width>
+        <width>90</width>
         <height>20</height>
        </rect>
       </property>

@@ -5,6 +5,7 @@
 #include "musicsettingmanager.h"
 #include "musicbackgroundmanager.h"
 #include "musicutils.h"
+#include "musicleftareawidget.h"
 
 MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
     : MusicAbstractMoveWidget(parent),
@@ -14,7 +15,7 @@ MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
 
     m_parentClass = parent;
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -31,14 +32,19 @@ MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
     connect(ui->openDetailButton, SIGNAL(clicked()), SLOT(openDetailInfo()));
     connect(ui->openDirButton, SIGNAL(clicked()), SLOT(openFileLocation()));
 
-    M_CONNECTION->setValue("MusicDownloadResetWidget", this);
-    M_CONNECTION->poolConnect("MusicDownloadResetWidget", "MusicLeftAreaWidget");
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicLeftAreaWidget::getClassName());
 }
 
 MusicDownloadResetWidget::~MusicDownloadResetWidget()
 {
-    M_CONNECTION->poolDisConnect("MusicDownloadResetWidget");
+    M_CONNECTION_PTR->poolDisConnect(getClassName());
     delete ui;
+}
+
+QString MusicDownloadResetWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicDownloadResetWidget::setSongName(const QString &name)
@@ -48,7 +54,7 @@ void MusicDownloadResetWidget::setSongName(const QString &name)
 
 void MusicDownloadResetWidget::show()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveWidget::show();
 }
@@ -70,7 +76,7 @@ void MusicDownloadResetWidget::openDetailInfo()
 
 void MusicDownloadResetWidget::openFileLocation()
 {
-    MusicUtils::openUrl(M_SETTING->value(MusicSettingManager::DownloadMusicExistPathChoiced).toString());
+    MusicUtils::UCore::openUrl(M_SETTING_PTR->value(MusicSettingManager::DownloadMusicExistPathChoiced).toString(), true);
     close();
 }
 
@@ -81,11 +87,16 @@ MusicDownloadMgmtWidget::MusicDownloadMgmtWidget(QObject *parent)
     m_parentClass = MStatic_cast(QWidget*, parent);
 }
 
+QString MusicDownloadMgmtWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicDownloadMgmtWidget::setSongName(const QString &name, MusicDownLoadQueryThreadAbstract::QueryType type)
 {
     if(type == MusicDownLoadQueryThreadAbstract::MusicQuery)
     {
-        bool exist = M_SETTING->value(MusicSettingManager::DownloadMusicExistChoiced).toBool();
+        bool exist = M_SETTING_PTR->value(MusicSettingManager::DownloadMusicExistChoiced).toBool();
         if(exist)
         {
             MusicDownloadResetWidget *resetWidget = new MusicDownloadResetWidget(m_parentClass);
@@ -95,7 +106,7 @@ void MusicDownloadMgmtWidget::setSongName(const QString &name, MusicDownLoadQuer
         }
     }
     MusicDownloadWidget *download = new MusicDownloadWidget(m_parentClass);
-    if(parent()->metaObject()->indexOfMethod("musicDownloadSongFinished()") != -1)
+    if(parent()->metaObject()->indexOfSlot("musicDownloadSongFinished()") != -1)
     {
         connect(download, SIGNAL(dataDownloadChanged()), parent(),
                           SLOT(musicDownloadSongFinished()));

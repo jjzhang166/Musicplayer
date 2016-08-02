@@ -12,11 +12,13 @@
 #include "musicobject.h"
 #include "musicuiobject.h"
 #include "musicabstractmovewidget.h"
-#ifdef MUSIC_QT_5
+#ifdef MUSIC_GREATER_NEW
 #   include <QtWidgets>
 #else
 #   include <QtGui>
 #endif
+
+class MusicClickedSlider;
 
 /*! @brief The class of the desktop remote widget base.
  * @author Greedysky <greedysky@163.com>
@@ -31,6 +33,10 @@ public:
      */
     virtual ~MusicRemoteWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void showPlayStatus(bool status) const;
     /*!
      * Set current play state button.
@@ -61,7 +67,7 @@ Q_SIGNALS:
     /*!
      * Set current play to next.
      */
-    void musicVolumeSignal(int index);
+    void musicVolumeSignal(int value);
     /*!
      * Set current play volume by value.
      */
@@ -75,7 +81,7 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void musicVolumeChanged(int index);
+    void musicVolumeChanged(int value);
     /*!
      * Set current play volume change by value.
      */
@@ -90,8 +96,8 @@ protected:
     QPushButton *m_NextSongButton, *m_PlayButton;
     QPushButton *m_SettingButton;
     QWidget *m_mainWidget, *m_volumeWidget;
-    QLabel *m_volumeLabel;
-    QSlider *m_volumeSlider;
+    QToolButton *m_volumeButton;
+    MusicClickedSlider *m_volumeSlider;
 
 };
 

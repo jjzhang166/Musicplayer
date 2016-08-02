@@ -8,14 +8,17 @@
 #include "musicnetworktestwidget.h"
 #include "musicconnecttransferwidget.h"
 #include "musicvolumegainwidget.h"
+#include "musicsoundtouchwidget.h"
+#include "musicsongringtonemakerwidget.h"
 #include "musicmessagebox.h"
 #include "musicutils.h"
+#include "musicapplication.h"
+#include "musicleftareawidget.h"
 
-#include <QProcess>
 #include <QTimer>
 
 MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
-    : QListWidget(parent), m_process(nullptr)
+    : QListWidget(parent)
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
     setFrameShape(QFrame::NoFrame);//Set No Border
@@ -23,31 +26,32 @@ MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
     setIconSize(QSize(60, 60));
     setViewMode(QListView::IconMode);
     setMovement(QListView::Static);
+
 #ifdef Q_OS_WIN
-    setSpacing(20);
+    setSpacing(17);
     addListWidgetItem();
 #else
-    setSpacing(19);
-    QTimer::singleShot(1, this, SLOT(addListWidgetItem()));
+    setSpacing(16);
+    QTimer::singleShot(MT_MS, this, SLOT(addListWidgetItem()));
 #endif
-    MusicUtils::setTransparent(this, 50);
+    MusicUtils::UWidget::setTransparent(this, 50);
     connect(this, SIGNAL(itemClicked(QListWidgetItem*)),
                   SLOT(itemHasClicked(QListWidgetItem*)));
 
-    M_CONNECTION->setValue("MusicToolSetsWidget", this);
-    M_CONNECTION->poolConnect("MusicToolSetsWidget", "MusicApplication");
-    M_CONNECTION->poolConnect("MusicToolSetsWidget", "MusicLeftAreaWidget");
+    M_CONNECTION_PTR->setValue(getClassName(), this);
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicApplication::getClassName());
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicLeftAreaWidget::getClassName());
 }
 
 MusicToolSetsWidget::~MusicToolSetsWidget()
 {
-    M_CONNECTION->poolDisConnect("MusicToolSetsWidget");
-    if(m_process)
-    {
-        m_process->kill();
-    }
-    delete m_process;
+    M_CONNECTION_PTR->poolDisConnect(getClassName());
     clearAllItems();
+}
+
+QString MusicToolSetsWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicToolSetsWidget::clearAllItems()
@@ -55,54 +59,62 @@ void MusicToolSetsWidget::clearAllItems()
     clear();
 }
 
+void MusicToolSetsWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    Q_UNUSED(event);
+}
+
 void MusicToolSetsWidget::addListWidgetItem()
 {
-    QListWidgetItem *item = new QListWidgetItem(QIcon(":/tools/localmanager")
+    QListWidgetItem *item = new QListWidgetItem(QIcon(":/tools/lb_localmanager")
                                                 ,tr("localmanager"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/recorder")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_recorder")
                                                 ,tr("recorder"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/bell")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_bell")
                                                 ,tr("bell"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/timer")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_timer")
                                                 ,tr("timer"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/transform")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_transform")
                                                 ,tr("transform"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/spectrum")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_spectrum")
                                                 ,tr("spectrum"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/wallpaper")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_wallpaper")
                                                 ,tr("wallpaper"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/phone")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_phone")
                                                 ,tr("phone"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/speed")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_speed")
                                                 ,tr("speed"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-                     item = new QListWidgetItem(QIcon(":/tools/gain")
+                     item = new QListWidgetItem(QIcon(":/tools/lb_gain")
                                                 ,tr("gain"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
-
+                     item = new QListWidgetItem(QIcon(":/tools/lb_soundtouch")
+                                                ,tr("soundtouch"), this);
+    item->setSizeHint(QSize(80, 90));
+    addItem(item);
 }
 
 void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
 {
-    switch(row(item))
+    switch( row(item) )
     {
         case 0:
            {
@@ -116,22 +128,7 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 2:
            {
-#ifdef Q_OS_WIN
-                if(!QFile(MAKE_RING_AL).exists())
-                {
-                    MusicMessageBox message;
-                    message.setText(tr("Lack of plugin file!"));
-                    message.exec();
-                    return;
-                }
-                if(m_process)
-                {
-                    m_process->kill();
-                    delete m_process;
-                }
-                m_process = new QProcess(this);
-                m_process->start(MAKE_RING_AL);
-#endif
+                MusicSongRingtoneMaker(this).exec();
                 break;
            }
         case 3:
@@ -173,6 +170,11 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
         case 9:
             {
                 MusicVolumeGainWidget(this).exec();
+                break;
+            }
+        case 10:
+            {
+                MusicSoundTouchWidget(this).exec();
                 break;
             }
         default:

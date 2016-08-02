@@ -14,13 +14,13 @@ MusicWebMusicRadioListView::MusicWebMusicRadioListView(QWidget *parent)
     setStyleSheet(MusicUIObject::MScrollBarStyle01);
     setViewMode(QListView::IconMode);
     setMovement(QListView::Static);
-    MusicUtils::setTransparent(this, 50);
+    MusicUtils::UWidget::setTransparent(this, 50);
 
-    m_cookJar = new QNetworkCookieJar;
+    m_cookJar = new QNetworkCookieJar(this);
 #ifdef Q_OS_WIN
-    setSpacing(20);
+    setSpacing(17);
 #else
-    setSpacing(19);
+    setSpacing(16);
 #endif
     connect(this, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(itemHasClicked(QListWidgetItem*)));
 }
@@ -32,13 +32,18 @@ MusicWebMusicRadioListView::~MusicWebMusicRadioListView()
     delete m_cookJar;
 }
 
+QString MusicWebMusicRadioListView::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicWebMusicRadioListView::initListItems()
 {
     if(count() == 0)
     {
         delete m_getChannelThread;
         m_getChannelThread = new MusicRadioChannelThread(this, m_cookJar);
-        connect(m_getChannelThread, SIGNAL(networkReplyFinished(QString)), SLOT(addListWidgetItem()));
+        connect(m_getChannelThread, SIGNAL(downLoadDataChanged(QString)), SLOT(addListWidgetItem()));
         m_getChannelThread->startToDownload(QString());
     }
 }

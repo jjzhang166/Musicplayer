@@ -24,13 +24,17 @@ public:
      */
     virtual ~MusicDownLoadQueryMultipleThread();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     virtual void startSearchSong(QueryType type, const QString &text) override;
     /*!
      * Start to Search data from name and type.
      */
 
 public Q_SLOTS:
-    virtual void searchFinshed() override;
+    virtual void downLoadFinished() override;
     /*!
      * Download data from net finished.
      */
@@ -40,7 +44,7 @@ protected:
     /*!
      * Get current url the user selected from mutiple queue containers.
      */
-    void readFromMusicSongAttribute(MusicSongInfomation &info, const QString &size,
+    void readFromMusicSongAttribute(MusicObject::MusicSongInfomation &info, const QString &size,
                                     int bit, const QString &url);
     /*!
      * Read tags(size\bitrate\url) from query results.

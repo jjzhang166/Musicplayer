@@ -14,7 +14,7 @@ MusicLrcErrorWidget::MusicLrcErrorWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -47,6 +47,11 @@ MusicLrcErrorWidget::MusicLrcErrorWidget(QWidget *parent)
 MusicLrcErrorWidget::~MusicLrcErrorWidget()
 {
     delete ui;
+}
+
+QString MusicLrcErrorWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicLrcErrorWidget::buttonClicked(int index)
@@ -92,7 +97,7 @@ void MusicLrcErrorWidget::confirmButtonClicked()
 
 int MusicLrcErrorWidget::exec()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();
 }

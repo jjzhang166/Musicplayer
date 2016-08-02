@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>上传歌手写真</string>
   </property>
   <widget class="QLabel" name="background">
    <property name="geometry">
@@ -156,7 +156,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>请上传尺寸1001*669以上的图片</string>
+    <string>请上传尺寸1033*660以上的图片</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

@@ -29,6 +29,10 @@ public:
      * Object contsructor by index.
      */
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     inline void setCurrentPlayIndex(int index) { m_currentPlayIndex = index;}
     /*!
      * Set current play index.
@@ -68,6 +72,10 @@ public:
      */
     virtual ~MusicSongsListPlayWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void getWidget(QWidget *&one, QWidget *&two) const;
     /*!
      * Get item left and right function widget.
@@ -112,6 +120,10 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
+    void deleteRenameItem();
+    /*!
+     * Delete rename item.
+     */
     void setChangItemName(const QString &name);
     /*!
      * Rename item artist label is finised.
@@ -134,6 +146,10 @@ public Q_SLOTS:
      */
 
 protected:
+    void createMoreMenu(QMenu *menu);
+    /*!
+     * Create more menu information.
+     */
     bool showArtPicture(const QString &name) const;
     /*!
      * Show artist small picture, if no exsit there is default pic.
@@ -143,7 +159,7 @@ protected:
     QLabel *m_artPictureLabel, *m_songNameLabel, *m_timeLabel;
     MusicSongsEnterPlayWidget *m_columnOne, *m_columnThree;
     QPushButton *m_loveButton, *m_deleteButton,* m_showMVButton;
-    QPushButton *m_downloadButton, *m_songShareButton;
+    QPushButton *m_downloadButton, *m_moreButton;
     MusicSongsToolItemRenamedWidget *m_renameLine;
 
 };

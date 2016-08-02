@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MusicSettingWidget</string>
+   <string>选项设置</string>
   </property>
   <widget class="QLabel" name="background">
    <property name="geometry">
@@ -595,9 +595,6 @@ font-weight:bold;</string>
     </widget>
    </widget>
    <widget class="QWidget" name="third">
-    <property name="styleSheet">
-     <string notr="true">QLineEdit{font-size:14px;color:#AAAAFF; font-weight:normal;border: 1px solid gray;}QLineEdit::hover{ border: 1px solid #AAAAFF;}</string>
-    </property>
     <widget class="Line" name="line_FS1">
      <property name="geometry">
       <rect>
@@ -725,7 +722,7 @@ font-weight:bold;</string>
       <rect>
        <x>120</x>
        <y>120</y>
-       <width>51</width>
+       <width>111</width>
        <height>16</height>
       </rect>
      </property>
@@ -738,7 +735,7 @@ font-weight:bold;</string>
       <rect>
        <x>240</x>
        <y>120</y>
-       <width>51</width>
+       <width>121</width>
        <height>16</height>
       </rect>
      </property>
@@ -782,7 +779,7 @@ font-weight:bold;</string>
       <rect>
        <x>30</x>
        <y>245</y>
-       <width>81</width>
+       <width>111</width>
        <height>16</height>
       </rect>
      </property>
@@ -795,7 +792,7 @@ font-weight:bold;</string>
       <rect>
        <x>150</x>
        <y>245</y>
-       <width>51</width>
+       <width>131</width>
        <height>16</height>
       </rect>
      </property>
@@ -1172,7 +1169,7 @@ font-weight:bold;</string>
       <string>透明度</string>
      </property>
     </widget>
-    <widget class="QSlider" name="transparentSlider">
+    <widget class="MusicClickedSlider" name="transparentSlider">
      <property name="geometry">
       <rect>
        <x>80</x>
@@ -1436,7 +1433,7 @@ font-weight:bold;</string>
       <string>透明度</string>
      </property>
     </widget>
-    <widget class="QSlider" name="DtransparentSlider">
+    <widget class="MusicClickedSlider" name="DtransparentSlider">
      <property name="geometry">
       <rect>
        <x>80</x>
@@ -1729,9 +1726,6 @@ font-weight:bold;</string>
     </widget>
    </widget>
    <widget class="QWidget" name="seven">
-    <property name="styleSheet">
-     <string notr="true">QLineEdit{font-size:14px;color:#AAAAFF; font-weight:normal;border: 1px solid gray;}QLineEdit::hover{ border: 1px solid #AAAAFF;}</string>
-    </property>
     <widget class="QLabel" name="setProxyWidget">
      <property name="geometry">
       <rect>
@@ -2176,6 +2170,11 @@ color:rgb(80,80,80);</string>
   <zorder>line_M</zorder>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MusicClickedSlider</class>
+   <extends>QSlider</extends>
+   <header>musicclickedslider.h</header>
+  </customwidget>
   <customwidget>
    <class>MusicPreviewLabel</class>
    <extends>QLabel</extends>

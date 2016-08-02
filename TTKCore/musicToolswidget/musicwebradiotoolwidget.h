@@ -10,11 +10,11 @@
    =================================================*/
 
 #include <QPushButton>
-#include <QStackedWidget>
 #include "musicglobaldefine.h"
 
 class MusicWebEntainRadioListView;
 class MusicWebMusicRadioListView;
+class MusicAnimationStackedWidget;
 
 /*! @brief The class of the web radio tool widget.
  * @author Greedysky <greedysky@163.com>
@@ -29,6 +29,11 @@ public:
      */
     ~MusicWebRadioToolWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
 private Q_SLOTS:
     void buttonClicked(int index);
     /*!
@@ -36,7 +41,12 @@ private Q_SLOTS:
      */
 
 protected:
-    QStackedWidget *m_stackedWidget;
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
+
+    MusicAnimationStackedWidget *m_stackedWidget;
     QPushButton *m_netRadioButton1,*m_netRadioButton2;
     MusicWebMusicRadioListView *m_musicRadioListView;
     MusicWebEntainRadioListView *m_entainRadioListView;

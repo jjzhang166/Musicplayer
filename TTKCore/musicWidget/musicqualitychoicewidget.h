@@ -9,7 +9,7 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QToolButton>
+#include "musictoolmenuwidget.h"
 #include "musicabstracttablewidget.h"
 
 /*! @brief The class of the quality choice table widget.
@@ -25,6 +25,11 @@ public:
      */
     virtual ~MusicQualityChoiceTableWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
 public Q_SLOTS:
     virtual void listCellClicked(int row, int column) override;
     /*!
@@ -38,12 +43,10 @@ public Q_SLOTS:
 };
 
 
-class QMenu;
-
 /*! @brief The class of the quality choice widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicQualityChoiceWidget : public QToolButton
+class MUSIC_WIDGET_EXPORT MusicQualityChoiceWidget : public MusicToolMenuWidget
 {
     Q_OBJECT
 public:
@@ -51,22 +54,22 @@ public:
     /*!
      * Object contsructor.
      */
-    ~MusicQualityChoiceWidget();
+
+    static QString getClassName();
+    /*!
+    * Get class object name.
+    */
 
 Q_SIGNALS:
-    void researchQueryByQuality();
+    void researchQueryByQuality(const QString &quality);
     /*!
-     * Research query by quality it changed emit.
+     * Research query by quality it changed.
      */
 
 public Q_SLOTS:
     void listCellClicked(int row);
     /*!
      * Current Table item clicked by index.
-     */
-    void getQualityString(QString &string);
-    /*!
-     * Get current selected quality string.
      */
 
 protected:
@@ -75,7 +78,6 @@ protected:
      * Create all widget in layout.
      */
 
-    QMenu *m_menu;
     QString m_currentQuality;
 
 };

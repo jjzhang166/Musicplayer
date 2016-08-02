@@ -13,7 +13,7 @@ MusicLrcArtPhotoUpload::MusicLrcArtPhotoUpload(QWidget *parent)
 {
     ui->setupUi(this);
     
-    ui->topTitleCloseButton->setIcon(QIcon(":/share/searchclosed"));
+    ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
@@ -44,6 +44,11 @@ MusicLrcArtPhotoUpload::~MusicLrcArtPhotoUpload()
     delete ui;
 }
 
+QString MusicLrcArtPhotoUpload::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicLrcArtPhotoUpload::selectButtonClicked()
 {
     QString picPath = QFileDialog::getOpenFileName(
@@ -54,7 +59,7 @@ void MusicLrcArtPhotoUpload::selectButtonClicked()
     }
 
     QPixmap pix(picPath);
-    if(pix.width() < 1001 || pix.height() < 669)
+    if(pix.width() < WINDOW_WIDTH_MIN || pix.height() < WINDOW_HEIGHT_MIN)
     {
         ui->stateLabel->show();
         ui->uploadButton->hide();
@@ -73,7 +78,7 @@ void MusicLrcArtPhotoUpload::selectButtonClicked()
 
 void  MusicLrcArtPhotoUpload::uploadButtonClicked()
 {
-    QDir bgDir(ART_BG_AL);
+    QDir bgDir(BACKGROUND_DIR_FULL);
     int count = 0;
     QString name = ui->artSearchEdit->text().trimmed();
     if(name.isEmpty())
@@ -92,7 +97,7 @@ void  MusicLrcArtPhotoUpload::uploadButtonClicked()
         }
     }
 
-    QString fileName = QString("%1%2%3").arg(ART_BG_AL).arg(name).arg(count);
+    QString fileName = QString("%1%2%3").arg(BACKGROUND_DIR_FULL).arg(name).arg(count);
     ui->imageLabel->saveImagePath(fileName + JPG_FILE);
     QFile::rename(fileName + JPG_FILE, fileName + SKN_FILE );
     close();
@@ -100,7 +105,7 @@ void  MusicLrcArtPhotoUpload::uploadButtonClicked()
 
 int MusicLrcArtPhotoUpload::exec()
 {
-    QPixmap pix(M_BG_MANAGER->getMBackground());
+    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
     ui->background->setPixmap(pix.scaled( size() ));
     return MusicAbstractMoveDialog::exec();
 }

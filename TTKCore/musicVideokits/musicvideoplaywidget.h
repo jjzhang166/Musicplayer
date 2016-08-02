@@ -15,6 +15,7 @@ class QLabel;
 class QPushButton;
 class QStackedWidget;
 class MusicVideoView;
+class MusicVideoFloatWidget;
 class MusicVideoTableWidget;
 class MusicLocalSongSearchEdit;
 
@@ -31,7 +32,15 @@ public:
      */
     ~MusicVideoPlayWidget();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     void resizeWindow(bool resize);
+    /*!
+     * Resize widget size or not.
+     */
+    void resizeWindow(int width, int height);
     /*!
      * Resize widget size or not.
      */
@@ -39,15 +48,21 @@ public:
     /*!
      * Set object to close current widget.
      */
+    QString getSearchText() const;
+    /*!
+     * Get search text in search line.
+     */
+
+Q_SIGNALS:
+    void freshButtonClicked(bool popup);
+    /*!
+     * Fresh button state changed.
+     */
 
 public Q_SLOTS:
-    void backButtonClicked();
+    void switchToSearchTable();
     /*!
-     * Stack backward button clicked.
-     */
-    void afterButtonClicked();
-    /*!
-     * Stack forward button clicked.
+     * Switch to search table.
      */
     void searchButtonClicked();
     /*!
@@ -66,15 +81,38 @@ public Q_SLOTS:
      * Set current media name and url to play.
      */
 
+    void freshButtonClicked();
+    /*!
+     * Fresh button clicked.
+     */
+    void fullscreenButtonClicked();
+    /*!
+     * Fullscreen button clicked.
+     */
+    void downloadButtonClicked();
+    /*!
+     * Download button clicked.
+     */
+    void shareButtonClicked();
+    /*!
+     * Share button clicked.
+     */
+
 protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
+
     QWidget *m_topWidget;
     QLabel *m_textLabel;
-    QPushButton *m_backButton, *m_afterButton;
     QPushButton *m_searchButton, *m_closeButton;
     QStackedWidget *m_stackedWidget;
     MusicVideoView *m_videoView;
     MusicVideoTableWidget *m_videoTable;
     MusicLocalSongSearchEdit *m_searchEdit;
+    MusicVideoFloatWidget *m_videoFloatWidget;
 
 };
 

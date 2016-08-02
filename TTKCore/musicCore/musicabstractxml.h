@@ -30,6 +30,11 @@ public:
      */
     ~MusicAbstractXml();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
 protected:
     bool readConfig(const QString &name);
     /*!
@@ -52,7 +57,7 @@ protected:
     /*!
      * Read xml attribute's text by tagName.
      */
-    MStriantMap readXmlAttributesByTagName(const QString &tagName) const;
+    MusicObject::MStriantMap readXmlAttributesByTagName(const QString &tagName) const;
     /*!
      * Read xml attributes by tagName and default name "value".
      */

@@ -30,7 +30,11 @@ public:
      */
     ~MusicDesktopWallpaperWidget();
 
-Q_SIGNALS:
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
 public Q_SLOTS:
     void netRadioButtonPressed();
     /*!
@@ -77,10 +81,6 @@ protected:
     void initParameters() const;
     /*!
      * Init parameters.
-     */
-    void findFiles(const QString &path);
-    /*!
-     * Find current dir files.
      */
     void setAutoStart(bool autoStart) const;
     /*!

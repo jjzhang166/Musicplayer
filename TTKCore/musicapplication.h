@@ -12,8 +12,7 @@
 #include <QMenu>
 #include <QTimer>
 #include <QCloseEvent>
-#include "musicabstractmovewidget.h"
-#include "musicobject.h"
+#include "musicabstractmoveresizewidget.h"
 
 class MusicPlayer;
 class MusicPlaylist;
@@ -31,7 +30,7 @@ class MusicApplication;
 /*! @brief The class of the app main widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_GUI_EXPORT MusicApplication : public MusicAbstractMoveWidget
+class MUSIC_GUI_EXPORT MusicApplication : public MusicAbstractMoveResizeWidget
 {
     Q_OBJECT
 public:
@@ -41,6 +40,10 @@ public:
      */
     virtual ~MusicApplication();
 
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
     QString getCurrentFileName() const;
     /*!
      * Get current file name.
@@ -175,6 +178,10 @@ public Q_SLOTS:
     /*!
      * Import outside song to play list and play.
      */
+    void musicCreateRightMenu();
+    /*!
+     * Create right menu.
+     */
     /////////////////////////////////////////////
     ///This is a slot by MusicLocalSongSearch's signal emit
     void musicSearchIndexChanged(int row, int col);
@@ -193,7 +200,7 @@ public Q_SLOTS:
      */
     /////////////////////////////////////////////
     ///This is a slot by MusicSongsSummarizied's signal emit
-    void setDeleteItemAt(const MIntList &index, bool remove);
+    void setDeleteItemAt(const MusicObject::MIntList &index, bool remove);
     /*!
      * Delete items from indexs.
      */
@@ -224,13 +231,14 @@ public Q_SLOTS:
      */
 
 protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
     virtual void closeEvent(QCloseEvent *event) override;
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
     virtual void dragMoveEvent(QDragMoveEvent *event) override;
     virtual void dropEvent(QDropEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
 #if defined(Q_OS_WIN)
-#  ifdef MUSIC_QT_5
+#  ifdef MUSIC_GREATER_NEW
     virtual bool nativeEvent(const QByteArray &, void *, long *) override;
 #  else
     virtual bool winEvent(MSG *message, long *result) override;
@@ -240,18 +248,6 @@ protected:
      * Override the widget event.
      */
 
-    void initWindowSurface();
-    /*!
-     * Init window surface widget interface.
-     */
-    void createPlayModeMenu(QMenu &menu);
-    /*!
-     * Create play mode menu.
-     */
-    void createPlayModeMenuIcon(QMenu &menu);
-    /*!
-     * Create play mode menu's icon.
-     */
     void readXMLConfigFromText();
     /*!
      * Read XML config from text.
@@ -265,7 +261,6 @@ private:
     Ui::MusicApplication *ui;
     bool m_playControl;
     int m_currentMusicSongTreeIndex;
-    QMenu m_playModeMenu;
 
     MusicPlayer* m_musicPlayer;
     MusicPlaylist* m_musicList;
@@ -274,7 +269,7 @@ private:
     MusicTopAreaWidget *m_topAreaWidget;
     MusicRightAreaWidget *m_rightAreaWidget;
     MusicLeftAreaWidget *m_leftAreaWidget;
-    MusicApplicationObject *m_object;
+    MusicApplicationObject *m_applicationObject;
 
 };
 

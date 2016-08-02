@@ -9,36 +9,38 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QNetworkReply>
 #include <QFile>
 #include <QTimer>
 #include "musicobject.h"
-#include "musicglobaldefine.h"
-
-class QNetworkAccessManager;
+#include "musicnetworkabstract.h"
+#include "musicnumberdefine.h"
 
 //single query
 const QString MUSIC_REQUERY_URL = "http://search.dongting.com/song/search/old?q=%1&page=1&size=500";
-const QString MV_REQUERY_URL = "http://pcweb.ttpod.com/mv/search?page=1&size=500&q=%1";
 const QString MUSIC_LRC_URL = "http://lp.music.ttpod.com/lrc/down?lrcid=&artist=%1&title=%2&song_id=%3";
 const QString SML_BG_ART_URL = "http://lp.music.ttpod.com/pic/down?artist=%1";
 const QString BIG_BG_ART_URL = "http://www.kuwo.cn/mingxing/%1/pic.htm";
 
 //mulity query
-const QString MUSIC_REQUERY_WY = "http://yyfm.xyz/search/wy/%1?p=1&f=json&sign=yyfmxyz"; //wangyiMusic
-const QString MUSIC_REQUERY_DX = "http://yyfm.xyz/search/dx/%1?p=1&f=json&sign=yyfmxyz"; //dianxinMusic
-const QString MUSIC_REQUERY_QQ = "http://yyfm.xyz/search/qq/%1?p=1&f=json&sign=yyfmxyz"; //qqMusic
-const QString MUSIC_REQUERY_XM = "http://yyfm.xyz/search/xm/%1?p=1&f=json&sign=yyfmxyz"; //xiamiMusic
-const QString MUSIC_REQUERY_TT = "http://yyfm.xyz/search/tt/%1?p=1&f=json&sign=yyfmxyz"; //ttpodMusic
-const QString MUSIC_REQUERY_BD = "http://yyfm.xyz/search/bd/%1?p=1&f=json&sign=yyfmxyz"; //baiduMusic
-const QString MUSIC_REQUERY_KW = "http://yyfm.xyz/search/kw/%1?p=1&f=json&sign=yyfmxyz"; //kuwoMusic
-const QString MUSIC_REQUERY_KG = "http://yyfm.xyz/search/kg/%1?p=1&f=json&sign=yyfmxyz"; //kuhouMusic
-const QString MUSIC_REQUERY_DM = "http://yyfm.xyz/search/dm/%1?p=1&f=json&sign=yyfmxyz"; //duomiMusic
+const QString MUSIC_REQUERY_WY = "http://itwusun.com/search/wy/%1?p=1&f=json&sign=itwusun";     //wangyiMusic
+const QString MUSIC_REQUERY_DX = "http://itwusun.com/search/dx/%1?p=1&f=json&sign=itwusun";     //dianxinMusic
+const QString MUSIC_REQUERY_QQ = "http://itwusun.com/search/qq/%1?p=1&f=json&sign=itwusun";     //qqMusic
+const QString MUSIC_REQUERY_XM = "http://itwusun.com/search/xm/%1?p=1&f=json&sign=itwusun";     //xiamiMusic
+const QString MUSIC_REQUERY_TT = "http://itwusun.com/search/tt/%1?p=1&f=json&sign=itwusun";     //ttpodMusic
+const QString MUSIC_REQUERY_BD = "http://itwusun.com/search/bd/%1?p=1&f=json&sign=itwusun";     //baiduMusic
+const QString MUSIC_REQUERY_KW = "http://itwusun.com/search/kw/%1?p=1&f=json&sign=itwusun";     //kuwoMusic
+const QString MUSIC_REQUERY_KG = "http://itwusun.com/search/kg/%1?p=1&f=json&sign=itwusun";     //kuhouMusic
+const QString MUSIC_REQUERY_DM = "http://itwusun.com/search/dm/%1?p=1&f=json&sign=itwusun";     //duomiMusic
+const QString MUSIC_REQUERY_MG = "http://itwusun.com/search/mg/%1?p=1&f=json&sign=itwusun";     //miguMusic
+const QString MUSIC_REQUERY_MU = "http://itwusun.com/search/miui/%1?p=1&f=json&sign=itwusun";   //dingdongMusic
+const QString MUSIC_REQUERY_EC = "http://itwusun.com/search/echo/%1?p=1&f=json&sign=itwusun";   //echoMusic
+const QString MUSIC_REQUERY_YY = "http://itwusun.com/search/yyt/%1?p=1&f=json&sign=itwusun";    //yinyuetaiMusic
+
 
 /*! @brief The class of abstract downloading data.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_NETWORK_EXPORT MusicDownLoadThreadAbstract : public QObject
+class MUSIC_NETWORK_EXPORT MusicDownLoadThreadAbstract : public MusicNetworkAbstract
 {
     Q_OBJECT
 public:
@@ -59,7 +61,11 @@ public:
      */
     virtual ~MusicDownLoadThreadAbstract();
 
-    void deleteAll();
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    virtual void deleteAll() override;
     /*!
      * Release the network object.
      */
@@ -69,38 +75,31 @@ public:
      * Subclass should implement this function.
      */
 
-Q_SIGNALS:
-    void musicDownLoadFinished(const QString &name);
-    /*!
-     * Data download is finished, get the type of download type.
-     */
-
 public Q_SLOTS:
-    virtual void downLoadFinished() = 0;
-    /*!
-     * Download data from net finished.
-     * Subclass should implement this function.
-     */
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     /*!
      * Get download received and total data.
      */
-    void replyError(QNetworkReply::NetworkError error);
+    virtual void replyError(QNetworkReply::NetworkError error) override;
     /*!
      * Download reply error.
      */
+#ifndef QT_NO_SSL
+    virtual void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors) override;
+    /*!
+     * Download ssl reply error.
+     */
+#endif
     void updateDownloadSpeed();
     /*!
      * Updata download speed due the user mod the net speed limited.
      */
 
 protected:
-    QNetworkAccessManager *m_manager;
-    QNetworkReply* m_reply;
     QFile *m_file;
     QString m_url, m_savePathName;
     Download_Type m_downloadType;
-    qint64 m_hasRecevied, m_currentRecevied;
+    qint64 m_hasReceived, m_currentReceived;
     QTimer m_timer;
 
 };

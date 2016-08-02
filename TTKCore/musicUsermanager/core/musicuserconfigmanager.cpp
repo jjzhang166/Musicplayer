@@ -6,9 +6,14 @@ MusicUserConfigManager::MusicUserConfigManager(QObject *parent)
 
 }
 
+QString MusicUserConfigManager::getClassName()
+{
+    return staticMetaObject.className();
+}
+
 void MusicUserConfigManager::writeUserXMLConfig(const MusicUserRecord &record)
 {
-    if( !writeConfig( USERPATH_AL ) )
+    if( !writeConfig( USERPATH_FULL ) )
     {
         return;
     }

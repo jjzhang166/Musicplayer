@@ -9,7 +9,7 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include "musiclrcfloatabstractwidget.h"
+#include "musicfloatabstractwidget.h"
 
 class QPushButton;
 class MusicLrcFloatPhotoWidget;
@@ -18,7 +18,7 @@ class MusicLrcFloatSettingWidget;
 /*! @brief The class of the lrc float widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_LRC_EXPORT MusicLrcFloatWidget : public MusicLrcFloatAbstractWidget
+class MUSIC_LRC_EXPORT MusicLrcFloatWidget : public MusicFloatAbstractWidget
 {
     Q_OBJECT
 public:
@@ -28,9 +28,13 @@ public:
      */
     virtual ~MusicLrcFloatWidget();
 
-    virtual void resizeWidth(int width) override;
+    static QString getClassName();
     /*!
-     * Resize width bound by given width.
+     * Get class object name.
+     */
+    virtual void resizeWindow(int width, int height) override;
+    /*!
+     * Resize window bound by given width and height.
      */
 
 public Q_SLOTS:

@@ -11,7 +11,7 @@
 
 #include "musicabstractxml.h"
 
-typedef struct MusicDownloadRecord
+typedef struct MUSIC_TOOL_EXPORT MusicDownloadRecord
 {
     QStringList m_names;
     QStringList m_paths;
@@ -23,13 +23,18 @@ typedef struct MusicDownloadRecord
  */
 class MUSIC_TOOL_EXPORT MusicMyDownloadRecordConfigManager : public MusicAbstractXml
 {
+    Q_OBJECT
 public:
     explicit MusicMyDownloadRecordConfigManager(QObject *parent = 0);
     /*!
      * Object contsructor.
      */
 
-    inline bool readDownloadXMLConfig(){ return readConfig(DOWNLOADINFO_AL); }
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    inline bool readDownloadXMLConfig(){ return readConfig(DOWNLOADINFO_FULL); }
     /*!
      * Read history download datas from xml file by given name.
      */

@@ -18,7 +18,7 @@ MusicBackgroundRemoteWidget::MusicBackgroundRemoteWidget(QWidget *parent)
 
     m_downloadQueue = new MusicDownloadQueueCache(QStringList(), QStringList(),
                             MusicDownLoadThreadAbstract::Download_BigBG, this);
-    connect(m_downloadQueue, SIGNAL(musicDownLoadFinished(QString)), m_listWidget,
+    connect(m_downloadQueue, SIGNAL(downLoadDataChanged(QString)), m_listWidget,
                              SLOT(reCreateItem(QString)));
 }
 
@@ -27,6 +27,11 @@ MusicBackgroundRemoteWidget::~MusicBackgroundRemoteWidget()
     delete m_downloadQueue;
     delete m_listWidget;
     delete m_group;
+}
+
+QString MusicBackgroundRemoteWidget::getClassName()
+{
+    return staticMetaObject.className();
 }
 
 void MusicBackgroundRemoteWidget::initWidget()
@@ -79,12 +84,12 @@ void MusicBackgroundRemoteWidget::buttonClicked(int index)
     }
 
     QDir dir( "." );
-    dir.mkpath( QString("%1%2").arg(DATA_CACHED_AL).arg(m_currentIndex) );
+    dir.mkpath( QString("%1%2").arg(CACHE_DIR_FULL).arg(m_currentIndex) );
 
     m_listWidget->clearAllItems();
     for(int i=0; i<count; i++)
     {
-        m_listWidget->createItem(QString(), ":/image/noneImage");
+        m_listWidget->createItem(QString(), ":/image/lb_noneImage");
     }
 
     m_downloadQueue->addImageQueue(m_urls[m_currentIndex], createPaths());
@@ -95,7 +100,7 @@ void MusicBackgroundRemoteWidget::itemUserClicked(QListWidgetItem *item)
 {
     if(!item->data(MUSIC_BG_ROLE).toString().isEmpty())
     {
-        emit showCustomSkin(QString("%1%2/%3%4").arg(DATA_CACHED_AL)
+        emit showCustomSkin(QString("%1%2/%3%4").arg(CACHE_DIR_FULL)
                            .arg(m_currentIndex).arg(m_listWidget->currentRow()).arg(JPG_FILE));
     }
 }
@@ -159,7 +164,7 @@ QStringList MusicBackgroundRemoteWidget::createPaths()
     }
     for(int i=0; i<count; ++i)
     {
-        paths << QString("%1%2/%3%4").arg(DATA_CACHED_AL)
+        paths << QString("%1%2/%3%4").arg(CACHE_DIR_FULL)
                  .arg(m_currentIndex).arg(i).arg(JPG_FILE);
     }
     return paths;
