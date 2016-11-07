@@ -14,14 +14,14 @@ QString MusicXMLConfigManager::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicXMLConfigManager::writeMusicSongsConfig(const MusicSongItems &musics)
+void MusicXMLConfigManager::writeMusicSongsConfig(const MusicSongItems &musics, const QString &path)
 {
     if( musics.isEmpty() )
     {
         return;
     }
     //Open wirte file
-    if( !writeConfig(MUSICPATH_FULL) )
+    if( !writeConfig( path ) )
     {
         return;
     }
@@ -31,11 +31,11 @@ void MusicXMLConfigManager::writeMusicSongsConfig(const MusicSongItems &musics)
     for(int i=0; i<musics.count(); ++i)
     {
         QDomElement pathDom = writeDomElementMutil(musicPlayer, "musicList", QStringList() << "name" << "index" << "count",
-                                  QList<QVariant>() << musics[i].m_itemName << i << musics[i].m_songs.count());
-        foreach(MusicSong song, musics[i].m_songs)
+                                  QVariantList() << musics[i].m_itemName << i << musics[i].m_songs.count());
+        foreach(const MusicSong &song, musics[i].m_songs)
         {
             writeDomElementMutilText(pathDom, "value", QStringList() << "name" << "playCount" << "time",
-                                     QList<QVariant>() << song.getMusicName() << song.getMusicPlayCount()
+                                     QVariantList() << song.getMusicName() << song.getMusicPlayCount()
                                                        << song.getMusicTime(), song.getMusicPath());
         }
     }
@@ -65,7 +65,6 @@ void MusicXMLConfigManager::writeXMLConfig()
 {
     int playModeChoiced = M_SETTING_PTR->value(MusicSettingManager::PlayModeChoiced).toInt();
     int volumeChoiced = M_SETTING_PTR->value(MusicSettingManager::VolumeChoiced).toInt();
-    int enhancedMusicChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedMusicChoiced).toInt();
     QStringList lastPlayIndexChoiced = M_SETTING_PTR->value(MusicSettingManager::LastPlayIndexChoiced).toStringList();
 
     ///////////////////////////////////////////////////////////////////////////
@@ -89,8 +88,8 @@ void MusicXMLConfigManager::writeXMLConfig()
     int lrcSizeChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcSizeChoiced).toInt();
     int lrcTypeChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcTypeChoiced).toInt();
     int lrcFamilyChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcFamilyChoiced).toInt();
-    QColor lrcFgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcFgColorChoiced).value<QColor>();
-    QColor lrcBgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcBgColorChoiced).value<QColor>();
+    QString lrcFgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcFgColorChoiced).toString();
+    QString lrcBgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcBgColorChoiced).toString();
     int lrcTransparentChoiced = M_SETTING_PTR->value(MusicSettingManager::LrcColorTransChoiced).toInt();
 
     ///////////////////////////////////////////////////////////////////////////
@@ -98,16 +97,27 @@ void MusicXMLConfigManager::writeXMLConfig()
     int DLrcSizeChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcSizeChoiced).toInt();
     int DLrcTypeChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcTypeChoiced).toInt();
     int DLrcFamilyChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcFamilyChoiced).toInt();
-    QColor DLrcFgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcFgColorChoiced).value<QColor>();
-    QColor DLrcBgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcBgColorChoiced).value<QColor>();
+    QString DLrcFgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcFgColorChoiced).toString();
+    QString DLrcBgColorChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcBgColorChoiced).toString();
     int DLrcTransparentChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcColorTransChoiced).toInt();
+    int DLrcWindowTypeChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcWindowTypeChoiced).toInt();
     int DLrcLockedChoiced = M_SETTING_PTR->value(MusicSettingManager::DLrcLockedChoiced).toInt();
     QPoint DLrcGeometry = M_SETTING_PTR->value(MusicSettingManager::DLrcGeometryChoiced).toPoint();
 
     ///////////////////////////////////////////////////////////////////////////
+    int enhancedMusicChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedMusicChoiced).toInt();
     int equalizerEnableChoiced = M_SETTING_PTR->value(MusicSettingManager::EqualizerEnableChoiced).toInt();
     QString equalizerValueChoiced = M_SETTING_PTR->value(MusicSettingManager::EqualizerValueChoiced).toString();
     int equalizerIndexChoiced = M_SETTING_PTR->value(MusicSettingManager::EqualizerIndexChoiced).toInt();
+    int enhancedBalanceChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedBalanceChoiced).toInt();
+    int enhancedFadeEnableChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedFadeEnableChoiced).toInt();
+    int enhancedFadeInValueChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedFadeInValueChoiced).toInt();
+    int enhancedFadeOutValueChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedFadeOutValueChoiced).toInt();
+    int enhancedBS2BChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedBS2BChoiced).toInt();
+    int enhancedCrossfadeChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedCrossfadeChoiced).toInt();
+    int enhancedStereoChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedStereoChoiced).toInt();
+    int enhancedLADSPAChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedLADSPAChoiced).toInt();
+    int enhancedSOXChoiced = M_SETTING_PTR->value(MusicSettingManager::EnhancedSOXChoiced).toInt();
 
     ///////////////////////////////////////////////////////////////////////////
     int timeAutoIndexChoiced = M_SETTING_PTR->value(MusicSettingManager::TimerAutoIndexChoiced).toInt();
@@ -133,6 +143,7 @@ void MusicXMLConfigManager::writeXMLConfig()
     int downloadCacheSize = M_SETTING_PTR->value(MusicSettingManager::DownloadCacheSizeChoiced).toInt();
     int downloadLimit = M_SETTING_PTR->value(MusicSettingManager::DownloadLimitChoiced).toInt();
     int downloadServer = M_SETTING_PTR->value(MusicSettingManager::DownloadServerChoiced).toInt();
+    int downloadServerMultiple = M_SETTING_PTR->value(MusicSettingManager::DownloadServerMultipleChoiced).toInt();
     QString downloadDLoadLimit = M_SETTING_PTR->value(MusicSettingManager::DownloadDLoadLimitChoiced).toString();
     QString downloadULoadLimit = M_SETTING_PTR->value(MusicSettingManager::DownloadULoadLimitChoiced).toString();
     ///////////////////////////////////////////////////////////////////////////
@@ -157,7 +168,6 @@ void MusicXMLConfigManager::writeXMLConfig()
     //Class B
     writeDomElement(music, "playMode", "value", playModeChoiced);
     writeDomElement(music, "playVolume", "value", volumeChoiced);
-    writeDomElement(music, "enhancedMusic", "value", enhancedMusicChoiced);
     writeDomElementText(music, "lastPlayIndex", "value", lastPlayIndexChoiced[0],
                         QString("%1,%2").arg(lastPlayIndexChoiced[1]).arg(lastPlayIndexChoiced[2]));
 
@@ -199,10 +209,8 @@ void MusicXMLConfigManager::writeXMLConfig()
     writeDomElement(showLrc, "lrcFamily", "value", lrcFamilyChoiced);
     writeDomElement(showLrc, "lrcType", "value", lrcTypeChoiced);
     writeDomElement(showLrc, "lrcTransparent", "value", lrcTransparentChoiced);
-    writeDomElement(showLrc, "lrcFgColor", "value", QString("%1,%2,%3").arg(lrcFgColorChoiced.red())
-                                        .arg(lrcFgColorChoiced.green()).arg(lrcFgColorChoiced.blue()));
-    writeDomElement(showLrc, "lrcBgColor", "value", QString("%1,%2,%3").arg(lrcBgColorChoiced.red())
-                                        .arg(lrcBgColorChoiced.green()).arg(lrcBgColorChoiced.blue()));
+    writeDomElement(showLrc, "lrcFgColor", "value", lrcFgColorChoiced);
+    writeDomElement(showLrc, "lrcBgColor", "value", lrcBgColorChoiced);
 
     ///////////////////////////////////////////////
     writeDomElement(showDLrc, "showDesktopLrc", "value", showDesktopLrcChoiced);
@@ -211,18 +219,27 @@ void MusicXMLConfigManager::writeXMLConfig()
     writeDomElement(showDLrc, "lrcDFamily", "value", DLrcFamilyChoiced);
     writeDomElement(showDLrc, "lrcDType", "value", DLrcTypeChoiced);
     writeDomElement(showDLrc, "lrcDTransparent", "value", DLrcTransparentChoiced);
-    writeDomElement(showDLrc, "lrcDFgColor", "value", QString("%1,%2,%3").arg(DLrcFgColorChoiced.red())
-                                         .arg(DLrcFgColorChoiced.green()).arg(DLrcFgColorChoiced.blue()));
-    writeDomElement(showDLrc, "lrcDBgColor", "value", QString("%1,%2,%3").arg(DLrcBgColorChoiced.red())
-                                        .arg(DLrcBgColorChoiced.green()).arg(DLrcBgColorChoiced.blue()));
+    writeDomElement(showDLrc, "lrcDFgColor", "value", DLrcFgColorChoiced);
+    writeDomElement(showDLrc, "lrcDBgColor", "value", DLrcBgColorChoiced);
 
+    writeDomElement(showDLrc, "lrcDWindowType", "value", DLrcWindowTypeChoiced);
     writeDomElement(showDLrc, "lrcDLocked", "value", DLrcLockedChoiced);
     writeDomElement(showDLrc, "lrcDGeometry", "value", QString("%1,%2").arg(DLrcGeometry.x()).arg(DLrcGeometry.y()));
 
     ///////////////////////////////////////////////
-    writeDomElement(equalizer, "equalizerEnale", "value", equalizerEnableChoiced);
+    writeDomElement(equalizer, "enhancedMusic", "value", enhancedMusicChoiced);
+    writeDomElement(equalizer, "equalizerEnable", "value", equalizerEnableChoiced);
     writeDomElement(equalizer, "equalizerIndex", "value", equalizerIndexChoiced);
     writeDomElement(equalizer, "equalizerValue", "value", equalizerValueChoiced);
+    writeDomElement(equalizer, "enhancedBalance", "value", enhancedBalanceChoiced);
+    writeDomElement(equalizer, "enhancedFadeEnable", "value", enhancedFadeEnableChoiced);
+    writeDomElement(equalizer, "enhancedFadeInValue", "value", enhancedFadeInValueChoiced);
+    writeDomElement(equalizer, "enhancedFadeOutValue", "value", enhancedFadeOutValueChoiced);
+    writeDomElement(equalizer, "enhancedBS2B", "value", enhancedBS2BChoiced);
+    writeDomElement(equalizer, "enhancedCrossfade", "value", enhancedCrossfadeChoiced);
+    writeDomElement(equalizer, "enhancedStereo", "value", enhancedStereoChoiced);
+    writeDomElement(equalizer, "enhancedLADSPA", "value", enhancedLADSPAChoiced);
+    writeDomElement(equalizer, "enhancedSOX", "value", enhancedSOXChoiced);
 
     ///////////////////////////////////////////////
     writeDomElement(downloads, "downloadMusicPath", "value", downloadMusicPath);
@@ -231,6 +248,7 @@ void MusicXMLConfigManager::writeXMLConfig()
     writeDomElement(downloads, "downloadCacheSize", "value", downloadCacheSize);
     writeDomElement(downloads, "downloadLimit", "value", downloadLimit);
     writeDomElement(downloads, "downloadServer", "value", downloadServer);
+    writeDomElement(downloads, "downloadServerMultiple", "value", downloadServerMultiple);
     writeDomElement(downloads, "downloadDLoadLimit", "value", downloadDLoadLimit);
     writeDomElement(downloads, "downloadULoadLimit", "value", downloadULoadLimit);
     //Write to file
@@ -321,10 +339,12 @@ void MusicXMLConfigManager::readOtherLoadConfig() const
     M_SETTING_PTR->setValue(MusicSettingManager::TimerAutoShutdownRepeatChoiced,
                      readXmlAttributeByTagNameValue("timeAutoShutdownRepeat").toInt());
 
+    QString path = readXmlAttributeByTagNameValue("downloadMusicPath");
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadMusicPathDirChoiced,
-                     readXmlAttributeByTagNameValue("downloadMusicPath"));
+                     path.isEmpty() ? MUSIC_DIR_FULL : path);
+    path = readXmlAttributeByTagNameValue("downloadLrcPath");
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadLrcPathDirChoiced,
-                     readXmlAttributeByTagNameValue("downloadLrcPath"));
+                     path.isEmpty() ? LRC_DIR_FULL : path);
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadCacheLimitChoiced,
                      readXmlAttributeByTagNameValue("downloadCacheLimit").toInt());
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadCacheSizeChoiced,
@@ -333,6 +353,8 @@ void MusicXMLConfigManager::readOtherLoadConfig() const
                      readXmlAttributeByTagNameValue("downloadLimit").toInt());
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadServerChoiced,
                      readXmlAttributeByTagNameValue("downloadServer").toInt());
+    M_SETTING_PTR->setValue(MusicSettingManager::DownloadServerMultipleChoiced,
+                     readXmlAttributeByTagNameValue("downloadServerMultiple").toInt());
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadDLoadLimitChoiced,
                      readXmlAttributeByTagNameValue("downloadDLoadLimit"));
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadULoadLimitChoiced,
@@ -357,14 +379,4 @@ MusicSongs MusicXMLConfigManager::readMusicFilePath(const QDomNode &node) const
                            element.attribute("name"));
     }
     return songs;
-}
-
-QColor MusicXMLConfigManager::readColorConfig(const QString &value) const
-{
-    QStringList rgb = readXmlAttributeByTagNameValue(value).split(',');
-    if(rgb.count() != 3)
-    {
-        return QColor();
-    }
-    return QColor(rgb[0].toInt(), rgb[1].toInt(), rgb[2].toInt());
 }

@@ -26,7 +26,7 @@ class MUSIC_VIDEO_EXPORT MusicVideoPlayWidget : public MusicAbstractMoveWidget
 {
     Q_OBJECT
 public:
-    MusicVideoPlayWidget(bool popup, QWidget *parent = 0);
+    explicit MusicVideoPlayWidget(bool popup, QWidget *parent = 0);
     /*!
      * Object contsructor.
      */
@@ -35,6 +35,11 @@ public:
     static QString getClassName();
     /*!
      * Get class object name.
+     */
+
+    bool isPopup() const;
+    /*!
+     * Get the window is popup or not.
      */
     void resizeWindow(bool resize);
     /*!
@@ -58,6 +63,10 @@ Q_SIGNALS:
     /*!
      * Fresh button state changed.
      */
+    void fullscreenButtonClicked(bool popup);
+    /*!
+     * Fullscreen button clicked.
+     */
 
 public Q_SLOTS:
     void switchToSearchTable();
@@ -67,6 +76,10 @@ public Q_SLOTS:
     void searchButtonClicked();
     /*!
      * Search button clicked.
+     */
+    void windowTopStateChanged();
+    /*!
+     * Window top state changed.
      */
     void videoResearchButtonSearched(const QString &name);
     /*!
@@ -105,9 +118,10 @@ protected:
      * Override the widget event.
      */
 
+    bool m_windowPopup;
     QWidget *m_topWidget;
     QLabel *m_textLabel;
-    QPushButton *m_searchButton, *m_closeButton;
+    QPushButton *m_searchButton, *m_closeButton, *m_winTopButton;
     QStackedWidget *m_stackedWidget;
     MusicVideoView *m_videoView;
     MusicVideoTableWidget *m_videoTable;

@@ -1,7 +1,7 @@
 #include "musiccloudfilemanagerdialog.h"
 #include "ui_musiccloudfilemanagerdialog.h"
-#include "musicbackgroundmanager.h"
 #include "musicitemdelegate.h"
+#include "musicuiobject.h"
 
 MusicCloudUploadTableWidget::MusicCloudUploadTableWidget(QWidget *parent)
     : MusicAbstractTableWidget(parent)
@@ -47,6 +47,10 @@ MusicCloudFileManagerDialog::MusicCloudFileManagerDialog(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
+    ui->reuploadButton->setEnabled(false);
+    ui->reuploadButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    connect(ui->reuploadButton, SIGNAL(clicked()), parent, SLOT(reuploadFileToServer()));
+
 }
 
 MusicCloudFileManagerDialog::~MusicCloudFileManagerDialog()
@@ -59,30 +63,40 @@ QString MusicCloudFileManagerDialog::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicCloudFileManagerDialog::creatFileManager(const UploadDatas &datas)
+void MusicCloudFileManagerDialog::setReuploadState(bool state)
+{
+    ui->reuploadButton->setEnabled(state);
+}
+
+void MusicCloudFileManagerDialog::creatFileManager(const UploadData &data)
+{
+    int index = ui->uploadTableWidget->rowCount();
+    ui->uploadTableWidget->setRowCount(index + 1);
+    QTableWidgetItem *item = new QTableWidgetItem;
+    ui->uploadTableWidget->setItem(index, 0, item);
+
+                      item = new QTableWidgetItem;
+    item->setText(MusicUtils::Widget::elidedText(font(), data.m_name, Qt::ElideRight, 260));
+    item->setToolTip(data.m_name);
+    item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    ui->uploadTableWidget->setItem(index, 1, item);
+
+                      item = new QTableWidgetItem;
+    item->setData(MUSIC_PROCS_ROLE, (data.m_state == UploadData::Successed) ? 100 : 0);
+    ui->uploadTableWidget->setItem(index, 2, item);
+
+                      item = new QTableWidgetItem;
+    item->setIcon( getIconByDataState(data.m_state) );
+    item->setTextAlignment(Qt::AlignCenter);
+    ui->uploadTableWidget->setItem(index, 3, item);
+}
+
+void MusicCloudFileManagerDialog::creatFilesManager(const UploadDatas &datas)
 {
     ui->uploadTableWidget->clear();
-    ui->uploadTableWidget->setRowCount(datas.count());
-    for(int i=0; i<datas.count(); ++i)
+    foreach(const UploadData &data, datas)
     {
-        UploadData data = datas[i];
-        QTableWidgetItem *item = new QTableWidgetItem;
-        ui->uploadTableWidget->setItem(i, 0, item);
-
-                          item = new QTableWidgetItem;
-        item->setText(MusicUtils::UWidget::elidedText(font(), data.m_name, Qt::ElideRight, 260));
-        item->setToolTip(data.m_name);
-        item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-        ui->uploadTableWidget->setItem(i, 1, item);
-
-                          item = new QTableWidgetItem;
-        item->setData(MUSIC_PROCS_ROLE, (data.m_state == UploadData::Successed) ? 100 : 0);
-        ui->uploadTableWidget->setItem(i, 2, item);
-
-                          item = new QTableWidgetItem;
-        item->setIcon( getIconByDataState(data.m_state) );
-        item->setTextAlignment(Qt::AlignCenter);
-        ui->uploadTableWidget->setItem(i, 3, item);
+        creatFileManager(data);
     }
 }
 
@@ -101,15 +115,13 @@ void MusicCloudFileManagerDialog::updateItemProgress(int percent, const UploadDa
 
 int MusicCloudFileManagerDialog::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }
 
 void MusicCloudFileManagerDialog::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::show();
 }
 

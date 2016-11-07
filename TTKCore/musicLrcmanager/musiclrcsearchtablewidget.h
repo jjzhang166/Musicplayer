@@ -14,7 +14,7 @@
 /*! @brief The class of the lrc search table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_LRC_EXPORT MusicLrcSearchTableWidget : public MusicQueryTableWidget
+class MUSIC_LRC_EXPORT MusicLrcSearchTableWidget : public MusicQueryItemTableWidget
 {
     Q_OBJECT
 public:

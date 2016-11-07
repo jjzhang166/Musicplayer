@@ -1,6 +1,5 @@
 #include "musicvolumegainwidget.h"
 #include "ui_musicvolumegainwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
 #include "musicuiobject.h"
 
@@ -128,7 +127,7 @@ void MusicVolumeGainWidget::createItemFinished(const QString &track, const QStri
     ui->tableWidget->setRowCount(row + 1);
 
     QTableWidgetItem *item = new QTableWidgetItem;
-    item->setText(MusicUtils::UWidget::elidedText(font(), m_paths[m_currentIndex], Qt::ElideRight, 320));
+    item->setText(MusicUtils::Widget::elidedText(font(), m_paths[m_currentIndex], Qt::ElideRight, 320));
     item->setToolTip(m_paths[m_currentIndex]);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     ui->tableWidget->setItem(row, 0, item);
@@ -174,7 +173,7 @@ void MusicVolumeGainWidget::addFileButtonClicked()
     {
         setControlEnable(false);
         int orcount = m_paths.count();
-        foreach(QString path, dialog.selectedFiles())
+        foreach(const QString &path, dialog.selectedFiles())
         {
             if(!m_paths.contains(path))
             {
@@ -202,7 +201,7 @@ void MusicVolumeGainWidget::addFilesButtonClicked()
     {
         setControlEnable(false);
         QList<QFileInfo> file(dialog.directory().entryInfoList());
-        foreach(QFileInfo info, file)
+        foreach(const QFileInfo &info, file)
         {
             if( QString("mp3").contains(info.suffix().toLower()) &&
                 !m_paths.contains(info.absoluteFilePath()) )
@@ -348,7 +347,6 @@ int MusicVolumeGainWidget::exec()
         return -1;
     }
 
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

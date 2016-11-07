@@ -1,7 +1,7 @@
 #include "musicremotewidgetforsimplestyle.h"
 #include "musicsettingmanager.h"
 #include "musicmarqueewidget.h"
-#include "musicutils.h"
+#include "musicwidgetutils.h"
 
 MusicRemoteWidgetForSimpleStyle::MusicRemoteWidgetForSimpleStyle(QWidget *parent)
     : MusicRemoteWidget(parent)
@@ -45,6 +45,6 @@ QString MusicRemoteWidgetForSimpleStyle::getClassName()
 
 void MusicRemoteWidgetForSimpleStyle::setLabelText(const QString &value)
 {
-    m_songNameLabel->setText(MusicUtils::UWidget::elidedText(font(), value,
+    m_songNameLabel->setText(MusicUtils::Widget::elidedText(font(), value,
                              Qt::ElideRight, 350));
 }

@@ -2,7 +2,6 @@
 #include "ui_musiclrcartphotoupload.h"
 #include "musicuiobject.h"
 #include "musicobject.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
 
 #include <QFileDialog>
@@ -19,15 +18,16 @@ MusicLrcArtPhotoUpload::MusicLrcArtPhotoUpload(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
 
     ui->artSearchEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
-    ui->uploadButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->closeButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->selectButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->uploadButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->closeButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->selectButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
 
     ui->uploadButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->closeButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->selectButton->setCursor(QCursor(Qt::PointingHandCursor));
 
-    ui->stateLabel->setStyleSheet(MusicUIObject::MCustomStyle08);
+    ui->stateLabel->setStyleSheet(MusicUIObject::MBackgroundStyle05 +
+                                  MusicUIObject::MColorStyle07);
 
     ui->uploadButton->hide();
     ui->closeButton->hide();
@@ -89,7 +89,7 @@ void  MusicLrcArtPhotoUpload::uploadButtonClicked()
         return;
     }
 
-    foreach(QFileInfo f, bgDir.entryInfoList())
+    foreach(const QFileInfo &f, bgDir.entryInfoList())
     {
         if(f.fileName().contains( name ))
         {
@@ -105,7 +105,6 @@ void  MusicLrcArtPhotoUpload::uploadButtonClicked()
 
 int MusicLrcArtPhotoUpload::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

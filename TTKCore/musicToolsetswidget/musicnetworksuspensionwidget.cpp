@@ -1,7 +1,7 @@
 #include "musicnetworksuspensionwidget.h"
 #include "musicnetworktestthread.h"
 #include "musicuiobject.h"
-#include "musicutils.h"
+#include "musicnumberutils.h"
 
 #include <QMenu>
 #include <QApplication>
@@ -58,7 +58,7 @@ void MusicNetworkSuspensionWidget::contextMenuEvent(QContextMenuEvent *event)
 
     QStringList list = m_thread->getNewtworkNames();
     QStringList available = m_thread->getAvailableNewtworkNames();
-    foreach(QString var, list)
+    foreach(const QString &var, list)
     {
         QAction *action = settingMenu.addAction(var);
         m_actionGroup->addAction(action);
@@ -113,8 +113,8 @@ void MusicNetworkSuspensionWidget::setAvailableNewtworkNames(const QStringList &
 
 void MusicNetworkSuspensionWidget::networkData(ulong upload, ulong download)
 {
-    m_upload = MusicUtils::UNumber::speed2Label(upload);
-    m_download = MusicUtils::UNumber::speed2Label(download);
+    m_upload = MusicUtils::Number::speed2Label(upload);
+    m_download = MusicUtils::Number::speed2Label(download);
     update();
 }
 

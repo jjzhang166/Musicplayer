@@ -8,25 +8,19 @@ MusicLRCManager::MusicLRCManager(QWidget *parent)
 {
     m_intervalCount = 0.0f;
 
-    m_linearGradient.setStart(0, 10);//The starting point coordinates filled
-    m_linearGradient.setFinalStop(0, 40);//The coordinates of the end filling
+    m_linearGradient.setStart(0, 0);
+    m_maskLinearGradient.setStart(0, 0);
 
-    //A linear gradient mask filling
-    m_maskLinearGradient.setStart(0, 10);
-    m_maskLinearGradient.setFinalStop(0, 40);
-
-    //Set the font
     m_font.setFamily("Times New Roman");
     m_font.setBold(true);
 
-    //Set the timer
-    m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), SLOT(setUpdateMask()));
     m_lrcMaskWidth = 0;
     m_lrcMaskWidthInterval = 0;
-    m_speedLeve = 1;
-
+    m_speedLevel = 1;
     m_transparent = 100;
+
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), SLOT(setUpdateMask()));
 }
 
 MusicLRCManager::~MusicLRCManager()
@@ -46,7 +40,10 @@ void MusicLRCManager::startTimerClock()
 
 void MusicLRCManager::setLrcFontSize(LrcSizeTable size)
 {
-    m_font.setPointSize(size);
+    if(size > 0)
+    {
+        m_font.setPointSize(size);
+    }
     setText( text() );
     update();
 }
@@ -84,7 +81,7 @@ void MusicLRCManager::startLrcMask(qint64 intervaltime)
     */
     m_intervalCount = 0.0f;
     m_geometry.setX(QFontMetrics(m_font).width(text()));
-    qreal count = intervaltime / m_speedLeve;
+    qreal count = intervaltime / m_speedLevel;
     m_lrcMaskWidthInterval = m_geometry.x() / count;
     m_lrcMaskWidth = 0;
     m_timer->start(LRC_PER_TIME);
@@ -96,23 +93,32 @@ void MusicLRCManager::stopLrcMask()
     update();
 }
 
-void MusicLRCManager::setLinearGradientColor(QColor color)
+void MusicLRCManager::setLinearGradientColor(const QList<QColor> &colors)
 {
     //The first parameter coordinates relative to the US, the area above,
     //calculated in accordance with the proportion of
-    color.setAlpha(m_transparent*2.55);
-    m_linearGradient.setColorAt(0.1, color);
-    m_linearGradient.setColorAt(0.5, QColor(114, 232, 255, m_transparent*2.55));
-    m_linearGradient.setColorAt(0.9, color);
+    QLinearGradient linearGradient;
+    for(int i=0; i<colors.count(); ++i)
+    {
+        QColor rgb = colors[i];
+        rgb.setAlpha(m_transparent*2.55);
+        linearGradient.setColorAt((i+1)*1.0/colors.count(), rgb);
+    }
+    m_linearGradient = linearGradient;
     update();
 }
 
-void MusicLRCManager::setMaskLinearGradientColor(QColor color)
+void MusicLRCManager::setMaskLinearGradientColor(const QList<QColor> &colors)
 {
-    color.setAlpha(m_transparent*2.55);
-    m_maskLinearGradient.setColorAt(0.1, color);
-    m_maskLinearGradient.setColorAt(0.5, QColor(255, 72, 16, m_transparent*2.55));
-    m_maskLinearGradient.setColorAt(0.9, color);
+    QLinearGradient maskLinearGradient;
+    for(int i=0; i<colors.count(); ++i)
+    {
+        QColor rgb = colors[i];
+        rgb.setAlpha(m_transparent*2.55);
+        maskLinearGradient.setColorAt((i+1)*1.0/colors.count(), rgb);
+    }
+    m_maskLinearGradient = maskLinearGradient;
+    update();
 }
 
 void MusicLRCManager::setUpdateMask()

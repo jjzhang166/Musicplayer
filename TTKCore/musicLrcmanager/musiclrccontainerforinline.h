@@ -15,6 +15,9 @@
 class MusicLrcFloatWidget;
 class MusicClickedLabel;
 class MusicLrcAnalysis;
+class MusicLrcCommentsWidget;
+class MusicLrcTranslatedWidget;
+class MusicLayoutAnimation;
 
 /*! @brief The class of the inline lrc container.
  * @author Greedysky <greedysky@163.com>
@@ -41,7 +44,7 @@ public:
     /*!
      * Stop timer clock to draw lrc.
      */
-    virtual void setMaskLinearGradientColor(QColor = CL_Mask) const override;
+    virtual void setMaskLinearGradientColor(const QList<QColor> &colors) const override;
     /*!
      * Set mask linear gradient color.
      */
@@ -101,10 +104,6 @@ Q_SIGNALS:
     /*!
      * The art background state has changed emit.
      */
-    void videoButtonClicked(const QString &text);
-    /*!
-     * Video button clicked it emit.
-     */
 
 public Q_SLOTS:
     void lrcSizeChanged(QAction *action) const;
@@ -143,15 +142,23 @@ public Q_SLOTS:
     /*!
      * Show local link widget.
      */
+    void showSongCommentsWidget();
+    /*!
+     * Show song comments widget.
+     */
 
 private Q_SLOTS:
     void getTranslatedLrcFinished(const QString &data);
     /*!
      * Get translated lrc finished.
      */
-    void videoButtonClicked();
+    void musicSongMovieClicked();
     /*!
      * Video button clicked.
+     */
+    void updateAnimationLrc();
+    /*!
+     * Animation finished.
      */
 
 protected:
@@ -197,7 +204,7 @@ protected:
     /*!
      * Set per lrc line style sheet by index and size and transparent.
      */
-    void resizeWidth(int width, int height);
+    void resizeWidth(int w, int h);
     /*!
      * Resize width bound by given width.
      */
@@ -205,11 +212,14 @@ protected:
     QPoint m_mousePressedAt, m_mouseMovedAt;
     bool m_mouseLeftPressed, m_showArtBackground;
     bool m_lrcDisplayAll;
+    int m_animationFreshTime;
     qint64 m_changeSpeedValue;
-    QVBoxLayout *m_vBoxLayout;
     MusicLrcFloatWidget *m_lrcFloatWidget;
     MusicClickedLabel *m_noLrcCurrentInfo;
     MusicLrcAnalysis *m_lrcAnalysis;
+    MusicLrcCommentsWidget *m_commentsWidget;
+    MusicLrcTranslatedWidget *m_translatedWidget;
+    MusicLayoutAnimation *m_layoutWidget;
 
 };
 

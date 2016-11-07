@@ -5,7 +5,7 @@
 #include "musicremotewidgetforsquare.h"
 #include "musicremotewidgetforsimplestyle.h"
 #include "musicremotewidgetforcomplexstyle.h"
-#include "musicttkuiobject.h"
+#include "musictinyuiobject.h"
 #include "musicclickedslider.h"
 
 MusicRemoteWidget::MusicRemoteWidget(QWidget *parent)
@@ -24,7 +24,7 @@ MusicRemoteWidget::MusicRemoteWidget(QWidget *parent)
     m_mainWidget = new QWidget(this);
     m_mainWidget->setObjectName("mainWidget");
 
-    m_showMainWindow->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    m_showMainWindow->setStyleSheet(MusicUIObject::MPushButtonStyle02);
     m_showMainWindow->setIcon(QIcon(":/image/lb_player_logo"));
     m_SettingButton->setIcon(QIcon(":/tiny/btn_setting_normal"));
 
@@ -40,11 +40,11 @@ MusicRemoteWidget::MusicRemoteWidget(QWidget *parent)
     m_SettingButton->setFixedSize(28, 28);
     m_showMainWindow->setFixedSize(30, 30);
 
-    m_PreSongButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnPrevious);
-    m_NextSongButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnNext);
-    m_PlayButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnPlay);
-    m_SettingButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnSetting);
-    m_mainWidget->setStyleSheet("#mainWidget{" + MusicUIObject::MCustomStyle09 + "}");
+    m_PreSongButton->setStyleSheet(MusicUIObject::MKGTinyBtnPrevious);
+    m_NextSongButton->setStyleSheet(MusicUIObject::MKGTinyBtnNext);
+    m_PlayButton->setStyleSheet(MusicUIObject::MKGTinyBtnPlay);
+    m_SettingButton->setStyleSheet(MusicUIObject::MKGTinyBtnSetting);
+    m_mainWidget->setStyleSheet(QString("#mainWidget{%1}").arg(MusicUIObject::MBackgroundStyle04));
 
     m_showMainWindow->setCursor(QCursor(Qt::PointingHandCursor));
     m_PreSongButton->setCursor(QCursor(Qt::PointingHandCursor));
@@ -107,17 +107,17 @@ void MusicRemoteWidget::contextMenuEvent(QContextMenuEvent *event)
     menu.addSeparator();
 
     menu.addAction(tr("CircleRemote"))->setEnabled(
-                !qobject_cast<MusicRemoteWidgetForCircle*>(this));
+                !MObject_cast(MusicRemoteWidgetForCircle*, this));
     menu.addAction(tr("SquareRemote"))->setEnabled(
-                !qobject_cast<MusicRemoteWidgetForSquare*>(this));
+                !MObject_cast(MusicRemoteWidgetForSquare*, this));
     menu.addAction(tr("RectangleRemote"))->setEnabled(
-                !qobject_cast<MusicRemoteWidgetForRectangle*>(this));
+                !MObject_cast(MusicRemoteWidgetForRectangle*, this));
     menu.addAction(tr("SimpleStyleRemote"))->setEnabled(
-                !qobject_cast<MusicRemoteWidgetForSimpleStyle*>(this));
+                !MObject_cast(MusicRemoteWidgetForSimpleStyle*, this));
     menu.addAction(tr("ComplexStyleRemote"))->setEnabled(
-                !qobject_cast<MusicRemoteWidgetForComplexStyle*>(this));
+                !MObject_cast(MusicRemoteWidgetForComplexStyle*, this));
     menu.addAction(tr("DiamondRemote"))->setEnabled(
-                !qobject_cast<MusicRemoteWidgetForDiamond*>(this));
+                !MObject_cast(MusicRemoteWidgetForDiamond*, this));
     menu.addAction(tr("quit"), this, SLOT(close()));
     connect(&menu, SIGNAL(triggered(QAction*)), SIGNAL(musicRemoteTypeChanged(QAction*)));
 
@@ -126,7 +126,7 @@ void MusicRemoteWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void MusicRemoteWidget::showPlayStatus(bool status) const
 {
-    m_PlayButton->setStyleSheet(status ? MusicTTKUIObject::MKGTinyBtnPlay : MusicTTKUIObject::MKGTinyBtnPause);
+    m_PlayButton->setStyleSheet(status ? MusicUIObject::MKGTinyBtnPlay : MusicUIObject::MKGTinyBtnPause);
 }
 
 void MusicRemoteWidget::setVolumeValue(int index)
@@ -141,7 +141,7 @@ void MusicRemoteWidget::musicVolumeChanged(int value)
 {
     emit musicVolumeSignal(value);
 
-    QString style = MusicTTKUIObject::MKGTinyBtnSoundWhite;
+    QString style = MusicUIObject::MKGTinyBtnSoundWhite;
     if(66 < value && value <=100)
     {
         style += "QToolButton{ margin-left:-48px; }";

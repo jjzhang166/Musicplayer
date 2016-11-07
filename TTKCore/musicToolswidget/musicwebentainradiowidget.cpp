@@ -1,7 +1,6 @@
 #include "musicwebentainradiowidget.h"
 #include "ui_musicwebentainradiowidget.h"
 #include "musicwebentainradiodatebase.h"
-#include "musicbackgroundmanager.h"
 #include "musiccoremplayer.h"
 
 #include <QProcess>
@@ -27,10 +26,10 @@ MusicWebEntainRadioWidget::MusicWebEntainRadioWidget(QWidget *parent)
     ui->colletButton->setIcon(QIcon(":/tiny/lb_star"));
     ui->discolletButton->setIcon(QIcon(":/tiny/lb_unstar"));
 
-    ui->playButton->setStyleSheet("background:transparent;");
-    ui->stopButton->setStyleSheet("background:transparent;");
-    ui->colletButton->setStyleSheet("background:transparent;");
-    ui->discolletButton->setStyleSheet("background:transparent;");
+    ui->playButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
+    ui->stopButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
+    ui->colletButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
+    ui->discolletButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
 
     ui->playButton->setIconSize(QSize(31, 31));
     ui->stopButton->setIconSize(QSize(31, 31));
@@ -149,7 +148,7 @@ void MusicWebEntainRadioWidget::updateRadioList(const QString &category)
     ui->listWidget->clear();
     QStringList fnames = m_database->getFavouriteNames();
     QStringList rnames = m_database->getRadioNames(category);
-    foreach(QString name, rnames)
+    foreach(const QString &name, rnames)
     {
         ui->listWidget->addItem(new QListWidgetItem(fnames.contains(name)
                                                     ? *m_collecticon
@@ -163,7 +162,7 @@ void MusicWebEntainRadioWidget::updateRecentList()
     ui->listWidget->clear();
     QStringList fnames = m_database->getFavouriteNames();
     QStringList rnames = m_database->getRecentNames();
-    foreach(QString name, rnames)
+    foreach(const QString &name, rnames)
     {
         ui->listWidget->addItem(new QListWidgetItem(fnames.contains(name)
                                                     ? *m_collecticon
@@ -175,7 +174,7 @@ void MusicWebEntainRadioWidget::updateFavouriteList()
 {
     clearAllItems();
     ui->listWidget->clear();
-    foreach(QString name, m_database->getFavouriteNames())
+    foreach(const QString &name, m_database->getFavouriteNames())
     {
         ui->listWidget->addItem(new QListWidgetItem(*m_collecticon, name));
     }
@@ -217,7 +216,6 @@ void MusicWebEntainRadioWidget::radioDiscolletButton()
 
 void MusicWebEntainRadioWidget::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     MusicAbstractMoveWidget::show();
 }

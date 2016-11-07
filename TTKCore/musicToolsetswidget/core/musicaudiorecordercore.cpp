@@ -1,5 +1,5 @@
 #include "musicaudiorecordercore.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
 
 MusicAudioRecorderCore::MusicAudioRecorderCore(QObject *parent)
     : QObject(parent)
@@ -85,7 +85,7 @@ int MusicAudioRecorderCore::addWavHeader(const char *filename)
 
     FILE *fp_s = nullptr;
     FILE *fp_d = nullptr;
-    fp_s = fopen(MusicUtils::UCore::toLocal8Bit(m_mpOutputFile->fileName()), "rb");
+    fp_s = fopen(MusicUtils::Core::toLocal8Bit(m_mpOutputFile->fileName()), "rb");
     if (fp_s == nullptr)
     {
         return -1;

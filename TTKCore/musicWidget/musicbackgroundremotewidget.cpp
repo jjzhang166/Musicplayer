@@ -38,15 +38,21 @@ void MusicBackgroundRemoteWidget::initWidget()
 {
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *hbox = new QHBoxLayout;
-    hbox->setContentsMargins(0, 0, 0, 0);
+    vbox->setSpacing(0);
+
+    QWidget *buttonWidget = new QWidget(this);
+    buttonWidget->setStyleSheet(MusicUIObject::MBackgroundStyle17);
+    QHBoxLayout *hbox = new QHBoxLayout(buttonWidget);
+    hbox->setContentsMargins(3, 3, 3, 3);
 
     createButton();
     for(int i=0; i<4; ++i)
     {
         hbox->addWidget( m_group->button(i) );
     }
-    vbox->addLayout(hbox);
+    buttonWidget->setLayout(hbox);
+    vbox->addWidget(buttonWidget);
+
     m_listWidget = new MusicBackgroundListWidget(this);
     connect(m_listWidget, SIGNAL(itemClicked(QListWidgetItem*)),
                           SLOT(itemUserClicked(QListWidgetItem*)));
@@ -61,7 +67,7 @@ void MusicBackgroundRemoteWidget::createButton()
         QPushButton *button = new QPushButton(this);
         button->setFixedHeight(25);
         button->setText(tr("NetButton%1").arg(i + 1));
-        button->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+        button->setStyleSheet(MusicUIObject::MPushButtonStyle04);
         button->setCursor(QCursor(Qt::PointingHandCursor));
         m_group->addButton(button, i);
     }
@@ -107,7 +113,7 @@ void MusicBackgroundRemoteWidget::itemUserClicked(QListWidgetItem *item)
 
 void MusicBackgroundRemoteWidget::createUrls()
 {
-    QString prefix = "http://img1.kwcdn.kuwo.cn/star/KuwoPhotoArt/0/0/";
+    QString prefix = MusicCryptographicHash::decryptData("NlNWQVlSdWFRcjZmdkN6UXdVRGprK2NMaTg5U3g3S0M2b3RDWE9mV0I3NGswa2NUSlZySzFONURtYk1hY2VveUpQL2w1Zz09", URL_KEY);
     ////////////////////1
     m_urls << (QStringList()
            << prefix + "1392706532786_0.jpg" << prefix + "1392706533257_0.jpg"

@@ -1,9 +1,8 @@
 #include "musicnetworktestwidget.h"
 #include "ui_musicnetworktestwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicuiobject.h"
 #include "musicnetworktestthread.h"
-#include "musicutils.h"
+#include "musicnumberutils.h"
 #include "musicdatadownloadthread.h"
 #include "musicmessagebox.h"
 #include "musicnetworksuspensionwidget.h"
@@ -33,11 +32,11 @@ MusicNetworkTestWidget::MusicNetworkTestWidget(QWidget *parent)
     ui->speedWidget->setAnimating(false);
     ui->speedWidget->setRatio(50);
 
-    ui->suspensionButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->suspensionButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->suspensionButton->setCursor(QCursor((Qt::PointingHandCursor)));
-    ui->settingButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->settingButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->settingButton->setCursor(QCursor((Qt::PointingHandCursor)));
-    ui->testButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->testButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->testButton->setCursor(QCursor((Qt::PointingHandCursor)));
     connect(ui->suspensionButton, SIGNAL(clicked()), SLOT(suspensionOpen()));
     connect(ui->testButton, SIGNAL(clicked()), SLOT(networkTestStart()));
@@ -73,7 +72,7 @@ void MusicNetworkTestWidget::settingButton()
     menu->setStyleSheet(MusicUIObject::MMenuStyle02);
 
     QStringList list = m_thread->getNewtworkNames();
-    foreach(QString var, list)
+    foreach(const QString &var, list)
     {
         m_actionGroup->addAction(menu->addAction(var));
     }
@@ -87,14 +86,14 @@ void MusicNetworkTestWidget::networkData(ulong upload, ulong download)
     m_totalUp += upload;
     m_totalDown += download;
 
-    ui->uploadSpeedValue->setText(MusicUtils::UNumber::speed2Label(upload));
-    ui->downloadSpeedValue->setText(MusicUtils::UNumber::speed2Label(download));
-    ui->uploadAllSpeedValue->setText(MusicUtils::UNumber::speed2Label(m_totalUp));
-    ui->downloadAllSpeedValue->setText(MusicUtils::UNumber::speed2Label(m_totalDown));
+    ui->uploadSpeedValue->setText(MusicUtils::Number::speed2Label(upload));
+    ui->downloadSpeedValue->setText(MusicUtils::Number::speed2Label(download));
+    ui->uploadAllSpeedValue->setText(MusicUtils::Number::speed2Label(m_totalUp));
+    ui->downloadAllSpeedValue->setText(MusicUtils::Number::speed2Label(m_totalDown));
 
     if(m_testTimer.isActive())
     {
-        int value = MusicUtils::UNumber::sizeByte2KByte(download);
+        int value = MusicUtils::Number::sizeByte2KByte(download);
         if(value > 100*ui->speedWidget->ratio())
         {
             value = 100*ui->speedWidget->ratio();
@@ -117,7 +116,7 @@ void MusicNetworkTestWidget::networkTestStart()
     ui->testButton->setEnabled(false);
     m_testTimer.stop();
     delete m_testDownload;
-    m_testDownload = new MusicDataDownloadThread(testUrl, testName,
+    m_testDownload = new MusicDataDownloadThread(MusicCryptographicHash::decryptData(testUrl, URL_KEY), testName,
                              MusicDownLoadThreadAbstract::Download_BigBG, this);
     m_testDownload->startToDownload();
     m_testTimer.start();
@@ -174,7 +173,6 @@ void MusicNetworkTestWidget::networkTestStop()
 
 void MusicNetworkTestWidget::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveWidget::show();
 }

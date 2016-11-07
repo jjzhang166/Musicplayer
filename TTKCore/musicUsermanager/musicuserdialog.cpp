@@ -5,7 +5,6 @@
 #include "musicusermodel.h"
 #include "musicmessagebox.h"
 #include "musictime.h"
-#include "musicutils.h"
 
 #include <QValidator>
 #include <QButtonGroup>
@@ -66,7 +65,7 @@ void MusicUserDialog::readFromUserConfig()
     {
         return;
     }
-    xml.readUserConfig(m_record);
+    xml.readUserConfig(m_records);
     readFromUserSettings();
 }
 
@@ -74,7 +73,7 @@ void MusicUserDialog::writeToUserConfig()
 {
     MusicUserConfigManager xml;
     writeToUserSettings();
-    xml.writeUserXMLConfig(m_record);
+    xml.writeUserXMLConfig(m_records);
 }
 
 void MusicUserDialog::firstStatckWidget()
@@ -83,9 +82,9 @@ void MusicUserDialog::firstStatckWidget()
     ui->userComboBox->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
     ui->userComboBox->view()->setStyleSheet(MusicUIObject::MScrollBarStyle01);
     ui->passwLineEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
-    ui->loginButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->forgotPwdButton->setStyleSheet(MusicUIObject::MPushButtonStyle09);
-    ui->registerButton->setStyleSheet(MusicUIObject::MPushButtonStyle09);
+    ui->loginButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->forgotPwdButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
+    ui->registerButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
 
     ui->registerButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->forgotPwdButton->setCursor(QCursor(Qt::PointingHandCursor));
@@ -101,9 +100,9 @@ void MusicUserDialog::secondStatckWidget()
     ui->registerMailLine->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->registerPwdLine->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->registerPwdCLine->setStyleSheet(MusicUIObject::MLineEditStyle01);
-    ui->confirmButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->cancelButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->agreementButton->setStyleSheet(MusicUIObject::MPushButtonStyle09);
+    ui->confirmButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->cancelButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->agreementButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
 
     ui->confirmButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->cancelButton->setCursor(QCursor(Qt::PointingHandCursor));
@@ -129,8 +128,8 @@ void MusicUserDialog::thirdStatckWidget()
     ui->pwdLineEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->mailLineEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->verificationCodeEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
-    ui->confirmButton_2->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->cancelButton_2->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->confirmButton_2->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->cancelButton_2->setStyleSheet(MusicUIObject::MPushButtonStyle04);
 
     ui->confirmButton_2->setCursor(QCursor(Qt::PointingHandCursor));
     ui->cancelButton_2->setCursor(QCursor(Qt::PointingHandCursor));
@@ -325,34 +324,48 @@ void MusicUserDialog::checkUserForgotPasswd()
      userLogin();
 }
 
+int MusicUserDialog::findUserNameIndex(const QString &name)
+{
+    int index = -1;
+    for(int i=0; i<m_records.count(); ++i)
+    {
+        if(m_records[i].m_name == name)
+        {
+            return i;
+        }
+    }
+    return index;
+}
+
 void MusicUserDialog::readFromUserSettings()
 {
-    int index = 0;
-    if((index = m_record.m_names.indexOf(m_userName)) != -1)
+    int index = findUserNameIndex(m_userName);
+    if(index != -1)
     {
-        ui->automaticLogon->setChecked( !(m_record.m_als[index] == "0") );
-        ui->rememberPwd->setChecked( !(m_record.m_rps[index] == "0") );
-        ui->passwLineEdit->setText( m_record.m_pwds[index] );
+        ui->automaticLogon->setChecked( !(m_records[index].m_al == "0") );
+        ui->rememberPwd->setChecked( !(m_records[index].m_rp == "0") );
+        ui->passwLineEdit->setText( m_records[index].m_pwd );
     }
 }
 
 void MusicUserDialog::writeToUserSettings()
 {
-    int index = 0;
-    if((index = m_record.m_names.indexOf(m_userName)) != -1)
+    int index = findUserNameIndex(m_userName);
+    if(index != -1)
     {
-        m_record.m_als[index] = ui->automaticLogon->isChecked() ? "1" : "0";
-        m_record.m_rps[index] = ui->rememberPwd->isChecked() ? "1" : "0";
-        m_record.m_pwds[index] = ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName)
+        m_records[index].m_al = ui->automaticLogon->isChecked() ? "1" : "0";
+        m_records[index].m_rp = ui->rememberPwd->isChecked() ? "1" : "0";
+        m_records[index].m_pwd = ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName)
                                                               : QString();
     }
     else
     {
-        m_record.m_names << m_userName;
-        m_record.m_als << (ui->automaticLogon->isChecked() ? "1" : "0");
-        m_record.m_rps << (ui->rememberPwd->isChecked() ? "1" : "0");
-        m_record.m_pwds << (ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName)
-                                                         : QString() );
+        MusicUserRecord record;
+        record.m_name = m_userName;
+        record.m_al = (ui->automaticLogon->isChecked() ? "1" : "0");
+        record.m_rp = (ui->rememberPwd->isChecked() ? "1" : "0");
+        record.m_pwd = (ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName) : QString() );
+        m_records << record;
     }
 }
 

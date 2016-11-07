@@ -1,21 +1,15 @@
 #include "musicsourceupdatewidget.h"
 #include "ui_musicsourceupdatewidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicsourcedownloadthread.h"
 #include "musicdatadownloadthread.h"
+#include "musicmessagebox.h"
 #include "musicuiobject.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
 #include "musicversion.h"
+#///QJson import
+#include "qjson/parser.h"
 
 #include <QProcess>
-
-#ifdef MUSIC_GREATER_NEW
-#   include <QJsonParseError>
-#   include <QJsonObject>
-#else
-#   include <QtScript/QScriptEngine>
-#   include <QtScript/QScriptValue>
-#endif
 
 MusicSourceUpdateWidget::MusicSourceUpdateWidget(QWidget *parent)
     : MusicAbstractMoveDialog(parent),
@@ -43,47 +37,41 @@ QString MusicSourceUpdateWidget::getClassName()
     return staticMetaObject.className();
 }
 
-int MusicSourceUpdateWidget::exec()
+void MusicSourceUpdateWidget::upgradeButtonClicked()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    ui->stackedWidget->setCurrentIndex(1);
+    QString localDwonload = "v" + m_newVersionStr + DD_TYPE_EXE;
+    MusicDataDownloadThread *download = new MusicDataDownloadThread(QString("%1%2").arg(MusicCryptographicHash::decryptData(DOWNLOAD_URL, URL_KEY)).arg(localDwonload),
+                                                                    MusicObject::getAppDir() + localDwonload, MusicDownLoadThreadAbstract::Download_Other, this);
+    connect(download, SIGNAL(downloadProgressChanged(float,QString,qint64)), SLOT(downloadProgressChanged(float,QString)));
+    connect(download, SIGNAL(downLoadDataChanged(QString)), SLOT(downloadProgressFinished()));
+    download->startToDownload();
+}
 
-    MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
-    connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(downLoadFinished(QByteArray)));
-    download->startToDownload(VERSION_URL);
-
-    return MusicAbstractMoveDialog::exec();
+void MusicSourceUpdateWidget::upgradeFailedClicked()
+{
+    MusicUtils::Core::openUrl(MusicCryptographicHash::decryptData(CSDN_URL, URL_KEY), false);
 }
 
 void MusicSourceUpdateWidget::downLoadFinished(const QByteArray &data)
 {
-#ifdef MUSIC_GREATER_NEW
-    QJsonParseError jsonError;
-    QJsonDocument parseDoucment = QJsonDocument::fromJson(data, &jsonError);
-    ///Put the data into Json
-    if( jsonError.error != QJsonParseError::NoError ||
-        !parseDoucment.isObject())
+    QJson::Parser parser;
+    bool ok;
+    QVariant parseData = parser.parse(data, &ok);
+    if(!ok)
     {
         return;
     }
 
-    QJsonObject jsonObject = parseDoucment.object();
-    m_newVersionStr = jsonObject.value("version").toString();
-#else
-    QScriptEngine engine;
-    QScriptValue sc = engine.evaluate("value=" + QString(data));
-    m_newVersionStr = sc.property("version").toString();
-#endif
+    QVariantMap value = parseData.toMap();
+    m_newVersionStr = value["version"].toString();
+
     QString text;
     if(m_newVersionStr != TTKMUSIC_VERSION_STR)
     {
         text.append(m_newVersionStr);
         text.append("\r\n");
-#ifdef MUSIC_GREATER_NEW
-        text.append(jsonObject.value("data").toString());
-#else
-        text.append(sc.property("data").toString());
-#endif
+        text.append(value["data"].toString());
         ui->upgradeButton->setEnabled(true);
         ui->titleLable_F->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     }
@@ -100,26 +88,27 @@ void MusicSourceUpdateWidget::downloadProgressChanged(float percent, const QStri
     ui->fileSizeLabel->setText(tr("FileSize: %1").arg(total));
     ui->downProgressBar->setValue(percent);
     ui->downProgressBarAL->setValue(percent);
+}
 
-    if(percent == 100.0f)
+void MusicSourceUpdateWidget::downloadProgressFinished()
+{
+    QString localDwonload = "v" + m_newVersionStr + DD_TYPE_EXE;
+    MusicMessageBox message(this);
+    message.setText(tr("Download Finish, Install Or Not"));
+    if(message.exec() == 0)
     {
-        QString localDwonload = "v" + m_newVersionStr + DD_TYPE_ZIP;
-        QProcess::startDetached(MusicObject::getAppDir() + NEW_UPDATE_URL, QStringList(localDwonload));
+        QProcess::startDetached(MusicObject::getAppDir() + localDwonload, QStringList());
         MStatic_cast(QWidget*, parent())->close();
     }
 }
 
-void MusicSourceUpdateWidget::upgradeButtonClicked()
+int MusicSourceUpdateWidget::exec()
 {
-    ui->stackedWidget->setCurrentIndex(1);
-    QString localDwonload = "v" + m_newVersionStr + DD_TYPE_ZIP;
-    MusicDataDownloadThread *download = new MusicDataDownloadThread(QString("%1%2").arg(DOWNLOAD_URL).arg(localDwonload),
-                                                                    MusicObject::getAppDir() + localDwonload, MusicDownLoadThreadAbstract::Download_Other, this);
-    connect(download, SIGNAL(downloadProgressChanged(float,QString,qint64)), SLOT(downloadProgressChanged(float,QString)));
-    download->startToDownload();
-}
+    setBackgroundPixmap(ui->background, size());
 
-void MusicSourceUpdateWidget::upgradeFailedClicked()
-{
-    MusicUtils::UCore::openUrl(CSDN_URL, false);
+    MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
+    connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(downLoadFinished(QByteArray)));
+    download->startToDownload(MusicCryptographicHash::decryptData(VERSION_URL, URL_KEY));
+
+    return MusicAbstractMoveDialog::exec();
 }

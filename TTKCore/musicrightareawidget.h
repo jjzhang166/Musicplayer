@@ -27,6 +27,21 @@ class MUSIC_GUI_EXPORT MusicRightAreaWidget : public QWidget
 {
     Q_OBJECT
 public:
+    enum MusicFunction{
+        KugGouSongWidget = 0,   ///*insert kugou song widget*/
+        KugGouRadioWidget,      ///*insert kugou radio widget*/
+        kugouListWidget,        ///*insert kugou list widget*/
+        VideoWidget,            ///*insert video widget*/
+        kugouLiveWidget,        ///*insert kugou live widget*/
+        LrcWidget,              ///*insert lrc display widget*/
+        SearchWidget,           ///*insert search display widget*/
+        SimilarWidget,          ///*insert similar found widget*/
+        AlbumWidget,            ///*insert album found widget*/
+        ArtistWidget,           ///*insert artist found widget*/
+        IndentifyWidget,        ///*insert indentify songs widget*/
+        KuiSheWidget            ///*insert kugou kuishe widget*/
+    };
+
     explicit MusicRightAreaWidget(QWidget *parent = 0);
     /*!
      * Object contsructor.
@@ -36,6 +51,10 @@ public:
     static QString getClassName();
     /*!
      * Get class object name.
+     */
+    static MusicRightAreaWidget *instance();
+    /*!
+     * Get class object instance.
      */
     void setupUi(Ui::MusicApplication* ui);
     /*!
@@ -122,6 +141,22 @@ public Q_SLOTS:
     /*!
      * Music function button clicked.
      */
+    void musicSongCommentsWidget();
+    /*!
+     * Music song comments widget.
+     */
+    void musicSimilarFound(const QString &text);
+    /*!
+     * Music similar function that by string.
+     */
+    void musicAlbumFound(const QString &text);
+    /*!
+     * Music album function that by string.
+     */
+    void musicArtistFound(const QString &text);
+    /*!
+     * Music artist function that by string.
+     */
     void musicLoadSongIndexWidget();
     /*!
      * Music load song index widget.
@@ -137,6 +172,10 @@ public Q_SLOTS:
     void setWindowLockedChanged();
     /*!
      * Lock current desktop lrc state changed.
+     */
+    void setWindowLrcTypeChanged();
+    /*!
+     * Set current desktop lrc window type changed.
      */
     void songResearchButtonSearched(const QString &name);
     /*!
@@ -169,12 +208,13 @@ protected:
      * Function button style clear.
      */
 
-    QWidget *m_supperClass, *m_stackedFuncWidget;
+    QWidget *m_stackedFuncWidget;
     Ui::MusicApplication *m_ui;
     MusicSettingWidget *m_setting;
-    MusicLrcContainerForDesktop *m_musiclrcfordesktop;
+    MusicLrcContainerForDesktop *m_musicLrcForDesktop;
     MusicDownloadStatusLabel *m_downloadStatusLabel;
 
+    static MusicRightAreaWidget *m_instance;
 };
 
 #endif // MUSICRIGHTAREAWIDGET_H

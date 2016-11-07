@@ -44,6 +44,10 @@ public:
     /*!
      * Get class object name.
      */
+    static MusicApplication *instance();
+    /*!
+     * Get class object instance.
+     */
     QString getCurrentFileName() const;
     /*!
      * Get current file name.
@@ -63,6 +67,14 @@ public:
     void updateCurrentArtist();
     /*!
      * Update current artist when it download finished.
+     */
+    int getPlayState() const;
+    /*!
+     * Get current play state.
+     */
+    int getPlayMode() const;
+    /*!
+     * Get current play mode.
      */
 
 public Q_SLOTS:
@@ -85,6 +97,10 @@ public Q_SLOTS:
     void showCurrentSong(int index);
     /*!
      * Show current song some information.
+     */
+    void musicStopPlay();
+    /*!
+     * Set current player to stop.
      */
     void musicStatePlay();
     /*!
@@ -137,6 +153,18 @@ public Q_SLOTS:
     void musicImportSongsOnlyDir();
     /*!
      * Import music songs by dir.
+     */
+    void musicImportSongsItemList();
+    /*!
+     * Import music songs by item list.
+     */
+    void musicExportSongsItemList(int index);
+    /*!
+     * Export music songs by item list.
+     */
+    void musicPlayIndex(int row);
+    /*!
+     * Set current row index music to play.
      */
     void musicPlayIndex(int row, int col);
     /*!
@@ -193,10 +221,6 @@ public Q_SLOTS:
     void getParameterSetting();
     /*!
      * Get settings parameters.
-     */
-    void musicSetEqualizer();
-    /*!
-     * Set music equalizer parameters.
      */
     /////////////////////////////////////////////
     ///This is a slot by MusicSongsSummarizied's signal emit
@@ -271,6 +295,7 @@ private:
     MusicLeftAreaWidget *m_leftAreaWidget;
     MusicApplicationObject *m_applicationObject;
 
+    static MusicApplication *m_instance;
 };
 
 #endif // MUSICAPPLICATION_H

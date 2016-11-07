@@ -40,7 +40,8 @@ public:
     /*!
      * Write datas into xml file.
      */
-    void writeMusicSongsConfig(const MusicSongItems &musics);
+    void writeMusicSongsConfig(const MusicSongItems &musics,
+                               const QString &path = MUSICPATH_FULL);
     /*!
      * Write music datas into xml file.
      */
@@ -57,11 +58,6 @@ public:
     { return readXmlAttributeByTagNameValue("playVolume").toInt(); }
     /*!
      * Read Music Play Volume Config.
-     */
-    inline int readEnhancedMusicConfig() const
-    { return readXmlAttributeByTagNameValue("enhancedMusic").toInt(); }
-    /*!
-     * Read Enhanced Music Config.
      */
     inline int readSystemCloseConfig() const
     { return readXmlAttributeByTagNameValue("closeEvent").toInt(); }
@@ -153,18 +149,28 @@ public:
     /*!
      * Read Show Desktop Lrc Family Transparent Config.
      */
+    inline int readDLrcWindowType() const
+    { return readXmlAttributeByTagNameValue("lrcDWindowType").toInt(); }
+    /*!
+     * Read Show Desktop Lrc Locked Config.
+     */
     inline int readShowDLrcLocked() const
     { return readXmlAttributeByTagNameValue("lrcDLocked").toInt(); }
     /*!
      * Read Show Desktop Lrc Locked Config.
+     */
+    inline int readEnhancedMusicConfig() const
+    { return readXmlAttributeByTagNameValue("enhancedMusic").toInt(); }
+    /*!
+     * Read Enhanced Music Config.
      */
     inline int readEqualizerIndex() const
     { return readXmlAttributeByTagNameValue("equalizerIndex").toInt(); }
     /*!
      * Read Equalizer Index Config.
      */
-    inline int readEqualizerEnale() const
-    { return readXmlAttributeByTagNameValue("equalizerEnale").toInt(); }
+    inline int readEqualizerEnable() const
+    { return readXmlAttributeByTagNameValue("equalizerEnable").toInt(); }
     /*!
      * Read Equalizer Enale Config.
      */
@@ -172,6 +178,51 @@ public:
     { return readXmlAttributeByTagNameValue("equalizerValue"); }
     /*!
      * Read Equalizer Value Config.
+     */
+    inline int readEnhancedBalance() const
+    { return readXmlAttributeByTagNameValue("enhancedBalance").toInt(); }
+    /*!
+     * Read Enhanced Volume Balance.
+     */
+    inline int readEnhancedFadeEnable() const
+    { return readXmlAttributeByTagNameValue("enhancedFadeEnable").toInt(); }
+    /*!
+     * Read Enhanced Fade Enable.
+     */
+    inline int readEnhancedFadeInValue() const
+    { return readXmlAttributeByTagNameValue("enhancedFadeInValue").toInt(); }
+    /*!
+     * Read Enhanced Fade In Value.
+     */
+    inline int readEnhancedFadeOutValue() const
+    { return readXmlAttributeByTagNameValue("enhancedFadeOutValue").toInt(); }
+    /*!
+     * Read Enhanced Fade Out Value.
+     */
+    inline int readEnhancedBS2B() const
+    { return readXmlAttributeByTagNameValue("enhancedBS2B").toInt(); }
+    /*!
+     * Read Enhanced BS2B.
+     */
+    inline int readEnhancedCrossfade() const
+    { return readXmlAttributeByTagNameValue("enhancedCrossfade").toInt(); }
+    /*!
+     * Read Enhanced Crossfade.
+     */
+    inline int readEnhancedStereo() const
+    { return readXmlAttributeByTagNameValue("enhancedStereo").toInt(); }
+    /*!
+     * Read Enhanced Stereo.
+     */
+    inline int readEnhancedLADSPA() const
+    { return readXmlAttributeByTagNameValue("enhancedLADSPA").toInt(); }
+    /*!
+     * Read Enhanced LADSPA.
+     */
+    inline int readEnhancedSOX() const
+    { return readXmlAttributeByTagNameValue("enhancedSOX").toInt(); }
+    /*!
+     * Read Enhanced SOX.
      */
     inline int readLanguageIndex() const
     { return readXmlAttributeByTagNameValue("language").toInt(); }
@@ -189,23 +240,23 @@ public:
      * Read Download Cache Size Config.
      */
 
-    inline QColor readShowLrcFgColor() const
-    { return readColorConfig("lrcFgColor");}
+    inline QString readShowLrcFgColor() const
+    { return readXmlAttributeByTagNameValue("lrcFgColor");}
     /*!
      * Read Show Lrc Fg Color Config.
      */
-    inline QColor readShowLrcBgColor() const
-    { return readColorConfig("lrcBgColor");}
+    inline QString readShowLrcBgColor() const
+    { return readXmlAttributeByTagNameValue("lrcBgColor");}
     /*!
      * Read Show Lrc Bg Color Config.
      */
-    inline QColor readShowDLrcFgColor() const
-    { return readColorConfig("lrcDFgColor");}
+    inline QString readShowDLrcFgColor() const
+    { return readXmlAttributeByTagNameValue("lrcDFgColor");}
     /*!
      * Read Show Desktop Lrc Fg Color Config.
      */
-    inline QColor readShowDLrcBgColor() const
-    { return readColorConfig("lrcDBgColor");}
+    inline QString readShowDLrcBgColor() const
+    { return readXmlAttributeByTagNameValue("lrcDBgColor");}
     /*!
      * Read Show Desktop Lrc Bg Color Config.
      */
@@ -231,10 +282,6 @@ protected:
     MusicSongs readMusicFilePath(const QDomNode &node) const;
     /*!
      * Read Music File Path.
-     */
-    QColor readColorConfig(const QString &value) const;
-    /*!
-     * Read Color Config base.
      */
 
 };

@@ -11,25 +11,39 @@ endif(COMMAND cmake_policy)
 add_definitions(-DQT_NO_DEBUG)
 add_definitions(-DQT_THREAD)
 
-set(MUSIC_APP_SOURCES
-  musicapplicationmain.cpp
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CACHEFILE_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CACHEFILE_DIR}/bin) 
+
+set(MUSIC_HEADERS
+    musiclocalpeer.h
+    musicrunapplication.h
+    musicrunglobaldefine.h
+    musicrunobject.h
+  )
+
+set(MUSIC_SOURCES
+    musiclocalpeer.cpp
+    musicrunapplication.cpp
+    musicrunobject.cpp
+    musicrunmain.cpp
+  )
+  
+SET(MUSIC_QRC
+    ${MUSIC_QRC_DIR}/MusicApp.qrc
 )
 
-add_executable(${TARGET_NAME} TTKApp.rc ${MUSIC_APP_SOURCES})
-add_dependencies(${TARGET_NAME} MusicCore)
-
 if(TTK_QT_VERSION VERSION_GREATER "4")
-  list(APPEND QT5_LIBS Qt5::Core Qt5::Network Qt5::Sql Qt5::Xml Qt5::Gui Qt5::Widgets Qt5::Multimedia Qt5::MultimediaWidgets Qt5::WinExtras ${QMMP_LIBRARY} MusicExtras zlib MusicCore -lIphlpapi -luser32)
-  if(UNIX)
-    list(REMOVE_ITEM QT5_LIBS Qt5::WinExtras -lIphlpapi -luser32)
-    list(APPEND QT5_LIBS Qt5::X11Extras)
-  endif()
+  QT5_WRAP_CPP(MUSIC_MOC_H ${MUSIC_HEADERS})
+  QT5_ADD_RESOURCES(MUSIC_RCC_SRCS ${MUSIC_QRC})
+  
+  add_executable(${TARGET_NAME} TTKApp.rc ${MUSIC_RCC_SRCS} ${MUSIC_SOURCES} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
+  list(APPEND QT5_LIBS Qt5::Core Qt5::Network Qt5::Gui Qt5::Widgets)
   target_link_libraries(${TARGET_NAME} ${QT5_LIBS})
 else()
-  list(APPEND QT4_LIBS ${QMMP_LIBRARY} ${QT_QTMULTIMEDIA_LIBRARY} ${QT_QTSCRIPT_LIBRARY} ${QT_QTSQL_LIBRARY} ${QT_QTXML_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTNETWORK_LIBRARY} ${QT_QTCORE_LIBRARY} MusicExtras zlib MusicCore -lIphlpapi -luser32)
-  if(UNIX)
-    list(REMOVE_ITEM QT4_LIBS ${QT_QTMULTIMEDIA_LIBRARY} -lIphlpapi -luser32)
-    list(APPEND QT4_LIBS -lQtMultimediaKit)
-  endif()
+  QT4_WRAP_CPP(MUSIC_MOC_H ${MUSIC_HEADERS})
+  QT4_ADD_RESOURCES(MUSIC_RCC_SRCS ${MUSIC_QRC})
+  
+  add_executable(${TARGET_NAME} TTKApp.rc ${MUSIC_RCC_SRCS} ${MUSIC_SOURCES} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
+  list(APPEND QT4_LIBS ${QT_QTGUI_LIBRARY} ${QT_QTNETWORK_LIBRARY} ${QT_QTCORE_LIBRARY})
   target_link_libraries(${TARGET_NAME} ${QT4_LIBS})
 endif()

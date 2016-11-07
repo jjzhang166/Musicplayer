@@ -15,6 +15,7 @@
 #include <QLabel>
 #include "musicglobaldefine.h"
 
+class MusicSplitItemClickedLabel;
 class MusicSongsToolItemRenamedWidget;
 
 /*! @brief The class of the song enter item widget.
@@ -106,18 +107,6 @@ Q_SIGNALS:
     /*!
      * Rename item artist label is finised it emit.
      */
-    void videoButtonClicked(const QString &text);
-    /*!
-     * Video button clicked it emit.
-     */
-    void currentLoveStateChanged();
-    /*!
-     * Current music love icon state changed.
-     */
-    void currentDownloadStateChanged();
-    /*!
-     * Current music download icon state changed.
-     */
 
 public Q_SLOTS:
     void deleteRenameItem();
@@ -127,14 +116,6 @@ public Q_SLOTS:
     void setChangItemName(const QString &name);
     /*!
      * Rename item artist label is finised.
-     */
-    void showMVButtonClicked();
-    /*!
-     * Show video button clicked.
-     */
-    void sharingButtonClicked();
-    /*!
-     * Sharing music button clicked.
      */
     void currentLoveStateClicked();
     /*!
@@ -156,7 +137,8 @@ protected:
      */
 
     QString m_totalTime;
-    QLabel *m_artPictureLabel, *m_songNameLabel, *m_timeLabel;
+    QLabel *m_artPictureLabel, *m_timeLabel;
+    MusicSplitItemClickedLabel *m_songNameLabel;
     MusicSongsEnterPlayWidget *m_columnOne, *m_columnThree;
     QPushButton *m_loveButton, *m_deleteButton,* m_showMVButton;
     QPushButton *m_downloadButton, *m_moreButton;

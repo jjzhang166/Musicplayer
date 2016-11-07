@@ -11,39 +11,19 @@
 # =================================================
 
 INCLUDEPATH += $$PWD \
-               $$PWD/network
+               $$PWD/utils
 
 !contains(CONFIG, TTK_NO_MSVC_LINK_NEED){
 HEADERS  += \
-    $$PWD/network/musicnetworkabstract.h \
-    $$PWD/network/musicdownloadthreadabstract.h \
-    $$PWD/network/musicdata2downloadthread.h \
-    $$PWD/network/musicdatadownloadthread.h \
-    $$PWD/network/musictextdownloadthread.h \
-    $$PWD/network/musicsourcedownloadthread.h \
-    $$PWD/network/musicnetworkthread.h \
-    $$PWD/network/musicnetworkproxy.h \
-    $$PWD/network/musicnetworkoperator.h \
-    $$PWD/network/musicbackgrounddownload.h \
-    $$PWD/network/musicdownloadqueuecache.h \
-    $$PWD/network/musicdownloadquerythreadabstract.h \
-    $$PWD/network/musicdownloadquerysinglethread.h \
-    $$PWD/network/musicdownloadquerymultiplethread.h \
-    $$PWD/network/musicradiochannelthread.h \
-    $$PWD/network/musicradioplaylistthread.h \
-    $$PWD/network/musicradiosongsthread.h \
-    $$PWD/network/musicradiothreadabstract.h \
-    $$PWD/network/musictranslationthread.h \
-    $$PWD/network/musicvoicettsthread.h \
+    $$PWD/utils/musiccoreutils.h \
+    $$PWD/utils/musicwidgetutils.h \
+    $$PWD/utils/musicnumberutils.h \
+    $$PWD/utils/musicstringutils.h \
     $$PWD/musiclogger.h \
     $$PWD/musicobject.h \
-    $$PWD/musicuiobject.h \
-    $$PWD/musicttkuiobject.h \
-    $$PWD/musicutils.h \
     $$PWD/musicnumberdefine.h \
     $$PWD/musicglobaldefine.h \
     $$PWD/musicglobalhotkey.h \
-    $$PWD/musicversion.h \
     $$PWD/musictime.h \
     $$PWD/musicxmlconfigmanager.h \
     $$PWD/musicplayer.h \
@@ -63,27 +43,10 @@ HEADERS  += \
 
 contains(CONFIG, TTK_BUILD_LIB){
 SOURCES += \
-    $$PWD/network/musicnetworkabstract.cpp \
-    $$PWD/network/musicdownloadthreadabstract.cpp \
-    $$PWD/network/musicdata2downloadthread.cpp \
-    $$PWD/network/musicdatadownloadthread.cpp \
-    $$PWD/network/musictextdownloadthread.cpp \
-    $$PWD/network/musicsourcedownloadthread.cpp \
-    $$PWD/network/musicnetworkthread.cpp \
-    $$PWD/network/musicnetworkproxy.cpp \
-    $$PWD/network/musicnetworkoperator.cpp \
-    $$PWD/network/musicbackgrounddownload.cpp \
-    $$PWD/network/musicdownloadqueuecache.cpp \
-    $$PWD/network/musicdownloadquerythreadabstract.cpp \
-    $$PWD/network/musicdownloadquerysinglethread.cpp \
-    $$PWD/network/musicdownloadquerymultiplethread.cpp \
-    $$PWD/network/musicradiochannelthread.cpp \
-    $$PWD/network/musicradioplaylistthread.cpp \
-    $$PWD/network/musicradiosongsthread.cpp \
-    $$PWD/network/musicradiothreadabstract.cpp \
-    $$PWD/network/musictranslationthread.cpp \
-    $$PWD/network/musicvoicettsthread.cpp \
-    $$PWD/musicutils.cpp \
+    $$PWD/utils/musiccoreutils.cpp \
+    $$PWD/utils/musicwidgetutils.cpp \
+    $$PWD/utils/musicnumberutils.cpp \
+    $$PWD/utils/musicstringutils.cpp \
     $$PWD/musicglobalhotkey.cpp \
     $$PWD/musictime.cpp \
     $$PWD/musicplayer.cpp \

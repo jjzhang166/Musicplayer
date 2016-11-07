@@ -3,11 +3,10 @@
 #include "musicdesktopwallpaperthread.h"
 #include "musicuiobject.h"
 #include "musicdatadownloadthread.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
 #include "musicregeditmanager.h"
 #include "musicnumberdefine.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
 
 #include <QFileDialog>
 #include <QStyledItemDelegate>
@@ -18,7 +17,6 @@ MusicDesktopWallpaperWidget::MusicDesktopWallpaperWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
 
     ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
@@ -68,10 +66,10 @@ void MusicDesktopWallpaperWidget::initWidgetStyle() const
     ui->netRadioButton->setStyleSheet(MusicUIObject::MRadioButtonStyle01);
     ui->localRadioButton->setStyleSheet(MusicUIObject::MRadioButtonStyle01);
     ui->playRadioButton->setStyleSheet(MusicUIObject::MRadioButtonStyle01);
-    ui->viewButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->cancelButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->confirmButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->stopButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->viewButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->cancelButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->confirmButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->stopButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->pictureEffect->setItemDelegate(new QStyledItemDelegate(ui->pictureEffect));
     ui->pictureEffect->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
     ui->pictureEffect->view()->setStyleSheet(MusicUIObject::MScrollBarStyle01);
@@ -129,7 +127,7 @@ void MusicDesktopWallpaperWidget::viewButtonPressed()
 
     QStringList filters;
     filters << "*.bmp" << "*.jpg" <<"*.jpeg" << "*.png";
-    foreach(QFileInfo file, MusicUtils::UCore::findFile(path, filters))
+    foreach(const QFileInfo &file, MusicUtils::Core::findFile(path, filters))
     {
         m_path << file.absoluteFilePath();
     }
@@ -204,7 +202,7 @@ void MusicDesktopWallpaperWidget::parameterFinished()
     m_wallThread->setParamters(para);
     m_wallThread->start();
     setAutoStart(ui->openWithstart->isChecked());
-    close();
+    hide();
 }
 
 void MusicDesktopWallpaperWidget::stopButtonPressed()
@@ -228,7 +226,6 @@ void MusicDesktopWallpaperWidget::setAutoStart(bool autoStart) const
 
 void MusicDesktopWallpaperWidget::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     MusicAbstractMoveWidget::show();
 }

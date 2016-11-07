@@ -13,6 +13,7 @@
 #include "musicglobaldefine.h"
 
 class MusicQualityChoiceWidget;
+class MusicCloudSharedSongWidget;
 
 namespace Ui {
     class MusicApplication;
@@ -34,6 +35,10 @@ public:
     static QString getClassName();
     /*!
      * Get class object name.
+     */
+    static MusicLeftAreaWidget *instance();
+    /*!
+     * Get class object instance.
      */
     void setupUi(Ui::MusicApplication* ui);
     /*!
@@ -99,14 +104,20 @@ public Q_SLOTS:
     /*!
      * Show projectM spectrum widget.
      */
+    void cloudSharedSongUploadAllDone();
+    /*!
+     * All files upload finsihed.
+     */
 
 protected:
-
-    QWidget *m_supperClass;
     Ui::MusicApplication *m_ui;
+
+    int m_currentIndex;
     QWidget *m_stackedWidget;
     MusicQualityChoiceWidget *m_qualityChoiceWidget;
+    MusicCloudSharedSongWidget *m_cloudSharedSongWidget;
 
+    static MusicLeftAreaWidget *m_instance;
 };
 
 #endif // MUSICLEFTAREAWIDGET_H

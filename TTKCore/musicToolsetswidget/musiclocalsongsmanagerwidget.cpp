@@ -2,21 +2,20 @@
 #include "ui_musiclocalsongsmanagerwidget.h"
 #include "musiclocalsongsmanagerthread.h"
 #include "musiclocalsongstablewidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
 #include "musicconnectionpool.h"
-#include "musicutils.h"
+#include "musicwidgetutils.h"
+#include "musicnumberutils.h"
 #include "musicsongssummarizied.h"
 
 #include <QDateTime>
-#include <QMovie>
 #include <QFileDialog>
 #include <QButtonGroup>
 #include <QStyledItemDelegate>
 
 MusicLocalSongsManagerWidget::MusicLocalSongsManagerWidget(QWidget *parent)
     : MusicAbstractMoveDialog(parent),
-      ui(new Ui::MusicLocalSongsManagerWidget), m_movie(nullptr)
+      ui(new Ui::MusicLocalSongsManagerWidget)
 {
     Q_UNUSED(qRegisterMetaType<QFileInfoList>("QFileInfoList"));
     ui->setupUi(this);
@@ -27,11 +26,13 @@ MusicLocalSongsManagerWidget::MusicLocalSongsManagerWidget(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    ui->toolWidget->setStyleSheet("#toolWidget{" + MusicUIObject::MCustomStyle27 + "}");
+    ui->toolWidget->setStyleSheet(QString("#toolWidget{%1}").arg(MusicUIObject::MBackgroundStyle07));
 
-    ui->allSelectedcheckBox->setStyleSheet(MusicUIObject::MCheckBoxStyle02);
-    ui->auditionButton->setStyleSheet(MusicUIObject::MToolButtonStyle07);
-    ui->addButton->setStyleSheet(MusicUIObject::MToolButtonStyle08);
+    ui->allSelectedcheckBox->setStyleSheet(MusicUIObject::MCheckBoxStyle03);
+    ui->auditionButton->setStyleSheet(MusicUIObject::MToolButtonStyle01 + MusicUIObject::MToolButtonStyle02 +
+                                      "QToolButton{ image:url(:/contextMenu/btn_audition);}");
+    ui->addButton->setStyleSheet(MusicUIObject::MToolButtonStyle01 + MusicUIObject::MToolButtonStyle02 +
+                                 "QToolButton{ image:url(:/contextMenu/btn_add);}");
 
     ui->auditionButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->addButton->setCursor(QCursor(Qt::PointingHandCursor));
@@ -40,23 +41,23 @@ MusicLocalSongsManagerWidget::MusicLocalSongsManagerWidget(QWidget *parent)
     ui->scanCustButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->searchLineLabel->setCursor(QCursor(Qt::PointingHandCursor));
 
+    ui->loadingLabel->setType(MusicGifLabelWidget::Gif_Cicle_Blue);
+
     ui->allSelectedcheckBox->setText(tr("allselected"));
     connect(ui->allSelectedcheckBox, SIGNAL(clicked(bool)), SLOT(selectedAllItems(bool)));
 
     ui->scanButton->setIcon(QIcon(":/toolSets/btn_search"));
-    ui->scanButton->setStyleSheet("QPushButton{ background:transparent;}"
-                                  "QPushButton::hover{ border:1px solid #000000;}");
+    ui->scanButton->setStyleSheet(MusicUIObject::MPushButtonStyle10);
     ui->scanCustButton->setIcon(QIcon(":/toolSets/btn_search"));
-    ui->scanCustButton->setStyleSheet("QPushButton{ background:transparent;}"
-                                      "QPushButton::hover{ border:1px solid #000000;}");
+    ui->scanCustButton->setStyleSheet(MusicUIObject::MPushButtonStyle10);
 
-    ui->showlistButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->showlistButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->showlistButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->filterComboBox->setItemDelegate(new QStyledItemDelegate(ui->filterComboBox));
     ui->filterComboBox->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
     ui->filterComboBox->view()->setStyleSheet(MusicUIObject::MScrollBarStyle01);
 
-    ui->showPathButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->showPathButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->showPathButton->setCursor(QCursor(Qt::PointingHandCursor));
 
     QButtonGroup *buttonGroup = new QButtonGroup(this);
@@ -88,8 +89,7 @@ MusicLocalSongsManagerWidget::MusicLocalSongsManagerWidget(QWidget *parent)
 
 MusicLocalSongsManagerWidget::~MusicLocalSongsManagerWidget()
 {
-    M_CONNECTION_PTR->poolDisConnect(getClassName() );
-    delete m_movie;
+    M_CONNECTION_PTR->removeValue(getClassName() );
     clearAllItems();
     m_thread->stopAndQuitThread();
     delete m_thread;
@@ -123,15 +123,15 @@ void MusicLocalSongsManagerWidget::addAllItems(const QFileInfoList &fileName)
         {
             var = fileName[i].fileName();
             QTableWidgetItem *item = new QTableWidgetItem;
-            item->setText(MusicUtils::UWidget::elidedText(font(), var, Qt::ElideRight, 310));
+            item->setText(MusicUtils::Widget::elidedText(font(), var, Qt::ElideRight, 310));
             item->setToolTip(var);
             item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
             ui->songlistsTable->setItem(i, 0, item);
 
                              item = new QTableWidgetItem;
-            item->setText(MusicUtils::UWidget::elidedText(font(), MusicUtils::UNumber::size2Number(fileName[i].size()),
+            item->setText(MusicUtils::Widget::elidedText(font(), MusicUtils::Number::size2Number(fileName[i].size()),
                                                          Qt::ElideRight, 50));
-            item->setToolTip(MusicUtils::UNumber::size2Label(fileName[i].size()));
+            item->setToolTip(MusicUtils::Number::size2Label(fileName[i].size()));
             item->setTextAlignment(Qt::AlignCenter);
             ui->songlistsTable->setItem(i, 1, item);
 
@@ -151,7 +151,7 @@ void MusicLocalSongsManagerWidget::addAllItems(const QFileInfoList &fileName)
         {
             var = fileName[i].absoluteFilePath();
             QTableWidgetItem *item = new QTableWidgetItem;
-            item->setText(MusicUtils::UWidget::elidedText(font(), var, Qt::ElideRight, 525));
+            item->setText(MusicUtils::Widget::elidedText(font(), var, Qt::ElideRight, 525));
             item->setToolTip(var);
             item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
             ui->songlistsTable->setItem(i, 0, item);
@@ -164,7 +164,7 @@ void MusicLocalSongsManagerWidget::addDrivesList()
     QStringList names;
     names << tr("Overall");
     QFileInfoList drives = QDir::drives();
-    foreach(QFileInfo driver, drives)
+    foreach(const QFileInfo &driver, drives)
     {
        names << driver.absoluteDir().absolutePath();
     }
@@ -192,8 +192,7 @@ void MusicLocalSongsManagerWidget::filterScanChanged(int index)
     }
 
     ui->loadingLabel->show();
-    ui->loadingLabel->setMovie(m_movie = new QMovie(":/toolSets/ib_loading", QByteArray(),this));
-    m_movie->start();
+    ui->loadingLabel->start();
     m_thread->start();
 }
 
@@ -227,7 +226,7 @@ bool MusicLocalSongsManagerWidget::filterIndexChanged()
     {
         QStringList names;
         QFileInfoList drives = QDir::drives();
-        foreach(QFileInfo driver, drives)
+        foreach(const QFileInfo &driver, drives)
         {
            names << driver.absoluteDir().absolutePath();
         }
@@ -260,8 +259,8 @@ void MusicLocalSongsManagerWidget::setSongNamePath(const QFileInfoList &name)
 {
     M_LOGGER_INFO("stop fetch!");
     ui->loadingLabel->hide();
-    delete m_movie;
-    m_movie = nullptr;
+    ui->loadingLabel->stop();
+
     clearAllItems();
     addAllItems( m_filenames = name );
 }
@@ -408,7 +407,6 @@ void MusicLocalSongsManagerWidget::setShowPathButton()
 
 int MusicLocalSongsManagerWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

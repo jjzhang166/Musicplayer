@@ -97,10 +97,6 @@ Q_SIGNALS:
     /*!
      * Parameters setting changed emit.
      */
-    void soundEqualizerClicked();
-    /*!
-     * Sound equalizer button clicked.
-     */
 
 public Q_SLOTS:
     void clearFunctionTableSelection();
@@ -170,6 +166,10 @@ public Q_SLOTS:
      * Reset desktop parameter.
      */
 
+    void downloadGroupServer(int index);
+    /*!
+     * Select the server in multi or vip multi.
+     */
     void downloadGroupCached(int index);
     /*!
      * Set enable or disable download cache.
@@ -204,13 +204,9 @@ public Q_SLOTS:
      * Test current network connection available changed.
      */
 
-    void soundEffectCheckBoxChanged();
+    void musicFadeInAndOutClicked(bool state);
     /*!
-     * Sound effect checkBox changed.
-     */
-    void soundEffectValueChanged(int index);
-    /*!
-     * Sound effect button value changed.
+     * Music fade in and out changed.
      */
 
     void commitTheResults();
@@ -247,7 +243,7 @@ protected:
     /*!
      * Init network stack widget.
      */
-    void lcrColorValue(Type key, const QString &type, QPushButton *obj);
+    void lcrColorValue(Type key, const QString &type, QLabel *obj);
     /*!
      * Set lrc color value by type and value type.
      */
@@ -269,8 +265,8 @@ protected:
      */
 
     Ui::MusicSettingWidget *ui;
-    QColor m_lrcSelectedFg, m_lrcSelectedBg;
-    QColor m_DlrcSelectedFg, m_DlrcSelectedBg;
+    QList<QColor> m_lrcSelectedFg, m_lrcSelectedBg;
+    QList<QColor> m_DlrcSelectedFg, m_DlrcSelectedBg;
 
 };
 

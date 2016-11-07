@@ -1,7 +1,8 @@
 #include "musicsystemtraymenu.h"
 #include "musicuiobject.h"
-#include "musicutils.h"
-#include "musicttkuiobject.h"
+#include "musicwidgetutils.h"
+#include "musiccontextuiobject.h"
+#include "musictinyuiobject.h"
 #include "musicclickedslider.h"
 
 #include <QLabel>
@@ -48,7 +49,7 @@ QString MusicSystemTrayMenu::getClassName()
 
 void MusicSystemTrayMenu::setLabelText(const QString &text) const
 {
-    m_showText->setText(MusicUtils::UWidget::elidedText(font(), text, Qt::ElideRight, 160));
+    m_showText->setText(MusicUtils::Widget::elidedText(font(), text, Qt::ElideRight, 160));
     m_showText->setToolTip(text);
 }
 
@@ -65,8 +66,8 @@ void MusicSystemTrayMenu::lockDesktopLrc(bool lock)
 
 void MusicSystemTrayMenu::showPlayStatus(bool status) const
 {
-    m_PlayOrStop->setStyleSheet(status ? MusicTTKUIObject::MKGContextPlay :
-                                         MusicTTKUIObject::MKGContextPause);
+    m_PlayOrStop->setStyleSheet(status ? MusicUIObject::MKGContextPlay :
+                                         MusicUIObject::MKGContextPause);
 }
 
 void MusicSystemTrayMenu::setVolumeValue(int value) const
@@ -75,7 +76,7 @@ void MusicSystemTrayMenu::setVolumeValue(int value) const
     m_volumeSlider->setValue(value);
     m_volumeSlider->blockSignals(false);
 
-    QString style = MusicTTKUIObject::MKGTinyBtnSound;
+    QString style = MusicUIObject::MKGTinyBtnSound;
     if(66 < value && value <=100)
     {
         style += "QToolButton{ margin-left:-48px; }";
@@ -122,9 +123,9 @@ void MusicSystemTrayMenu::createPlayWidgetActions()
     nextPlay->setFixedSize(32, 32);
     m_PlayOrStop->setFixedSize(32, 32);
 
-    previousPlay->setStyleSheet(MusicTTKUIObject::MKGContextPrevious);
-    nextPlay->setStyleSheet(MusicTTKUIObject::MKGContextNext);
-    m_PlayOrStop->setStyleSheet(MusicTTKUIObject::MKGContextPlay);
+    previousPlay->setStyleSheet(MusicUIObject::MKGContextPrevious);
+    nextPlay->setStyleSheet(MusicUIObject::MKGContextNext);
+    m_PlayOrStop->setStyleSheet(MusicUIObject::MKGContextPlay);
 
     previousPlay->setCursor(QCursor(Qt::PointingHandCursor));
     nextPlay->setCursor(QCursor(Qt::PointingHandCursor));
@@ -140,7 +141,7 @@ void MusicSystemTrayMenu::createPlayWidgetActions()
 
     m_showText = new QLabel(widgetActionContainer);
     m_showText->setAlignment(Qt::AlignCenter);
-    m_showText->setStyleSheet(MusicUIObject::MCustomStyle12);
+    m_showText->setStyleSheet(MusicUIObject::MColorStyle03);
     vbox->addWidget(widgetContainer);
     vbox->addWidget(m_showText);
     widgetActionContainer->setLayout(vbox);

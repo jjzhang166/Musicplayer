@@ -9,7 +9,6 @@
 #include "decoderfactory.h"
 #include "metadatamodel.h"
 #include "decoder.h"
-///
 
 MusicSongTag::MusicSongTag()
 {
@@ -30,6 +29,7 @@ bool MusicSongTag::readFile(const QString &file)
 {
     delete m_tag;
     m_tag = new TagReadAndWrite(file);
+    m_filePath = file;
     if(!m_tag->readFile())
     {
         return readOtherTaglibNotSupport(file);
@@ -37,6 +37,11 @@ bool MusicSongTag::readFile(const QString &file)
 
     m_parameters = m_tag->getMusicTags();
     return true;
+}
+
+QString MusicSongTag::getFilePath() const
+{
+    return m_filePath;
 }
 
 bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
@@ -62,7 +67,7 @@ bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
 
     QObject *obj = loader.instance();
     DecoderFactory *decoderfac = nullptr;
-    if(obj && (decoderfac = qobject_cast<DecoderFactory*>( obj )) )
+    if(obj && (decoderfac = MObject_cast(DecoderFactory*, obj)) )
     {
         MetaDataModel *model = decoderfac->createMetaDataModel(path);
         if(model != nullptr)
@@ -97,9 +102,9 @@ QString MusicSongTag::getNotSupportedPluginPath(const QString &format)
 #  endif
 #elif defined Q_OS_UNIX
 #  ifdef MUSIC_GREATER_NEW
-    path = QString("qmmp/Input/%1.dll").arg(format);
+    path = QString("qmmp/Input/%1.so").arg(format);
 #  else
-    path = QString("../lib/qmmp/Input/%1.dll").arg(format);
+    path = QString("../lib/qmmp/Input/%1.so").arg(format);
 #  endif
 #endif
     return path;

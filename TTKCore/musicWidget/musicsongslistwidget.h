@@ -11,21 +11,23 @@
 
 #include <QMenu>
 #include <QTimer>
-#include <QContextMenuEvent>
 #include "musicsong.h"
-#include "musicabstracttablewidget.h"
+#include "musicslowmovingtablewidget.h"
 
+class QPropertyAnimation;
+class MusicOpenFileWidget;
 class MusicSongsListPlayWidget;
 class MusicSongsListItemInfoWidget;
+class MusicSongsListFunctionWidget;
 
 /*! @brief The class of the songs list widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicSongsListWidget : public MusicAbstractTableWidget
+class MUSIC_WIDGET_EXPORT MusicSongsListWidget : public MusicSlowMovingTableWidget
 {
     Q_OBJECT
 public:
-    explicit MusicSongsListWidget(QWidget *parent = 0);
+    explicit MusicSongsListWidget(int index, QWidget *parent = 0);
     /*!
      * Object contsructor.
      */
@@ -48,6 +50,10 @@ public:
      * Clear All Items.
      */
 
+    void setParentToolIndex(int index);
+    /*!
+     * Set parent tool index.
+     */
     int allRowsHeight() const;
     /*!
      * Get all rows height.
@@ -56,9 +62,17 @@ public:
     /*!
      * Select the current play row.
      */
+    inline int getPlayRowIndex() const { return m_playRowIndex; }
+    /*!
+     * Get the current play row.
+     */
     inline void setPlaybackMode(MusicObject::SongPlayType type) { m_songplaymode = type;}
     /*!
      * Set current play mode.
+     */
+    inline int getTransparent() const { return m_transparent;}
+    /*!
+     * Get item transparent.
      */
     inline void setTransparent(int transparent) { m_transparent = transparent;}
     /*!
@@ -75,6 +89,10 @@ public:
     void replacePlayWidgetRow();
     /*!
      * Replace current play widget row.
+     */
+    bool createUploadFileWidget();
+    /*!
+     * Create upload file widget.
      */
 
 Q_SIGNALS:
@@ -177,9 +195,53 @@ public Q_SLOTS:
     /*!
      * Open music file information widget.
      */
+    void musicSongMovieFound();
+    /*!
+     * To search song mv by song name.
+     */
+    void musicSongMovieFoundPy();
+    /*!
+     * To search song mv by song name in play widget.
+     */
+    void musicAlbumFoundWidget();
+    /*!
+     * Open music album found widget.
+     */
+    void musicSimilarFoundWidget();
+    /*!
+     * Open music similar found widget.
+     */
+    void musicSimilarFoundWidgetPy();
+    /*!
+     * Open music similar found widget in play widget.
+     */
+    void musicSongSharedWidget();
+    /*!
+     * Open music song shared widget.
+     */
+    void musicSongSharedWidgetPy();
+    /*!
+     * Open music song shared widget in play widget.
+     */
+    void musicSongTransferWidget();
+    /*!
+     * Open music song transfer widget.
+     */
+    void musicSongDownload();
+    /*!
+     * Open music song download widget.
+     */
+    void musicSearchQuery(QAction *action);
+    /*!
+     * Open music song search query.
+     */
     void setItemRenameFinished(const QString &name);
     /*!
      * Rename item artist label is finised.
+     */
+    void deleteFloatWidget();
+    /*!
+     * Delete the float function widget.
      */
 
 protected:
@@ -201,16 +263,34 @@ protected:
     /*!
      * Create context menu.
      */
+    QString getCurrentSongPath() const;
+    /*!
+     * Get current song path.
+     */
+    QString getSongPath(int index) const;
+    /*!
+     * Get song path.
+     */
+    QString getCurrentSongName() const;
+    /*!
+     * Get current song name.
+     */
+    QString getSongName(int index) const;
+    /*!
+     * Get song name.
+     */
 
-    int m_transparent;
+    int m_transparent, m_parentToolIndex;
     int m_playRowIndex, m_dragStartIndex;
     QPoint m_dragStartPoint;
     bool m_mouseMoved;
 
     QTimer m_timerShow, m_timerStay;
     MusicSongs *m_musicSongs;
+    MusicOpenFileWidget *m_uploadFileWidget;
     MusicSongsListItemInfoWidget *m_musicSongsInfoWidget;
     MusicSongsListPlayWidget *m_musicSongsPlayWidget;
+    MusicSongsListFunctionWidget *m_floatWidget;
 
     bool m_leftButtonPressed;
     bool m_renameActived, m_deleteItemWithFile;

@@ -1,13 +1,14 @@
 #include "musiclrcfloatwidget.h"
 #include "musiclrcfloatphotowidget.h"
 #include "musiclrcfloatsettingwidget.h"
+#include "musicinlinefloatuiobject.h"
 
 #include <QPushButton>
 
 MusicLrcFloatWidget::MusicLrcFloatWidget(QWidget *parent)
     : MusicFloatAbstractWidget(parent)
 {
-    setStyleSheet(MusicUIObject::MCustomStyle03);
+    setStyleSheet(MusicUIObject::MBackgroundStyle08);
 
     m_floatPhotoWidget = new MusicLrcFloatPhotoWidget(parent);
     m_floatPhotoWidget->hide();
@@ -21,23 +22,22 @@ MusicLrcFloatWidget::MusicLrcFloatWidget(QWidget *parent)
     m_wallp = new QPushButton(tr(" Wallp"), this);
     m_photo = new QPushButton(tr(" Photo"), this);
 
-    m_update->setIcon(QIcon(":/lrc/lb_lrc_update"));
-    m_search->setIcon(QIcon(":/lrc/lb_lrc_search"));
-    m_more->setIcon(QIcon(":/lrc/lb_lrc_more"));
-    m_wallp->setIcon(QIcon(":/lrc/lb_lrc_wallpaper"));
-    m_photo->setIcon(QIcon(":/lrc/lb_lrc_photo"));
+    m_update->setGeometry(15, 10, 80, 20);
+    m_search->setGeometry(15, 50, 80, 20);
+    m_more->setGeometry(15, 90, 80, 20);
+    m_wallp->setGeometry(15, 130, 80, 20);
+    m_photo->setGeometry(15, 170, 80, 20);
 
-    m_update->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_search->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_more->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_wallp->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_photo->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-
-    m_update->setGeometry(15, 10, m_update->width(), m_update->height());
-    m_search->setGeometry(15, 50, m_search->width(), m_search->height());
-    m_more->setGeometry(15, 90, m_more->width(), m_more->height());
-    m_wallp->setGeometry(15, 130, m_wallp->width(), m_wallp->height());
-    m_photo->setGeometry(15, 170, m_photo->width(), m_photo->height());
+    m_update->setStyleSheet(MusicUIObject::MKGInlineFloatUpdate + MusicUIObject::MPushButtonStyle09 +
+                            MusicUIObject::MPushButtonStyle01);
+    m_search->setStyleSheet(MusicUIObject::MKGInlineFloatSearch + MusicUIObject::MPushButtonStyle09 +
+                            MusicUIObject::MPushButtonStyle01);
+    m_more->setStyleSheet(MusicUIObject::MKGInlineFloatMore + MusicUIObject::MPushButtonStyle09 +
+                          MusicUIObject::MPushButtonStyle01);
+    m_wallp->setStyleSheet(MusicUIObject::MKGInlineFloatWallpaper + MusicUIObject::MPushButtonStyle09 +
+                           MusicUIObject::MPushButtonStyle01);
+    m_photo->setStyleSheet(MusicUIObject::MKGInlineFloatPhoto + MusicUIObject::MPushButtonStyle09 +
+                           MusicUIObject::MPushButtonStyle01);
 
     m_update->setCursor(QCursor(Qt::PointingHandCursor));
     m_search->setCursor(QCursor(Qt::PointingHandCursor));

@@ -35,7 +35,6 @@ public:
      * Get class object name.
      */
 
-protected:
     bool readConfig(const QString &name);
     /*!
      * Read datas from xml file by given name.
@@ -79,7 +78,7 @@ protected:
      * Append xml element nodes by node name\ key name and value.
      */
     QDomElement writeDomElementMutil(QDomElement &element, const QString &node,
-                                     const QStringList &keys, const QList<QVariant> &values);
+                                     const QStringList &keys, const QVariantList &values);
     /*!
      * Append xml elements nodes by node name\ keys name and values.
      */
@@ -90,7 +89,7 @@ protected:
      * Append xml element nodes by node name\ key name \ value and attribute's text.
      */
     QDomElement writeDomElementMutilText(QDomElement &element, const QString &node,
-                                         const QStringList &keys, const QList<QVariant> &values,
+                                         const QStringList &keys, const QVariantList &values,
                                          const QString &text);
     /*!
      * Append xml elements nodes by node name\ keys name \ values and attribute's text.
@@ -104,6 +103,7 @@ protected:
      * Append xml element nodes key name and value.
      */
 
+protected:
     QFile *m_file;
     QDomDocument *m_ddom;
 

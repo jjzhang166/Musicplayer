@@ -36,6 +36,10 @@ public:
     /*!
      * Get class object name.
      */
+    static MusicApplicationObject *instance();
+    /*!
+     * Get class object instance.
+     */
     bool getWindowToTop() const {return m_setWindowToTop;}
     /*!
      * Get current window is to top.
@@ -66,16 +70,8 @@ public:
     /*!
      * Window close animation opacity.
      */
-    void musicSetEqualizer();
-    /*!
-     * Show set equalizer widget.
-     */
 
 Q_SIGNALS:
-    void getCurrentPlayList(QStringList &list);
-    /*!
-     * Get current play lists.
-     */
     void enhancedMusicChanged(int type);
     /*!
      * Set enhanced music config changed.
@@ -102,6 +98,10 @@ public Q_SLOTS:
     /*!
      * Set current window to top.
      */
+    void musicResetWindow();
+    /*!
+     * Reset current window geometry.
+     */
     void musicToolSetsParameter();
     /*!
      * Timer parameter changed.
@@ -110,15 +110,28 @@ public Q_SLOTS:
     /*!
      * Detect mobile devices on linux.
      */
+    void musicSetEqualizer();
+    /*!
+     * Show set equalizer widget.
+     */
+    void musicSetSoundEffect();
+    /*!
+     * Show set sound effect widget.
+     */
 
 protected:
+    bool closeCurrentEqualizer();
+    /*!
+     * Close current equalizer.
+     */
+
     bool m_setWindowToTop;
     QPropertyAnimation *m_animation;
-    QWidget *m_supperClass;
     MusicTimerAutoObject *m_musicTimerAutoObj;
     MusicMobileDevicesWidget *m_mobileDevices;
     MusicMobileDevicesThread *m_mobileDevicesLinux;
 
+    static MusicApplicationObject *m_instance;
 };
 
 #endif // MUSICAPPLICATIONOBJECT_H

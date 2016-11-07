@@ -4,16 +4,16 @@
 #include "musiclocalsongsmanagerwidget.h"
 #include "musictransformwidget.h"
 #include "musicdesktopwallpaperwidget.h"
-#include "musicconnectionpool.h"
 #include "musicnetworktestwidget.h"
 #include "musicconnecttransferwidget.h"
 #include "musicvolumegainwidget.h"
 #include "musicsoundtouchwidget.h"
 #include "musicsongringtonemakerwidget.h"
+#include "musicgrabwidget.h"
 #include "musicmessagebox.h"
-#include "musicutils.h"
 #include "musicapplication.h"
 #include "musicleftareawidget.h"
+#include "musicrightareawidget.h"
 
 #include <QTimer>
 
@@ -34,18 +34,13 @@ MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
     setSpacing(16);
     QTimer::singleShot(MT_MS, this, SLOT(addListWidgetItem()));
 #endif
-    MusicUtils::UWidget::setTransparent(this, 50);
+    MusicUtils::Widget::setTransparent(this, 50);
     connect(this, SIGNAL(itemClicked(QListWidgetItem*)),
                   SLOT(itemHasClicked(QListWidgetItem*)));
-
-    M_CONNECTION_PTR->setValue(getClassName(), this);
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicApplication::getClassName());
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicLeftAreaWidget::getClassName());
 }
 
 MusicToolSetsWidget::~MusicToolSetsWidget()
 {
-    M_CONNECTION_PTR->poolDisConnect(getClassName());
     clearAllItems();
 }
 
@@ -106,8 +101,16 @@ void MusicToolSetsWidget::addListWidgetItem()
                                                 ,tr("gain"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
+                     item = new QListWidgetItem(QIcon(":/tools/lb_detect")
+                                                ,tr("detect"), this);
+    item->setSizeHint(QSize(80, 90));
+    addItem(item);
                      item = new QListWidgetItem(QIcon(":/tools/lb_soundtouch")
                                                 ,tr("soundtouch"), this);
+    item->setSizeHint(QSize(80, 90));
+    addItem(item);
+                     item = new QListWidgetItem(QIcon(":/tools/lb_grabwindow")
+                                                ,tr("grabwindow"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
 }
@@ -135,7 +138,7 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
            {
                 MusicTimerWidget timer(this);
                 QStringList songlist;
-                emit getCurrentPlayList(songlist);
+                MusicApplication::instance()->getCurrentPlayList(songlist);
                 timer.setSongStringList(songlist);
                 timer.exec();
                 break;
@@ -147,7 +150,7 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 5:
             {
-                emit showSpectrumWidget();
+                MusicLeftAreaWidget::instance()->musicAnalyzerSpectrumWidget();
                 break;
             }
         case 6:
@@ -174,7 +177,17 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 10:
             {
+                MusicRightAreaWidget::instance()->musicFunctionClicked(MusicRightAreaWidget::IndentifyWidget);
+                break;
+            }
+        case 11:
+            {
                 MusicSoundTouchWidget(this).exec();
+                break;
+            }
+        case 12:
+            {
+                (new MusicGrabWidget)->show();
                 break;
             }
         default:

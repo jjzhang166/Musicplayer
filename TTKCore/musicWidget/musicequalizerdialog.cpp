@@ -2,10 +2,10 @@
 #include "ui_musicequalizerdialog.h"
 #include "musicsettingmanager.h"
 #include "musicuiobject.h"
-#include "musicttkuiobject.h"
-#include "musicbackgroundmanager.h"
+#include "musicmagicwidgetuiobject.h"
 #include "musicconnectionpool.h"
-#include "musicutils.h"
+#include "musicsoundeffectswidget.h"
+#include "musicwidgetutils.h"
 #include "musicplayer.h"
 
 #include <QSignalMapper>
@@ -38,19 +38,20 @@ MusicEqualizerDialog::MusicEqualizerDialog(QWidget *parent)
                   << tr("Electronics"));
     connect(ui->eqChoice, SIGNAL(currentIndexChanged(int)), SLOT(eqChoiceIndexChanged(int)));
 
-    ui->showEqButton->setStyleSheet(MusicTTKUIObject::MKGEqualizerOff);
+    ui->showEqButton->setStyleSheet(MusicUIObject::MKGEqualizerOff);
 
+    setControlEnable(false);
     initEqualizeValue();
     readEqInformation();
-    setControlEnable(false);
 
     M_CONNECTION_PTR->setValue(getClassName(), this);
     M_CONNECTION_PTR->poolConnect(getClassName(), MusicPlayer::getClassName());
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicSoundEffectsWidget::getClassName());
 }
 
 MusicEqualizerDialog::~MusicEqualizerDialog()
 {
-    M_CONNECTION_PTR->poolDisConnect(getClassName());
+    M_CONNECTION_PTR->removeValue(getClassName());
     writeEqInformation();
     delete m_signalMapper;
     delete ui;
@@ -79,20 +80,20 @@ void MusicEqualizerDialog::init()
 
     connect(ui->showEqButton, SIGNAL(clicked()), SLOT(setEqEnable()));
     connect(ui->resetButton, SIGNAL(clicked()), SLOT(resetEq()));
-    ui->resetButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->resetButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
 
 #ifdef Q_OS_UNIX
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_21, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_22, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_23, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_24, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_25, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_26, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_27, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_28, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_29, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_30, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->showPerArea_31, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_21, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_22, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_23, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_24, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_25, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_26, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_27, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_28, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_29, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_30, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->showPerArea_31, 9);
 #endif
 }
 
@@ -150,7 +151,6 @@ void MusicEqualizerDialog::writeEqInformation() const
           ui->verticalSlider6->value()).arg(ui->verticalSlider7->value()).arg(
           ui->verticalSlider8->value()).arg(ui->verticalSlider9->value()).arg(
           ui->verticalSlider10->value()));
-
 }
 
 void MusicEqualizerDialog::verticalSliderChanged(int)
@@ -176,31 +176,30 @@ void MusicEqualizerDialog::setEqEnable()
 {
     m_eable = !m_eable;
     emit setEnaleEffect(m_eable);
-    ui->showEqButton->setStyleSheet(!m_eable ? MusicTTKUIObject::MKGEqualizerOff :
-                                               MusicTTKUIObject::MKGEqualizerOn);
+    ui->showEqButton->setStyleSheet(!m_eable ? MusicUIObject::MKGEqualizerOff : MusicUIObject::MKGEqualizerOn);
 
-    setControlEnable(!m_eable);
+    setControlEnable(m_eable);
     if(m_eable)
     {
         emitParameter();
     }
 }
 
-void MusicEqualizerDialog::setControlEnable(bool) const
+void MusicEqualizerDialog::setControlEnable(bool enable) const
 {
-    ui->bwVerticalSlider->setEnabled(m_eable);
-    ui->verticalSlider1->setEnabled(m_eable);
-    ui->verticalSlider2->setEnabled(m_eable);
-    ui->verticalSlider3->setEnabled(m_eable);
-    ui->verticalSlider4->setEnabled(m_eable);
-    ui->verticalSlider5->setEnabled(m_eable);
-    ui->verticalSlider6->setEnabled(m_eable);
-    ui->verticalSlider7->setEnabled(m_eable);
-    ui->verticalSlider8->setEnabled(m_eable);;
-    ui->verticalSlider9->setEnabled(m_eable);
-    ui->verticalSlider10->setEnabled(m_eable);
-    ui->eqChoice->setEnabled(m_eable);
-    ui->resetButton->setEnabled(m_eable);
+    ui->bwVerticalSlider->setEnabled(enable);
+    ui->verticalSlider1->setEnabled(enable);
+    ui->verticalSlider2->setEnabled(enable);
+    ui->verticalSlider3->setEnabled(enable);
+    ui->verticalSlider4->setEnabled(enable);
+    ui->verticalSlider5->setEnabled(enable);
+    ui->verticalSlider6->setEnabled(enable);
+    ui->verticalSlider7->setEnabled(enable);
+    ui->verticalSlider8->setEnabled(enable);;
+    ui->verticalSlider9->setEnabled(enable);
+    ui->verticalSlider10->setEnabled(enable);
+    ui->eqChoice->setEnabled(enable);
+    ui->resetButton->setEnabled(enable);
 }
 
 void MusicEqualizerDialog::resetEq()
@@ -265,7 +264,6 @@ void MusicEqualizerDialog::eqChoiceIndexChanged(int index)
 
 int MusicEqualizerDialog::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

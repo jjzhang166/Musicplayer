@@ -1,16 +1,16 @@
 #include "musicsongsearchonlinewidget.h"
-#include "musictextdownloadthread.h"
-#include "musicdatadownloadthread.h"
-#include "musicdata2downloadthread.h"
 #include "musicbackgrounddownload.h"
 #include "musiclocalsongsearchrecordconfigmanager.h"
 #include "musicmessagebox.h"
-#include "musicconnectionpool.h"
 #include "musiccoremplayer.h"
-#include "musicdownloadmgmtwidget.h"
+#include "musicdownloadwidget.h"
 #include "musicitemdelegate.h"
 #include "musiccryptographichash.h"
 #include "musicsettingmanager.h"
+#include "musicconnectionpool.h"
+#include "musicdatadownloadthread.h"
+#include "musicdownloadqueryfactory.h"
+#include "musicrightareawidget.h"
 
 #include <QDateTime>
 #include <QVBoxLayout>
@@ -20,17 +20,16 @@
 #include <QButtonGroup>
 
 MusicSongSearchOnlineTableWidget::MusicSongSearchOnlineTableWidget(QWidget *parent)
-    : MusicQueryTableWidget(parent), m_audition(nullptr)
+    : MusicQueryItemTableWidget(parent), m_audition(nullptr)
 {
     setColumnCount(6);
     QHeaderView *headerview = horizontalHeader();
     headerview->resizeSection(0, 30);
     headerview->resizeSection(1, 315);
-    headerview->resizeSection(2, 198);
+    headerview->resizeSection(2, 195);
     headerview->resizeSection(3, 60);
     headerview->resizeSection(4, 26);
     headerview->resizeSection(5, 26);
-    MusicUtils::UWidget::setTransparent(this, 255);
 
     m_previousAuditionRow = -1;
     M_CONNECTION_PTR->setValue(getClassName(), this);
@@ -55,146 +54,43 @@ void MusicSongSearchOnlineTableWidget::startSearchQuery(const QString &text)
         return;
     }
     ////////////////////////////////////////////////
-    MusicSearchRecord record;
+    MusicSearchRecords records;
     MusicLocalSongSearchRecordConfigManager search(this);
     if(!search.readSearchXMLConfig())
     {
         return;
     }
-    search.readSearchConfig( record );
-    record.m_names.insert(0, text);
-    record.m_times.insert(0, QString::number(QDateTime::currentMSecsSinceEpoch()));
-    search.writeSearchConfig( record );
+    search.readSearchConfig( records );
+    MusicSearchRecord record;
+    record.m_name = text;
+    record.m_time = QString::number(QDateTime::currentMSecsSinceEpoch());
+    records.insert(0, record);
+    search.writeSearchConfig( records );
     ////////////////////////////////////////////////
+    if(!m_downLoadManager)
+    {
+        MusicQueryItemTableWidget::startSearchQuery(text);
+    }
     m_downLoadManager->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, text);
 }
 
-void MusicSongSearchOnlineTableWidget::setSearchQuality(const QString &quality)
+void MusicSongSearchOnlineTableWidget::musicDownloadLocal(int row)
 {
-    m_downLoadManager->setSearchQuality(quality);
-}
-
-void MusicSongSearchOnlineTableWidget::searchDataDwonloadFinished()
-{
-    if(m_downloadData.isValid())
+    MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
+    if(row < 0 || (row >= rowCount() - 1) || row >= musicSongInfos.count())
     {
-        emit muiscSongToPlayListChanged(m_downloadData.m_songName, m_downloadData.m_time,
-                                        m_downloadData.m_format, true);
+        return;
     }
-    m_downloadData.clear();
-}
 
-void MusicSongSearchOnlineTableWidget::clearAllItems()
-{
-    MusicAbstractTableWidget::clear();
-    setColumnCount(6);
-}
-
-void MusicSongSearchOnlineTableWidget::createSearchedItems(const QString &songname,
-                                const QString &artistname, const QString &time)
-{
-    int count;
-    setRowCount(count = m_downLoadManager->getSongIdIndex());
-
-    QTableWidgetItem *item = new QTableWidgetItem;
-    item->setData(MUSIC_CHECK_ROLE, false);
-    item->setData(MUSIC_AUDIT_ROLE, AUDITION_STOP);
-    setItem(count - 1, 0, item);
-
-                      item = new QTableWidgetItem;
-    item->setText(MusicUtils::UWidget::elidedText(font(), songname, Qt::ElideRight, 300));
-    item->setTextColor(QColor(50, 50, 50));
-    item->setTextAlignment(Qt::AlignCenter);
-    item->setToolTip(songname);
-    setItem(count - 1, 1, item);
-
-                      item = new QTableWidgetItem;
-    item->setText(MusicUtils::UWidget::elidedText(font(), artistname, Qt::ElideRight, 180));
-    item->setTextColor(QColor(50, 50, 50));
-    item->setTextAlignment(Qt::AlignCenter);
-    item->setToolTip(artistname);
-    setItem(count - 1, 2, item);
-
-                      item = new QTableWidgetItem(time);
-    item->setTextColor(QColor(50, 50, 50));
-    item->setTextAlignment(Qt::AlignCenter);
-    setItem(count - 1, 3, item);
-
-                      item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_add")));
-    setItem(count - 1, 4, item);
-
-                      item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_download")));
-    setItem(count - 1, 5, item);
-}
-
-void MusicSongSearchOnlineTableWidget::listCellClicked(int row, int col)
-{
-    MusicQueryTableWidget::listCellClicked(row, col);
-    switch(col)
-    {
-        case 4:
-            addSearchMusicToPlayList(row);
-            break;
-        case 5:
-            musicDownloadLocal(row);
-            break;
-        default:
-            break;
-    }
-    emit auditionIsPlaying( item(row, 0)->data(MUSIC_AUDIT_ROLE).toInt() == AUDITION_STOP );
-}
-
-void MusicSongSearchOnlineTableWidget::resizeEvent(QResizeEvent *event)
-{
-    QWidget::resizeEvent(event);
-    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
-    QHeaderView *headerview = horizontalHeader();
-    headerview->resizeSection(1, (width - WINDOW_WIDTH_MIN)*0.4 + 315);
-    headerview->resizeSection(2, (width - WINDOW_WIDTH_MIN)*0.4 + 198);
-    headerview->resizeSection(3, (width - WINDOW_WIDTH_MIN)*0.2 + 60);
-
-    for(int i=0; i<rowCount(); ++i)
-    {
-        QTableWidgetItem *it = item(i, 1);
-        it->setText(MusicUtils::UWidget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 300));
-
-        it = item(i, 2);
-        it->setText(MusicUtils::UWidget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 180));
-    }
-}
-
-void MusicSongSearchOnlineTableWidget::contextMenuEvent(QContextMenuEvent *event)
-{
-    MusicQueryTableWidget::contextMenuEvent(event);
-    QMenu rightClickMenu(this);
-    createContextMenu(rightClickMenu);
-
-    QAction *playAction = rightClickMenu.addAction(QIcon(":/contextMenu/btn_play"), tr("musicPlay"));
-    QAction *addAction = rightClickMenu.addAction(tr("musicAdd"));
-    rightClickMenu.insertAction(rightClickMenu.actions().first(), addAction);
-    rightClickMenu.insertAction(addAction, playAction);
-    m_actionGroup->addAction( playAction );
-    m_actionGroup->addAction( addAction );
-    rightClickMenu.exec(QCursor::pos());
-}
-
-void MusicSongSearchOnlineTableWidget::actionGroupClick(QAction *action)
-{
-    MusicQueryTableWidget::actionGroupClick(action);
-    int row = currentRow();
-    switch( findActionGroup(action) )
-    {
-        case 4: auditionToMusic(row); break;
-        case 5: addSearchMusicToPlayList(row); break;
-    }
+    MusicDownloadWidget *download = new MusicDownloadWidget(this);
+    download->setSongName(musicSongInfos[row], MusicDownLoadQueryThreadAbstract::MusicQuery);
+    download->show();
 }
 
 void MusicSongSearchOnlineTableWidget::auditionToMusic(int row)
 {
     MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
-    if(musicSongInfos.isEmpty() || row < 0)
+    if(musicSongInfos.isEmpty() || row < 0 || (row >= rowCount() - 1))
     {
         MusicMessageBox message;
         message.setText(tr("Please Select One Item First!"));
@@ -205,6 +101,7 @@ void MusicSongSearchOnlineTableWidget::auditionToMusic(int row)
     {
         m_audition = new MusicCoreMPlayer(this);
     }
+
     m_audition->setMedia(MusicCoreMPlayer::MusicCategory, musicSongInfos[row].m_songAttrs.first().m_url);
 
     if(m_previousAuditionRow != -1)
@@ -221,7 +118,7 @@ void MusicSongSearchOnlineTableWidget::auditionToMusicStop(int row)
     {
         m_audition->stop();
     }
-    if(row < 0)
+    if(row < 0 || (row >= rowCount() - 1))
     {
         MusicMessageBox message;
         message.setText(tr("Please Select One Item First!"));
@@ -232,6 +129,152 @@ void MusicSongSearchOnlineTableWidget::auditionToMusicStop(int row)
     emit auditionIsPlaying(true);
 }
 
+void MusicSongSearchOnlineTableWidget::setSearchQuality(const QString &quality)
+{
+    MusicQueryItemTableWidget::startSearchQuery(QString());
+    m_downLoadManager->setSearchQuality(quality);
+}
+
+void MusicSongSearchOnlineTableWidget::listCellEntered(int row, int column)
+{
+    MusicQueryItemTableWidget::listCellEntered(row, column);
+    if(column == 4 || column == 5)
+    {
+        setCursor(QCursor(Qt::PointingHandCursor));
+    }
+    else
+    {
+        unsetCursor();
+    }
+}
+
+void MusicSongSearchOnlineTableWidget::listCellClicked(int row, int column)
+{
+    MusicQueryItemTableWidget::listCellClicked(row, column);
+    switch(column)
+    {
+        case 4:
+            addSearchMusicToPlayList(row);
+            break;
+        case 5:
+            musicDownloadLocal(row);
+            break;
+        default:
+            break;
+    }
+
+    emit auditionIsPlaying( item(row, 0)->data(MUSIC_AUDIT_ROLE).toInt() == AUDITION_STOP );
+}
+
+void MusicSongSearchOnlineTableWidget::clearAllItems()
+{
+    MusicQueryItemTableWidget::clearAllItems();
+    setColumnCount(6);
+}
+
+void MusicSongSearchOnlineTableWidget::createSearchedItems(const QString &songname,
+                                const QString &artistname, const QString &time)
+{
+    int count = rowCount();
+    setRowCount(count + 1);
+
+    QTableWidgetItem *item = new QTableWidgetItem;
+    item->setData(MUSIC_CHECK_ROLE, false);
+    item->setData(MUSIC_AUDIT_ROLE, AUDITION_STOP);
+    setItem(count, 0, item);
+
+                      item = new QTableWidgetItem;
+    item->setText(MusicUtils::Widget::elidedText(font(), songname, Qt::ElideRight, 300));
+    item->setTextColor(QColor(50, 50, 50));
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setToolTip(songname);
+    setItem(count, 1, item);
+
+                      item = new QTableWidgetItem;
+    item->setText(MusicUtils::Widget::elidedText(font(), artistname, Qt::ElideRight, 180));
+    item->setTextColor(QColor(50, 50, 50));
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setToolTip(artistname);
+    setItem(count, 2, item);
+
+                      item = new QTableWidgetItem(time);
+    item->setTextColor(QColor(50, 50, 50));
+    item->setTextAlignment(Qt::AlignCenter);
+    setItem(count, 3, item);
+
+                      item = new QTableWidgetItem;
+    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_add")));
+    setItem(count, 4, item);
+
+                      item = new QTableWidgetItem;
+    item->setIcon(QIcon(QString::fromUtf8(":/contextMenu/btn_download")));
+    setItem(count, 5, item);
+}
+
+void MusicSongSearchOnlineTableWidget::itemDoubleClicked(int row, int column)
+{
+    if(column <= 0 || row < 0|| (row >= rowCount() - 1))
+    {
+        return;
+    }
+    addSearchMusicToPlayList(row);
+}
+
+void MusicSongSearchOnlineTableWidget::actionGroupClick(QAction *action)
+{
+    MusicQueryItemTableWidget::actionGroupClick(action);
+    int row = currentRow();
+    switch( action->data().toInt() )
+    {
+        case 4: auditionToMusic(row); break;
+        case 5: addSearchMusicToPlayList(row); break;
+    }
+}
+
+void MusicSongSearchOnlineTableWidget::searchDataDwonloadFinished()
+{
+    if(m_downloadData.isValid())
+    {
+        emit muiscSongToPlayListChanged(m_downloadData.m_songName, m_downloadData.m_time,
+                                        m_downloadData.m_format, true);
+    }
+    m_downloadData.clear();
+}
+
+void MusicSongSearchOnlineTableWidget::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
+    QHeaderView *headerview = horizontalHeader();
+    headerview->resizeSection(1, (width - WINDOW_WIDTH_MIN)*0.4 + 315);
+    headerview->resizeSection(2, (width - WINDOW_WIDTH_MIN)*0.4 + 195);
+    headerview->resizeSection(3, (width - WINDOW_WIDTH_MIN)*0.2 + 60);
+
+    for(int i=0; i<rowCount(); ++i)
+    {
+        QTableWidgetItem *it = item(i, 1);
+        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 300));
+
+        it = item(i, 2);
+        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 180));
+    }
+}
+
+void MusicSongSearchOnlineTableWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    MusicQueryItemTableWidget::contextMenuEvent(event);
+    QMenu rightClickMenu(this);
+    createContextMenu(rightClickMenu);
+
+    QAction *playAction = rightClickMenu.addAction(QIcon(":/contextMenu/btn_play"), tr("musicPlay"));
+    QAction *addAction = rightClickMenu.addAction(tr("musicAdd"));
+    rightClickMenu.insertAction(rightClickMenu.actions().first(), addAction);
+    rightClickMenu.insertAction(addAction, playAction);
+    m_actionGroup->addAction( playAction )->setData(4);
+    m_actionGroup->addAction( addAction )->setData(5);
+    rightClickMenu.exec(QCursor::pos());
+}
+
 void MusicSongSearchOnlineTableWidget::addSearchMusicToPlayList(int row)
 {
     if(!M_NETWORK_PTR->isOnline())
@@ -239,7 +282,7 @@ void MusicSongSearchOnlineTableWidget::addSearchMusicToPlayList(int row)
         emit showDownLoadInfoFor(MusicObject::DW_DisConnection);
         return;
     }
-    if(row < 0)
+    if(row < 0 || (row >= rowCount() - 1))
     {
         MusicMessageBox message;
         message.setText(tr("Please Select One Item First!"));
@@ -252,22 +295,15 @@ void MusicSongSearchOnlineTableWidget::addSearchMusicToPlayList(int row)
     MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos[row];
     MusicObject::MusicSongAttribute musicSongAttr = musicSongInfo.m_songAttrs.first();
     QString musicSong = item(row, 2)->toolTip() + " - " + item(row, 1)->toolTip();
-    QString musicEnSong = MusicCryptographicHash().encrypt(musicSong, DOWNLOAD_KEY);
+    QString musicEnSong = MusicCryptographicHash::encryptData(musicSong, DOWNLOAD_KEY);
     QString downloadName = QString("%1%2.%3").arg(CACHE_DIR_FULL).arg(musicEnSong).arg(musicSongAttr.m_format);
     MusicDataDownloadThread *downSong = new MusicDataDownloadThread( musicSongAttr.m_url, downloadName,
                                                                      MusicDownLoadThreadAbstract::Download_Music, this);
     connect(downSong, SIGNAL(downLoadDataChanged(QString)), SLOT(searchDataDwonloadFinished()));
     downSong->startToDownload();
 
-//    (new MusicTextDownLoadThread(musicSongInfo.m_lrcUrl, LRC_DIR_FULL + musicSong + LRC_FILE,
-//                                 MusicDownLoadThreadAbstract::Download_Lrc, this))->startToDownload();
-#ifndef USE_MULTIPLE_QUERY
-    (new MusicData2DownloadThread(musicSongInfo.m_smallPicUrl, ART_DIR_FULL + musicSongInfo.m_singerName + SKN_FILE,
-                                  MusicDownLoadThreadAbstract::Download_SmlBG, this))->startToDownload();
-#else
-    (new MusicDataDownloadThread(musicSongInfo.m_smallPicUrl, ART_DIR_FULL + musicSongInfo.m_singerName + SKN_FILE,
-                                 MusicDownLoadThreadAbstract::Download_SmlBG, this))->startToDownload();
-#endif
+    M_DOWNLOAD_QUERY_PTR->getDownloadSmallPic(musicSongInfo.m_smallPicUrl, ART_DIR_FULL + musicSongInfo.m_singerName + SKN_FILE,
+                                              MusicDownLoadThreadAbstract::Download_SmlBG, this)->startToDownload();
     ///download big picture
     (new MusicBackgroundDownload(musicSongInfo.m_singerName, musicSongInfo.m_singerName, this))->startToDownload();
 
@@ -275,21 +311,6 @@ void MusicSongSearchOnlineTableWidget::addSearchMusicToPlayList(int row)
     m_downloadData.m_songName = musicEnSong;
     m_downloadData.m_time =  item(row, 3)->text();
     m_downloadData.m_format = musicSongAttr.m_format;
-}
-
-void MusicSongSearchOnlineTableWidget::musicDownloadLocal(int row)
-{
-    MusicDownloadMgmtWidget mgmt(this);
-    mgmt.setSongName(item(row, 2)->toolTip() + " - " + item(row, 1)->toolTip(), MusicDownLoadQueryThreadAbstract::MusicQuery);
-}
-
-void MusicSongSearchOnlineTableWidget::itemDoubleClicked(int row, int column)
-{
-    if(column <= 0 || row < 0)
-    {
-        return;
-    }
-    addSearchMusicToPlayList(row);
 }
 
 
@@ -315,6 +336,8 @@ MusicSongSearchOnlineWidget::MusicSongSearchOnlineWidget(QWidget *parent)
 
     createToolWidget(toolWidget);
     connect(m_searchTableWidget, SIGNAL(auditionIsPlaying(bool)), SLOT(auditionIsPlaying(bool)));
+    connect(m_searchTableWidget, SIGNAL(restartSearchQuery(QString)), MusicRightAreaWidget::instance(),
+                                 SLOT(songResearchButtonSearched(QString)));
 }
 
 MusicSongSearchOnlineWidget::~MusicSongSearchOnlineWidget()
@@ -344,6 +367,7 @@ void MusicSongSearchOnlineWidget::researchQueryByQuality(const QString &name, co
 void MusicSongSearchOnlineWidget::buttonClicked(int index)
 {
     MusicObject::MIntList list = m_searchTableWidget->getSelectedItems();
+    list.removeOne(m_searchTableWidget->rowCount() - 1);
     if(list.isEmpty())
     {
         MusicMessageBox message;
@@ -351,6 +375,7 @@ void MusicSongSearchOnlineWidget::buttonClicked(int index)
         message.exec();
         return;
     }
+
     foreach(int row, list)
     {
         switch(index)
@@ -400,20 +425,22 @@ void MusicSongSearchOnlineWidget::createToolWidget(QWidget *widget)
     funcLayout->addWidget(m_textLabel);
 
     m_playButton = new QPushButton(tr("Play"), this);
+    m_playButton->setIcon(QIcon(":/contextMenu/btn_play_white"));
+    m_playButton->setIconSize(QSize(14, 14));
     m_playButton->setFixedSize(70, 20);
-    m_playButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
+    m_playButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     m_playButton->setCursor(QCursor(Qt::PointingHandCursor));
     funcLayout->addWidget(m_playButton);
 
     QPushButton *addButton = new QPushButton(tr("Add"), this);
     addButton->setFixedSize(70, 20);
-    addButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
+    addButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     addButton->setCursor(QCursor(Qt::PointingHandCursor));
     funcLayout->addWidget(addButton);
 
     QPushButton *downloadButton = new QPushButton(tr("Download"), this);
     downloadButton->setFixedSize(70, 20);
-    downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
+    downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     downloadButton->setCursor(QCursor(Qt::PointingHandCursor));
     funcLayout->addWidget(downloadButton);
 
@@ -430,7 +457,7 @@ void MusicSongSearchOnlineWidget::createToolWidget(QWidget *widget)
     QHBoxLayout *labelLayout = new QHBoxLayout(labelWidget);
     labelLayout->setContentsMargins(7, 0, 10, 0);
     labelLayout->setSpacing(10);
-    labelWidget->setStyleSheet(MusicUIObject::MCustomStyle17);
+    labelWidget->setStyleSheet(MusicUIObject::MBackgroundStyle03);
 
     QCheckBox *label_checkBox = new QCheckBox(this);
     label_checkBox->setStyleSheet(MusicUIObject::MCheckBoxStyle01);
@@ -439,15 +466,15 @@ void MusicSongSearchOnlineWidget::createToolWidget(QWidget *widget)
     labelLayout->addWidget(label_checkBox, 3);
 
     QLabel *Label1 = new QLabel(tr("Song"), this);
-    Label1->setStyleSheet(MusicUIObject::MCustomStyle18);
+    Label1->setStyleSheet(MusicUIObject::MFontStyle01);
     labelLayout->addWidget(Label1, 5);
 
     QLabel *Label2 = new QLabel(tr("Artist"), this);
-    Label2->setStyleSheet(MusicUIObject::MCustomStyle18);
+    Label2->setStyleSheet(MusicUIObject::MFontStyle01);
     labelLayout->addWidget(Label2, 3);
 
     QLabel *Label3 = new QLabel(tr("Operator"), this);
-    Label3->setStyleSheet(MusicUIObject::MCustomStyle18);
+    Label3->setStyleSheet(MusicUIObject::MFontStyle01);
     labelLayout->addWidget(Label3, 1);
 
     labelWidget->setLayout(labelLayout);
@@ -459,6 +486,6 @@ void MusicSongSearchOnlineWidget::setResizeLabelText(const QString &name)
     int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
     width = width - WINDOW_WIDTH_MIN + 240;
     m_textLabel->setText(tr("&nbsp;find <font color=red> %1 </font> result")
-                         .arg(MusicUtils::UWidget::elidedText(font(), name, Qt::ElideRight, width)));
+                         .arg(MusicUtils::Widget::elidedText(font(), name, Qt::ElideRight, width)));
     m_textLabel->setToolTip(name);
 }

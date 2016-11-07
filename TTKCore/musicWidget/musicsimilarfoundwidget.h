@@ -10,13 +10,46 @@
    =================================================*/
 
 #include <QLabel>
-#ifndef USE_MULTIPLE_QUERY
-#  include "musicdownloadquerysinglethread.h"
-#else
-#  include "musicdownloadquerymultiplethread.h"
-#endif
+#include "musicqueryfoundtablewidget.h"
 
-class QCheckBox;
+/*! @brief The class of the similar music found table widget.
+ * @author Greedysky <greedysky@163.com>
+ */
+class MUSIC_WIDGET_EXPORT MusicSimilarFoundTableWidget : public MusicQueryFoundTableWidget
+{
+    Q_OBJECT
+public:
+    explicit MusicSimilarFoundTableWidget(QWidget *parent = 0);
+    /*!
+     * Object contsructor.
+     */
+    virtual ~MusicSimilarFoundTableWidget();
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+    void setQueryInput(MusicDownLoadQueryThreadAbstract *query);
+    /*!
+     * Set network query input.
+     */
+
+public Q_SLOTS:
+    virtual void createSearchedItems(const QString &songname, const QString &artistname,
+                                     const QString &time) override;
+    /*!
+     * Create searched items.
+     */
+
+protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
+
+};
+
+
 
 /*! @brief The class of similar music found widget.
  * @author Greedysky <greedysky@163.com>
@@ -40,13 +73,6 @@ public:
      * Set current name to search founds.
      */
 
-Q_SIGNALS:
-    void muiscSongToPlayListChanged(const QString &name, const QString &time,
-                                    const QString &format, bool play);
-    /*!
-     * Add current network music to download to local.
-     */
-
 public Q_SLOTS:
     void queryAllFinished();
     /*!
@@ -56,9 +82,9 @@ public Q_SLOTS:
     /*!
      * Send recieved data from net.
      */
-    void selectAllItems(bool all);
+    void urlHasChanged(const QString &imageUrl);
     /*!
-     * Select all items or not.
+     * Data download finished and send to shared on web.
      */
     void playButtonClicked();
     /*!
@@ -82,22 +108,12 @@ protected:
     /*!
      * Create init interface lables.
      */
-    MusicObject::MIntList foundCheckedItem();
-    /*!
-     * Found which items is checked.
-     */
-    void downloadDataFrom(bool play);
-    /*!
-     * Download data from net and just play or not.
-     */
 
     QString m_songNameFull;
     QWidget *m_mainWindow;
     QLabel *m_statusLabel;
-    QList<QCheckBox*> m_checkBoxs;
     QList<QLabel*> m_iconLabels;
-    QList<DownloadData*> m_likeDownloadDatas;
-    MusicDownLoadQueryThreadAbstract *m_downloadThread;
+    MusicSimilarFoundTableWidget *m_similarTableWidget;
 
 };
 

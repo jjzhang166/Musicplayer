@@ -1,9 +1,10 @@
 #include "musicsongstoolboxwidget.h"
+#include "musicsongstoolitemrenamedwidget.h"
 #include "musicclickedlabel.h"
 #include "musicuiobject.h"
-#include "musicobject.h"
-#include "musicsongstoolitemrenamedwidget.h"
-#include "musicutils.h"
+#include "musicsong.h"
+#include "musicwidgetutils.h"
+#include "musicapplication.h"
 
 #include <QMenu>
 #include <QPainter>
@@ -25,7 +26,7 @@ MusicSongsToolBoxTopWidget::MusicSongsToolBoxTopWidget(int index, const QString 
     m_labelIcon->setPixmap(QPixmap(":/tiny/lb_arrow_up_normal"));
     m_labelText = new QLabel(this);
     m_labelText->setText(text);
-    MusicUtils::UWidget::setLabelFontStyle(m_labelText, MusicObject::FT_Bold);
+    MusicUtils::Widget::setLabelFontStyle(m_labelText, MusicObject::FT_Bold);
 
     MusicClickedLabel *menuLabel = new MusicClickedLabel(this);
     connect(menuLabel, SIGNAL(clicked()), SLOT(showMenu()));
@@ -33,7 +34,6 @@ MusicSongsToolBoxTopWidget::MusicSongsToolBoxTopWidget(int index, const QString 
     menuLabel->setGeometry(290, 10, 16, 16);
     topLayout->addWidget(m_labelIcon);
     topLayout->addWidget(m_labelText);
-//    topLayout->addWidget(menuLabel);
     topLayout->addStretch(1);
 
     setLayout(topLayout);
@@ -78,6 +78,11 @@ void MusicSongsToolBoxTopWidget::deleteRowItem()
     emit deleteRowItem(m_index);
 }
 
+void MusicSongsToolBoxTopWidget::deleteRowItemAll()
+{
+    emit deleteRowItemAll(m_index);
+}
+
 void MusicSongsToolBoxTopWidget::changRowItemName()
 {
     if(!m_renameLine)
@@ -99,6 +104,21 @@ void MusicSongsToolBoxTopWidget::setChangItemName(const QString &name)
     m_renameLine = nullptr;
 }
 
+void MusicSongsToolBoxTopWidget::addNewFiles()
+{
+    emit addNewFiles(m_index);
+}
+
+void MusicSongsToolBoxTopWidget::addNewDir()
+{
+    emit addNewDir(m_index);
+}
+
+void MusicSongsToolBoxTopWidget::exportSongsItemList()
+{
+   MusicApplication::instance()->musicExportSongsItemList(m_index);
+}
+
 void MusicSongsToolBoxTopWidget::showMenu()
 {
     QMenu menu(this);
@@ -106,9 +126,22 @@ void MusicSongsToolBoxTopWidget::showMenu()
     menu.addAction(tr("addNewItem"), parent(), SIGNAL(addNewRowItem()));
     menu.addSeparator();
 
-    bool disable = !(m_index == 0 || m_index == 1 || m_index == 2);
-    menu.addAction(tr("deleteItem"), this, SLOT(deleteRowItem()))->setEnabled(disable);
+    QMenu musicAddNewFiles(tr("addNewFiles"), &menu);
+    menu.addMenu(&musicAddNewFiles)->setEnabled(m_index != MUSIC_LOVEST_LIST && m_index != MUSIC_NETWORK_LIST);
+    musicAddNewFiles.addAction(tr("openOnlyFiles"), this, SLOT(addNewFiles()));
+    musicAddNewFiles.addAction(tr("openOnlyDir"), this, SLOT(addNewDir()));
+    menu.addAction(tr("playLater"));
+    menu.addAction(tr("addToPlayList"));
+    menu.addAction(tr("collectAll"));
+    menu.addAction(tr("exportList"), this, SLOT(exportSongsItemList()))
+                   ->setEnabled(m_index != MUSIC_LOVEST_LIST && m_index != MUSIC_NETWORK_LIST);
+    menu.addSeparator();
+
+    bool disable = !(m_index == MUSIC_NORMAL_LIST || m_index == MUSIC_LOVEST_LIST || m_index == MUSIC_NETWORK_LIST);
+    menu.addAction(tr("deleteAll"), this, SLOT(deleteRowItemAll()));
+    menu.addAction(QIcon(":/contextMenu/btn_delete"), tr("deleteItem"), this, SLOT(deleteRowItem()))->setEnabled(disable);
     menu.addAction(tr("changItemName"), this, SLOT(changRowItemName()))->setEnabled(disable);
+
     menu.exec(QCursor::pos());
 }
 
@@ -143,7 +176,10 @@ MusicSongsToolBoxWidgetItem::MusicSongsToolBoxWidgetItem(int index, const QStrin
     m_topWidget = new MusicSongsToolBoxTopWidget(index, text, this);
     connect(m_topWidget, SIGNAL(mousePressAt(int)), parent, SLOT(mousePressAt(int)));
     connect(m_topWidget, SIGNAL(deleteRowItem(int)), SIGNAL(deleteRowItem(int)));
+    connect(m_topWidget, SIGNAL(deleteRowItemAll(int)), SIGNAL(deleteRowItemAll(int)));
     connect(m_topWidget, SIGNAL(renameFinished(int,QString)), SIGNAL(changRowItemName(int,QString)));
+    connect(m_topWidget, SIGNAL(addNewFiles(int)), SIGNAL(addNewFiles(int)));
+    connect(m_topWidget, SIGNAL(addNewDir(int)), SIGNAL(addNewDir(int)));
 
     m_layout = new QVBoxLayout(this);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -194,16 +230,16 @@ QString MusicSongsToolBoxWidgetItem::getTitle() const
     return m_topWidget->getTitle();
 }
 
-void MusicSongsToolBoxWidgetItem::setItemHide(bool hide)
+void MusicSongsToolBoxWidgetItem::setItemExpand(bool expand)
 {
-    m_topWidget->setItemExpand(hide);
+    m_topWidget->setItemExpand(expand);
     foreach(QWidget *w, m_itemList)
     {
-        w->setVisible(hide);
+        w->setVisible(expand);
     }
 }
 
-bool MusicSongsToolBoxWidgetItem::itemHide() const
+bool MusicSongsToolBoxWidgetItem::itemExpand() const
 {
     if(!m_itemList.isEmpty())
     {
@@ -234,6 +270,8 @@ MusicSongsToolBoxWidget::MusicSongsToolBoxWidget(QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground);
 
     m_currentIndex = -1;
+    m_itemIndexRaise = 0;
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
@@ -245,18 +283,16 @@ MusicSongsToolBoxWidget::MusicSongsToolBoxWidget(QWidget *parent)
     contentsWidget->setLayout(m_layout);
 
     m_scrollArea = new QScrollArea(this);
-    m_scrollArea->setStyleSheet(MusicUIObject::MScrollBarStyle01);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
     m_scrollArea->setAlignment(Qt::AlignLeft);
     m_scrollArea->setWidget(contentsWidget);
 
-    QString style = "background:rgba(255,255,255,25)";
     contentsWidget->setObjectName("contentsWidget");
-    contentsWidget->setStyleSheet(QString("#contentsWidget{%1}").arg(style));
+    contentsWidget->setStyleSheet(QString("#contentsWidget{%1}").arg(MusicUIObject::MBackgroundStyle09));
     QWidget *view = m_scrollArea->viewport();
     view->setObjectName("viewport");
-    view->setStyleSheet(QString("#viewport{%1}").arg(style));
+    view->setStyleSheet(QString("#viewport{%1}").arg(MusicUIObject::MBackgroundStyle09));
 
     mainLayout->addWidget(m_scrollArea);
     setLayout(mainLayout);
@@ -266,7 +302,7 @@ MusicSongsToolBoxWidget::~MusicSongsToolBoxWidget()
 {
     while(!m_itemList.isEmpty())
     {
-        delete m_itemList.takeLast();
+        delete m_itemList.takeLast().m_widgetItem;
     }
     delete m_layout;
     delete m_scrollArea;
@@ -282,17 +318,17 @@ void MusicSongsToolBoxWidget::setCurrentIndex(int index)
     m_currentIndex = index;
     for(int i=0; i<m_itemList.count(); ++i)
     {
-        m_itemList[i]->setItemHide( i== index );
+        m_itemList[i].m_widgetItem->setItemExpand( i == index );
     }
 }
 
 void MusicSongsToolBoxWidget::mousePressAt(int index)
 {
-    m_currentIndex = index;
+    m_currentIndex = foundMappingIndex(index);
     for(int i=0; i<m_itemList.count(); ++i)
     {
-        bool hide = (i== index) ? !m_itemList[i]->itemHide() : false;
-        m_itemList[i]->setItemHide(hide);
+        bool hide = (i == m_currentIndex) ? !m_itemList[i].m_widgetItem->itemExpand() : false;
+        m_itemList[i].m_widgetItem->setItemExpand(hide);
     }
 }
 
@@ -326,13 +362,21 @@ void MusicSongsToolBoxWidget::addItem(QWidget *item, const QString &text)
     //hide before widget
     for(int i=0; i<m_itemList.count(); ++i)
     {
-        m_itemList[i]->setItemHide(false);
+        m_itemList[i].m_widgetItem->setItemExpand(false);
     }
 
     // Add item and make sure it stretches the remaining space.
-    MusicSongsToolBoxWidgetItem *it = new MusicSongsToolBoxWidgetItem(m_itemList.count(), text, this);
+    MusicSongsToolBoxWidgetItem *it = new MusicSongsToolBoxWidgetItem(m_itemIndexRaise, text, this);
     it->addItem(item);
-    m_itemList.append(it);
+    it->setItemExpand(true);
+
+    MusicToolBoxWidgetItem widgetItem;
+    widgetItem.m_widgetItem = it;
+    widgetItem.m_itemIndex = m_itemIndexRaise++;
+    m_itemList.append(widgetItem);
+
+    m_currentIndex = m_itemList.count() - 1;
+
     m_layout->addWidget(it);
     m_layout->addStretch(5);
 }
@@ -341,14 +385,14 @@ void MusicSongsToolBoxWidget::removeItem(QWidget *item)
 {
     for(int i=0; i<m_itemList.count(); ++i)
     {
-        MusicSongsToolBoxWidgetItem *it = m_itemList[i];
+        MusicSongsToolBoxWidgetItem *it = m_itemList[i].m_widgetItem;
         for(int j=0; j<it->count(); ++j)
         {
             if(it->item(j) == item)
             {
                 m_layout->removeWidget(item);
-                m_itemList.takeAt(i)->deleteLater();
-                m_currentIndex = 0;
+                m_itemList.takeAt(i).m_widgetItem->deleteLater();
+                m_currentIndex = MUSIC_NORMAL_LIST;
                 return;
             }
         }
@@ -359,7 +403,7 @@ void MusicSongsToolBoxWidget::setTitle(QWidget *item, const QString &text)
 {
     for(int i=0; i<m_itemList.count(); ++i)
     {
-        MusicSongsToolBoxWidgetItem *it = m_itemList[i];
+        MusicSongsToolBoxWidgetItem *it = m_itemList[i].m_widgetItem;
         for(int j=0; j<it->count(); ++j)
         {
             if(it->item(j) == item)
@@ -375,7 +419,7 @@ QString MusicSongsToolBoxWidget::getTitle(QWidget *item) const
 {
     for(int i=0; i<m_itemList.count(); ++i)
     {
-        MusicSongsToolBoxWidgetItem *it = m_itemList[i];
+        MusicSongsToolBoxWidgetItem *it = m_itemList[i].m_widgetItem;
         for(int j=0; j<it->count(); ++j)
         {
             if(it->item(j) == item)
@@ -395,4 +439,18 @@ void MusicSongsToolBoxWidget::mousePressEvent(QMouseEvent *event)
 void MusicSongsToolBoxWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     Q_UNUSED(event);
+}
+
+int MusicSongsToolBoxWidget::foundMappingIndex(int index)
+{
+    int id = -1;
+    for(int i=0; i<m_itemList.count(); ++i)
+    {
+        if(m_itemList[i].m_itemIndex == index)
+        {
+            id = i;
+            break;
+        }
+    }
+    return id;
 }

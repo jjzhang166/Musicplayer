@@ -9,20 +9,39 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include "musicdownloadquerythreadabstract.h"
 #include "musicquerytablewidget.h"
+#include "musicdownloadquerythreadabstract.h"
 
 #define AUDITION_PLAY MStatic_cast(int, Qt::yellow)
 #define AUDITION_STOP MStatic_cast(int, Qt::transparent)
 
+typedef struct MUSIC_NETWORK_EXPORT DownloadData
+{
+    QString m_songName;
+    QString m_time;
+    QString m_format;
+
+    void clear()
+    {
+        m_songName.clear();
+        m_time.clear();
+        m_format.clear();
+    }
+
+    bool isValid() const
+    {
+        return !(m_songName.isEmpty() && m_time.isEmpty() && m_format.isEmpty());
+    }
+
+}DownloadData;
+TTK_DECLARE_LISTS(DownloadData)
+
 class MusicCoreMPlayer;
-class MusicDataDownloadThread;
-class MusicTextDownLoadThread;
 
 /*! @brief The class of the song search online table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicSongSearchOnlineTableWidget : public MusicQueryTableWidget
+class MUSIC_WIDGET_EXPORT MusicSongSearchOnlineTableWidget : public MusicQueryItemTableWidget
 {
     Q_OBJECT
 public:
@@ -59,17 +78,16 @@ public:
      */
 
 Q_SIGNALS:
-    void muiscSongToPlayListChanged(const QString &name, const QString &time,
-                                    const QString &format, bool play);
-    /*!
-     * Add current network music to download to local.
-     */
     void auditionIsPlaying(bool play);
     /*!
      * Check current audtion is playing or not.
      */
 
 public Q_SLOTS:
+    virtual void listCellEntered(int row, int column) override;
+    /*!
+     * Table widget list cell enter.
+     */
     virtual void listCellClicked(int row, int column) override;
     /*!
      * Table widget list cell click.

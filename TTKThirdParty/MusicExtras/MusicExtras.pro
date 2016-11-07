@@ -13,30 +13,37 @@
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+include(../../TTKVersion.pri)
+unix:VERSION += $$TTKMusicPlayer
+
 win32{
-    TARGET = ../../../bin/MusicExtras
+    TARGET = ../../../bin/$$TTKMusicPlayer/MusicExtras
     msvc{
         LIBS += -luser32
     }
 }
-unix:TARGET = ../../lib/MusicExtras
+unix:TARGET = ../../lib/$$TTKMusicPlayer/MusicExtras
 TEMPLATE = lib
 
 QMAKE_CXXFLAGS += -std=c++11
-unix:VERSION += 2.3.2.0
 
 INCLUDEPATH += ../../
+
+win32{
+    LIBS += -L../../bin/$$TTKMusicPlayer -lMusicUi
+}
+unix:!mac{
+    LIBS += -L../../lib/$$TTKMusicPlayer -lMusicUi
+}
+
 HEADERS  += \
     musicextrasglobaldefine.h \
     ../../musicglobal.h \
     ../../musicprivate.h
 
-RESOURCES += \
-    ../../TTKQrc/MusicThirdParty.qrc
-
-include(hz2py/Hz2Py.pri)
-include(kugou/KuGou.pri)
+include(qhz2py/QHz2Py.pri)
 include(qiniu/QiNiu.pri)
 include(qjson/QJson.pri)
+include(qkugou/QKuGou.pri)
 include(qrencode/QRencode.pri)
-include(shortcut/ShortCut.pri)
+include(qshortcut/QShortCut.pri)

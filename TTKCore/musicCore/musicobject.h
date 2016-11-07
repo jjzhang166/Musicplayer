@@ -11,9 +11,18 @@
 
 #include <QDir>
 #include <QApplication>
+#if defined (Q_OS_ANDROID)
+#include <QtAndroidExtras/QtAndroid>
+#include <QtAndroidExtras/QAndroidJniEnvironment>
+#endif
 #include "musicglobal.h"
 
+#define APPNAME                 "TTKMusicPlayer"
 ///////////////////////////////////////
+
+#define APPDATA_DIR             "AppData/"
+#define DOWNLOADS_DIR           "Downloads/"
+
 #define LRC_DIR                 "MLrc/"
 #define MUSIC_DIR               "Music/"
 #define MOVIE_DIR               "Movie/"
@@ -32,7 +41,8 @@
 #define LRC_FILE                ".lrc"
 #define KRC_FILE                ".krc"
 #define MP3_FILE                ".mp3"
-#define TMP_FILE                ".ttk"
+#define CFG_FILE                ".ttk"
+#define LST_FILE                ".lis"
 
 #define MAKE_TRANSFORM          "MPlugins/avconv.dll"
 #define MAKE_KRC2LRC            "MPlugins/avk2l.dll"
@@ -45,28 +55,48 @@
 
 #define COFIGPATH               "musicconfig.xml"
 #define NETDADIOPATH            "musicradio.dll"
-#define MUSICPATH               "music.dll"
-#define DOWNLOADINFO            "music_1.dll"
-#define MUSICSEARCH             "music_2.dll"
-#define DARABASEPATH            "musicuser_1.dll"
-#define USERPATH                "musicuser_2.dll"
-#define BARRAGEPATH             "musicbarrage"
+#define MUSICPATH               "music.lis"
+#define DOWNLOADINFO            "musicdown.ttk"
+#define MUSICSEARCH             "musichistory.ttk"
+#define DARABASEPATH            "musicuser.dll"
+#define USERPATH                "musicuser.ttk"
+#define BARRAGEPATH             "musicbarrage.ttk"
+#define SOUNDPATH               "sound.wav"
 
 #define SQLITE_DATABASE         "QSQLITE"
 #define MYSQL_DATABASE          "QMYSQL"
 #define OCI_DATABASE            "QOCI"
 
 ///////////////////////////////////////
-#define LRC_DIR_FULL            MusicObject::getAppDir() + LRC_DIR
-#define MUSIC_DIR_FULL          MusicObject::getAppDir() + MUSIC_DIR
-#define MOVIE_DIR_FULL          MusicObject::getAppDir() + MOVIE_DIR
+#if defined (Q_OS_ANDROID)
+#  define APPDATA_DIR_FULL      MusicObject::getAppDir() + APPDATA_DIR
+#  define DOWNLOADS_DIR_FULL    MusicObject::getAppDir() + DOWNLOADS_DIR
+#else
+#  define APPDATA_DIR_FULL      MusicObject::getAppDir() + QString("../") + APPDATA_DIR
+#  define DOWNLOADS_DIR_FULL    MusicObject::getAppDir() + QString("../") + DOWNLOADS_DIR
+#endif
+
+#define LRC_DIR_FULL            DOWNLOADS_DIR_FULL + LRC_DIR
+#define MUSIC_DIR_FULL          DOWNLOADS_DIR_FULL + MUSIC_DIR
+#define MOVIE_DIR_FULL          DOWNLOADS_DIR_FULL + MOVIE_DIR
+#define TEMPORARY_DIR_FULL      DOWNLOADS_DIR_FULL + TEMPORARY_DIR
+#define CACHE_DIR_FULL          DOWNLOADS_DIR_FULL + CACHE_DIR
+#define ART_DIR_FULL            DOWNLOADS_DIR_FULL + ART_DIR
+#define BACKGROUND_DIR_FULL     DOWNLOADS_DIR_FULL + BACKGROUND_DIR
+
+#define COFIGPATH_FULL          APPDATA_DIR_FULL + COFIGPATH
+#define NETDADIOPATH_FULL       APPDATA_DIR_FULL + NETDADIOPATH
+#define MUSICPATH_FULL          APPDATA_DIR_FULL + MUSICPATH
+#define DOWNLOADINFO_FULL       APPDATA_DIR_FULL + DOWNLOADINFO
+#define MUSICSEARCH_FULL        APPDATA_DIR_FULL + MUSICSEARCH
+#define DARABASEPATH_FULL       APPDATA_DIR_FULL + DARABASEPATH
+#define USERPATH_FULL           APPDATA_DIR_FULL + USERPATH
+#define BARRAGEPATH_FULL        APPDATA_DIR_FULL + BARRAGEPATH
+
 #define THEME_DIR_FULL          MusicObject::getAppDir() + THEME_DIR
-#define CACHE_DIR_FULL          MusicObject::getAppDir() + CACHE_DIR
-#define ART_DIR_FULL            MusicObject::getAppDir() + ART_DIR
 #define PLUGINS_DIR_FULL        MusicObject::getAppDir() + PLUGINS_DIR
-#define BACKGROUND_DIR_FULL     MusicObject::getAppDir() + BACKGROUND_DIR
 #define LANGUAGE_DIR_FULL       MusicObject::getAppDir() + LANGUAGE_DIR
-#define TEMPORARY_DIR_FULL      MusicObject::getAppDir() + TEMPORARY_DIR
+#define SOUNDPATH_FULL          MusicObject::getAppDir() + SOUNDPATH
 
 #define MAKE_TRANSFORM_FULL     MusicObject::getAppDir() + MAKE_TRANSFORM
 #define MAKE_KRC2LRC_FULL       MusicObject::getAppDir() + MAKE_KRC2LRC
@@ -77,15 +107,6 @@
 #define MAKE_NETS_FULL          MusicObject::getAppDir() + MAKE_NETS
 #endif
 
-#define COFIGPATH_FULL          MusicObject::getAppDir() + COFIGPATH
-#define NETDADIOPATH_FULL       MusicObject::getAppDir() + NETDADIOPATH
-#define MUSICPATH_FULL          MusicObject::getAppDir() + MUSICPATH
-#define DOWNLOADINFO_FULL       MusicObject::getAppDir() + DOWNLOADINFO
-#define MUSICSEARCH_FULL        MusicObject::getAppDir() + MUSICSEARCH
-#define DARABASEPATH_FULL       MusicObject::getAppDir() + DARABASEPATH
-#define USERPATH_FULL           MusicObject::getAppDir() + USERPATH
-#define BARRAGEPATH_FULL        MusicObject::getAppDir() + BARRAGEPATH
-
 ///////////////////////////////////////
 #define USERID             20
 #define PASSWD             100
@@ -93,9 +114,9 @@
 #define USERNAME           20
 #define LOGINTIME          20
 ///////////////////////////////////////
-
 #define WINDOW_WIDTH_MIN    1033
 #define WINDOW_HEIGHT_MIN   660
+///////////////////////////////////////
 
 /*! @brief The namespace of the application object.
  * @author Greedysky <greedysky@163.com>
@@ -109,19 +130,23 @@ namespace MusicObject
         QString m_url;
         QString m_size;
     }MusicSongAttribute;
-    typedef QList<MusicSongAttribute> MusicSongAttributes;
+    TTK_DECLARE_LISTS(MusicSongAttribute)
+
     ///////////////////////////////////////
 
     typedef struct MusicSongInfomation
     {
         MusicSongAttributes m_songAttrs;
+        QString m_songId;
+        QString m_albumId;
+        QString m_artistId;
         QString m_lrcUrl;
         QString m_smallPicUrl;
         QString m_singerName;
         QString m_songName;
         QString m_timeLength;
     }MusicSongInfomation;
-    typedef QList<MusicSongInfomation> MusicSongInfomations;
+    TTK_DECLARE_LISTS(MusicSongInfomation)
     ///////////////////////////////////////
 
     enum DownLoadType
@@ -155,7 +180,20 @@ namespace MusicObject
 
     static QString getAppDir()
     {
+#if defined (Q_OS_ANDROID)
+        QAndroidJniObject mediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment",
+                                                                           "getExternalStorageDirectory",
+                                                                           "()Ljava/io/File;");
+        QAndroidJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
+        QString path = mediaPath.toString() + "/TTKMobile/";
+        if(!QDir().exists(path))
+        {
+            QDir().mkpath(path);
+        }
+        return path;
+#else
         return QApplication::applicationDirPath() + "/";
+#endif
     }
     /*!
      * Get application dir.

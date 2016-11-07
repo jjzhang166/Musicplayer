@@ -1,6 +1,6 @@
 #include "musiclocalsongsmanagerthread.h"
 #include "musicplayer.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
 
 MusicLocalSongsManagerThread::MusicLocalSongsManagerThread(QObject *parent)
     : QThread(parent)
@@ -21,11 +21,11 @@ QString MusicLocalSongsManagerThread::getClassName()
 void MusicLocalSongsManagerThread::run()
 {
     QFileInfoList list;
-    foreach(QString path, m_path)
+    foreach(const QString &path, m_path)
     {
         if(m_run)
         {
-            list << MusicUtils::UCore::findFile(path, MusicPlayer::supportFormatsFilterString());
+            list << MusicUtils::Core::findFile(path, MusicPlayer::supportFormatsFilterString());
         }
     }
     ///The name and path search ended when sending the corresponding

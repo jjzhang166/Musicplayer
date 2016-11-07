@@ -1,10 +1,9 @@
 #include "musicuserrecordwidget.h"
 #include "ui_musicuserrecordwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicuiobject.h"
 #include "musicusermodel.h"
 #include "musicmessagebox.h"
-#include "musicutils.h"
+#include "musicwidgetutils.h"
 
 #include <QFileDialog>
 #include <QCryptographicHash>
@@ -17,8 +16,8 @@ MusicUserRecordWidget::MusicUserRecordWidget(QWidget *parent)
     ui->setupUi(this);
 
 #ifdef Q_OS_UNIX
-    MusicUtils::UWidget::setLabelFontSize(ui->label_5T, 9);
-    MusicUtils::UWidget::setLabelFontSize(ui->label_6T, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->label_5T, 9);
+    MusicUtils::Widget::setLabelFontSize(ui->label_6T, 9);
 #endif
     ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
@@ -83,16 +82,16 @@ void MusicUserRecordWidget::initTabF()
     string = m_userModel->getUserCity(uid);
     if(!string.isEmpty())
     {
-        MusicUtils::UWidget::setComboboxText(ui->cityComboBox_F, string);
+        MusicUtils::Widget::setComboboxText(ui->cityComboBox_F, string);
     }
 
     string = m_userModel->getUserCountry(uid);
     if(!string.isEmpty())
     {
-        MusicUtils::UWidget::setComboboxText(ui->countryComboBox_F, string);
+        MusicUtils::Widget::setComboboxText(ui->countryComboBox_F, string);
     }
     ui->signatureEdit_F->setText(m_userModel->getUserSignature(uid));
-    ui->confirmButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle10);
+    ui->confirmButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle06);
 
     connect(ui->confirmButton_F, SIGNAL(clicked()), SLOT(confirmButtonClickedF()));
 }
@@ -102,7 +101,7 @@ void MusicUserRecordWidget::initTabS()
     QString path = m_userModel->getUserIcon(ui->userIDLabel_F->text());
     ui->bigPixmapLabel_S->setPixmap(QPixmap(path).scaled(ui->bigPixmapLabel_S->size()));
     ui->smlPixmapLabel_S->setPixmap(QPixmap(path).scaled(ui->smlPixmapLabel_S->size()));
-    ui->openFileButton_S->setStyleSheet(MusicUIObject::MPushButtonStyle10);
+    ui->openFileButton_S->setStyleSheet(MusicUIObject::MPushButtonStyle06);
     connect(ui->openFileButton_S, SIGNAL(clicked()), SLOT(openFileButtonClickedS()));
 }
 
@@ -118,7 +117,7 @@ void MusicUserRecordWidget::initTabT()
     connect(ui->newPwdEdit_T, SIGNAL(checkPwdStrength(int)), SLOT(checkPwdStrength(int)));
 
     changeVerificationCodeT();
-    ui->confirmButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle10);
+    ui->confirmButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle06);
     connect(ui->verificationCode, SIGNAL(clicked()), SLOT(changeVerificationCodeT()));
     connect(ui->confirmButton_T, SIGNAL(clicked()), SLOT(confirmButtonClickedT()));
 }
@@ -232,21 +231,19 @@ void MusicUserRecordWidget::confirmButtonClickedT()
 
 void MusicUserRecordWidget::checkPwdStrength(int code)
 {
-    QString blue = "background:#80B7F1;";
-    QString grey = "background:#BFBFBF;";
-
-    ui->pwdStrengthT1->setStyleSheet(code != -1 ? blue : grey);
-    ui->pwdStrengthT2->setStyleSheet(grey);
-    ui->pwdStrengthT3->setStyleSheet(grey);
+    ui->pwdStrengthT1->setStyleSheet(code != -1 ? MusicUIObject::MBackgroundStyle14 :
+                                                  MusicUIObject::MBackgroundStyle15);
+    ui->pwdStrengthT2->setStyleSheet(MusicUIObject::MBackgroundStyle15);
+    ui->pwdStrengthT3->setStyleSheet(MusicUIObject::MBackgroundStyle15);
 
     switch(code)
     {
         case  1:
-            ui->pwdStrengthT2->setStyleSheet(blue);
+            ui->pwdStrengthT2->setStyleSheet(MusicUIObject::MBackgroundStyle14);
             break;
         case  2:
-            ui->pwdStrengthT2->setStyleSheet(blue);
-            ui->pwdStrengthT3->setStyleSheet(blue);
+            ui->pwdStrengthT2->setStyleSheet(MusicUIObject::MBackgroundStyle14);
+            ui->pwdStrengthT3->setStyleSheet(MusicUIObject::MBackgroundStyle14);
             break;
         default: break;
     }
@@ -254,7 +251,6 @@ void MusicUserRecordWidget::checkPwdStrength(int code)
 
 int MusicUserRecordWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();;
 }

@@ -1,11 +1,9 @@
 ﻿#include "ui_musicdownloadresetwidget.h"
 #include "musicdownloadmgmtwidget.h"
-#include "musicconnectionpool.h"
 #include "musicdownloadwidget.h"
 #include "musicsettingmanager.h"
-#include "musicbackgroundmanager.h"
-#include "musicutils.h"
 #include "musicleftareawidget.h"
+#include "musiccoreutils.h"
 
 MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
     : MusicAbstractMoveWidget(parent),
@@ -24,21 +22,19 @@ MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    ui->downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
-    ui->openDetailButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
-    ui->openDirButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
+    ui->downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
+    ui->openDetailButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
+    ui->openDirButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
 
     connect(ui->downloadButton, SIGNAL(clicked()), SLOT(restartToDownload()));
     connect(ui->openDetailButton, SIGNAL(clicked()), SLOT(openDetailInfo()));
     connect(ui->openDirButton, SIGNAL(clicked()), SLOT(openFileLocation()));
-
-    M_CONNECTION_PTR->setValue(getClassName(), this);
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicLeftAreaWidget::getClassName());
+    connect(this, SIGNAL(openStackedDownloadWidget()), MusicLeftAreaWidget::instance(),
+                  SLOT(musicStackedMyDownWidgetChanged()));
 }
 
 MusicDownloadResetWidget::~MusicDownloadResetWidget()
 {
-    M_CONNECTION_PTR->poolDisConnect(getClassName());
     delete ui;
 }
 
@@ -54,8 +50,7 @@ void MusicDownloadResetWidget::setSongName(const QString &name)
 
 void MusicDownloadResetWidget::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveWidget::show();
 }
 
@@ -76,7 +71,7 @@ void MusicDownloadResetWidget::openDetailInfo()
 
 void MusicDownloadResetWidget::openFileLocation()
 {
-    MusicUtils::UCore::openUrl(M_SETTING_PTR->value(MusicSettingManager::DownloadMusicExistPathChoiced).toString(), true);
+    MusicUtils::Core::openUrl(M_SETTING_PTR->value(MusicSettingManager::DownloadMusicExistPathChoiced).toString(), true);
     close();
 }
 

@@ -2,13 +2,9 @@
 #include "qnutils.h"
 #include "qnmac.h"
 #include "qnconf.h"
+#///QJson import
+#include "qjson/serializer.h"
 
-#ifdef MUSIC_GREATER_NEW
-#   include <QJsonObject>
-#   include <QJsonDocument>
-#else
-#   include <QMap>
-#endif
 #include <QStringList>
 
 class QNPutPolicyPrivate : public TTKPrivate<QNPutPolicy>
@@ -64,11 +60,7 @@ QNPutPolicyPrivate::QNPutPolicyPrivate()
 
 QByteArray QNPutPolicyPrivate::toJSON(bool compact)
 {
-#if defined MUSIC_GREATER_NEW && !defined MUSIC_GREATER_FIVE_ZERO
-    QJsonObject json;
-#else
     QMap<QString, QVariant> json;
-#endif
     json["scope"] = m_scope;
     json["deadline"] = m_deadline;
 
@@ -133,29 +125,15 @@ QByteArray QNPutPolicyPrivate::toJSON(bool compact)
         json["persistentPipeline"] = m_persistentPipeline;
     }
 
-#if defined MUSIC_GREATER_NEW && !defined MUSIC_GREATER_FIVE_ZERO
-    QJsonDocument doc = QJsonDocument(json);
-    QByteArray data = doc.toJson(compact ? QJsonDocument::Compact :
-                                           QJsonDocument::Indented);
-#else
     Q_UNUSED(compact);
-    QByteArray data("{");
-    QList<QString> keys(json.keys());
-    QList<QVariant> values(json.values());
-    for(int i=0; i<keys.count(); ++i)
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray data = serializer.serialize(json, &ok);
+    if(!ok)
     {
-        switch(values[i].type())
-        {
-            case QVariant::String : data.append(QString("\"%1\":\"%2\",")
-                                    .arg(keys[i]).arg(values[i].toString())); break;
-            case QVariant::Int : data.append(QString("\"%1\":%2,")
-                                 .arg(keys[i]).arg(values[i].toInt())); break;
-            default: break;
-        }
+        data = "{}";
     }
-    if(data.count() != 1) data.chop(1);
-    data.append("}");
-#endif
+
     return data;
 }
 

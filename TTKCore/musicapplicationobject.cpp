@@ -9,35 +9,30 @@
 #include "musictimerautoobject.h"
 #include "musicmessagebox.h"
 #include "musicequalizerdialog.h"
-#include "musicconnectionpool.h"
 #include "musicsettingmanager.h"
 #include "musicregeditmanager.h"
 #include "musicmobiledevicesthread.h"
 #include "musicsourceupdatewidget.h"
+#include "musicsoundeffectswidget.h"
 #include "musicnumberdefine.h"
 #include "musicapplication.h"
-#include "musicenhancedwidget.h"
 
 #include <QPropertyAnimation>
 #include <QApplication>
 #include <QDesktopWidget>
 
+MusicApplicationObject *MusicApplicationObject::m_instance = nullptr;
+
 MusicApplicationObject::MusicApplicationObject(QObject *parent)
     : QObject(parent), m_mobileDevices(nullptr)
 {
-    m_supperClass = MStatic_cast(QWidget*, parent);
-    QWidget *widget = QApplication::desktop();
-    m_supperClass->move( (widget->width() - m_supperClass->width())/2,
-                         (widget->height() - m_supperClass->height())/2 );
-    M_SETTING_PTR->setValue(MusicSettingManager::ScreenSize, widget->size());
-    M_SETTING_PTR->setValue(MusicSettingManager::WidgetSize, QSize(WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN));
+    Q_INIT_RESOURCE(MusicPlayer);
+    m_instance = this;
 
+    musicResetWindow();
     windowStartAnimationOpacity();
+
     m_musicTimerAutoObj = new MusicTimerAutoObject(this);
-    connect(m_musicTimerAutoObj, SIGNAL(setPlaySong(int)), parent,
-                                 SLOT(setPlaySongChanged(int)));
-    connect(m_musicTimerAutoObj, SIGNAL(setStopSong()), parent,
-                                 SLOT(setStopSongChanged()));
 #ifdef Q_OS_UNIX
     m_mobileDevicesLinux = new MusicMobileDevicesThread(this);
     connect(m_mobileDevicesLinux, SIGNAL(devicesChanged(bool)), SLOT(musicDevicesLinuxChanged(bool)));
@@ -45,17 +40,14 @@ MusicApplicationObject::MusicApplicationObject(QObject *parent)
 #elif defined Q_OS_WIN
     m_mobileDevicesLinux = nullptr;
 #endif
-
     m_setWindowToTop = false;
-    M_CONNECTION_PTR->setValue(getClassName(), this);
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicApplication::getClassName());
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicEnhancedWidget::getClassName());
 
     musicToolSetsParameter();
 }
 
 MusicApplicationObject::~MusicApplicationObject()
 {
+    Q_CLEANUP_RESOURCE(MusicPlayer);
     delete m_mobileDevicesLinux;
     delete m_mobileDevices;
     delete m_musicTimerAutoObj;
@@ -65,6 +57,11 @@ MusicApplicationObject::~MusicApplicationObject()
 QString MusicApplicationObject::getClassName()
 {
     return staticMetaObject.className();
+}
+
+MusicApplicationObject *MusicApplicationObject::instance()
+{
+    return m_instance;
 }
 
 void MusicApplicationObject::getParameterSetting()
@@ -80,7 +77,7 @@ void MusicApplicationObject::getParameterSetting()
 
 void MusicApplicationObject::windowStartAnimationOpacity()
 {
-    m_animation = new QPropertyAnimation(m_supperClass, "windowOpacity");
+    m_animation = new QPropertyAnimation(MusicApplication::instance(), "windowOpacity");
     m_animation->setDuration(MT_S2MS);
     m_animation->setStartValue(0);
     m_animation->setEndValue(1);
@@ -168,7 +165,7 @@ void MusicApplicationObject::musicAboutUs()
 
 void MusicApplicationObject::musicVersionUpdate()
 {
-    MusicSourceUpdateWidget(m_supperClass).exec();
+    MusicSourceUpdateWidget(MusicApplication::instance()).exec();
 }
 
 void MusicApplicationObject::musicAudioRecorder()
@@ -181,7 +178,7 @@ void MusicApplicationObject::musicTimerWidget()
 {
     MusicTimerWidget timer;
     QStringList list;
-    emit getCurrentPlayList(list);
+    MusicApplication::instance()->getCurrentPlayList(list);
     timer.setSongStringList(list);
     timer.exec();
 }
@@ -189,32 +186,27 @@ void MusicApplicationObject::musicTimerWidget()
 void MusicApplicationObject::musicSetWindowToTop()
 {
     m_setWindowToTop = !m_setWindowToTop;
-    Qt::WindowFlags flags = m_supperClass->windowFlags();
-    m_supperClass->setWindowFlags( m_setWindowToTop ?
-                  (flags | Qt::WindowStaysOnTopHint) :
-                  (flags & ~Qt::WindowStaysOnTopHint) );
-    m_supperClass->show();
+    Qt::WindowFlags flags = MusicApplication::instance()->windowFlags();
+    MusicApplication::instance()->setWindowFlags( m_setWindowToTop ?
+                              (flags | Qt::WindowStaysOnTopHint) :
+                              (flags & ~Qt::WindowStaysOnTopHint) );
+    MusicApplication::instance()->show();
+}
+
+void MusicApplicationObject::musicResetWindow()
+{
+    QWidget *widget = QApplication::desktop();
+    M_SETTING_PTR->setValue(MusicSettingManager::ScreenSize, widget->size());
+    M_SETTING_PTR->setValue(MusicSettingManager::WidgetSize, QSize(WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN));
+
+    MusicApplication::instance()->setGeometry((widget->width() - WINDOW_WIDTH_MIN)/2,
+                                (widget->height() - WINDOW_HEIGHT_MIN)/2,
+                                WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN);
 }
 
 void MusicApplicationObject::musicToolSetsParameter()
 {
     m_musicTimerAutoObj->runTimerAutoConfig();
-}
-
-void MusicApplicationObject::musicSetEqualizer()
-{
-    if(M_SETTING_PTR->value(MusicSettingManager::EnhancedMusicChoiced).toInt() != 0)
-    {
-        MusicMessageBox message;
-        message.setText(tr("we are opening the magic sound, if you want to close?"));
-        if(message.exec())
-        {
-            return;
-        }
-        emit enhancedMusicChanged(0);
-    }
-    MusicEqualizerDialog eq;
-    eq.exec();
 }
 
 void MusicApplicationObject::musicDevicesLinuxChanged(bool state)
@@ -226,4 +218,40 @@ void MusicApplicationObject::musicDevicesLinuxChanged(bool state)
         m_mobileDevices = new MusicMobileDevicesWidget;
         m_mobileDevices->show();
     }
+}
+
+void MusicApplicationObject::musicSetEqualizer()
+{
+    if(!closeCurrentEqualizer())
+    {
+        return;
+    }
+    MusicEqualizerDialog equalizer;
+    equalizer.exec();
+}
+
+void MusicApplicationObject::musicSetSoundEffect()
+{
+    if(!closeCurrentEqualizer())
+    {
+        return;
+    }
+    MusicSoundEffectsWidget sound;
+    sound.setParentConnect(this);
+    sound.exec();
+}
+
+bool MusicApplicationObject::closeCurrentEqualizer()
+{
+    if(M_SETTING_PTR->value(MusicSettingManager::EnhancedMusicChoiced).toInt() != 0)
+    {
+        MusicMessageBox message;
+        message.setText(tr("we are opening the magic sound, if you want to close?"));
+        if(message.exec())
+        {
+            return false;
+        }
+        emit enhancedMusicChanged(0);
+    }
+    return true;
 }

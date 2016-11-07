@@ -1,9 +1,9 @@
 #include "musicfileinformationwidget.h"
 #include "ui_musicfileinformationwidget.h"
 #include "musicuiobject.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
+#include "musicnumberutils.h"
 #include "musicsongtag.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
 
 MusicModifyLineEdit::MusicModifyLineEdit(QWidget *parent)
@@ -55,7 +55,7 @@ MusicFileInformationWidget::MusicFileInformationWidget(QWidget *parent)
 
     setStyleSheet(MusicUIObject::MLineEditStyle01);
 
-    ui->viewButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->viewButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->viewButton->setCursor(QCursor(Qt::PointingHandCursor));
     connect(ui->viewButton, SIGNAL(clicked()), SLOT(musicOpenFileDir()));
 }
@@ -73,7 +73,7 @@ QString MusicFileInformationWidget::getClassName()
 
 void MusicFileInformationWidget::musicOpenFileDir()
 {
-    if(!MusicUtils::UCore::openUrl(QFileInfo(m_path).absoluteFilePath()))
+    if(!MusicUtils::Core::openUrl(QFileInfo(m_path).absoluteFilePath()))
     {
         MusicMessageBox message;
         message.setText(tr("The origin one does not exist!"));
@@ -89,7 +89,7 @@ void MusicFileInformationWidget::setFileInformation(const QString &name)
     QString check;
     ui->filePathEdit->setText( (check = name).isEmpty() ? "-" : check );
     ui->fileFormatEdit->setText( (check = fin.suffix() ).isEmpty() ? "-" : check );
-    ui->fileSizeEdit->setText( (check = MusicUtils::UNumber::size2Label(fin.size()) )
+    ui->fileSizeEdit->setText( (check = MusicUtils::Number::size2Label(fin.size()) )
                                 .isEmpty() ? "-" : check );
 
     ui->fileAlbumEdit->setText( state ? ((check = tag.getAlbum()).isEmpty() ? "-" : check) : "-" );
@@ -136,7 +136,6 @@ void MusicFileInformationWidget::saveModifyData()
 
 int MusicFileInformationWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

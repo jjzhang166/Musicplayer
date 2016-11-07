@@ -15,7 +15,6 @@
 #include "musicsettingmanager.h"
 
 class MusicLrcSearchWidget;
-class MusicLrcMakerWidget;
 
 /*! @brief The class of the lrc container base.
  * @author Greedysky <greedysky@163.com>
@@ -44,7 +43,7 @@ public:
      * Stop timer clock to draw lrc.
      * Subclass should implement this function.
      */
-    virtual void setMaskLinearGradientColor(QColor = CL_Mask) const = 0;
+    virtual void setMaskLinearGradientColor(const QList<QColor> &colors) const = 0;
     /*!
      * Set mask linear gradient color.
      * Subclass should implement this function.
@@ -58,13 +57,21 @@ public:
      * Set setting parameter.
      */
 
+    inline QString getCurrentSongName() const { return m_currentSongName;}
+    /*!
+     * Set current song name.
+     */
     inline void setCurrentSongName(const QString &name) { m_currentSongName = name;}
     /*!
      * Set current song name.
      */
-    inline void setCurrentTime(qint64 time) { m_currentTime = time;}
+    void setCurrentTime(qint64 time, qint64 total);
     /*!
-     * Set current time.
+     * Set current play total time.
+     */
+    qint64 getTotalTime() const;
+    /*!
+     * Get current play total time.
      */
 
 Q_SIGNALS:
@@ -126,11 +133,10 @@ protected:
      */
 
     bool m_linkLocalLrc;
-    qint64 m_currentTime;
+    qint64 m_currentTime, m_totalTime;
     QString m_currentSongName, m_containerType;
     QList<MusicLRCManager*> m_musicLrcContainer;
     MusicLrcSearchWidget *m_musicLrcSearchWidget;
-    MusicLrcMakerWidget *m_makerWidget;
 
 };
 

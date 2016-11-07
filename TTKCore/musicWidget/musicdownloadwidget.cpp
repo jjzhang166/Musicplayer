@@ -1,15 +1,14 @@
 #include "musicdownloadwidget.h"
 #include "ui_musicdownloadwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicuiobject.h"
 #include "musicsettingmanager.h"
 #include "musicnetworkthread.h"
 #include "musicmydownloadrecordconfigmanager.h"
-#include "musictextdownloadthread.h"
 #include "musicdatadownloadthread.h"
-#include "musicdata2downloadthread.h"
-#include "musicbackgrounddownload.h"
+#include "musicttdatadownloadthread.h"
 #include "musicmessagebox.h"
+#include "musicdownloadqueryfactory.h"
+#include "musiccoreutils.h"
 
 #include <QFileDialog>
 #include <QLabel>
@@ -61,7 +60,7 @@ MusicDownloadTableWidget::MusicDownloadTableWidget(QWidget *parent)
     setColumnCount(1);
     QHeaderView *headerview = horizontalHeader();
     headerview->resizeSection(0, 400);
-    MusicUtils::UWidget::setTransparent(this, 255);
+    MusicUtils::Widget::setTransparent(this, 255);
 }
 
 MusicDownloadTableWidget::~MusicDownloadTableWidget()
@@ -136,14 +135,13 @@ MusicDownloadWidget::MusicDownloadWidget(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    ui->pathChangedButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
-    ui->settingButton->setStyleSheet(MusicUIObject::MPushButtonStyle05);
-    ui->downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle10);
-#ifndef USE_MULTIPLE_QUERY
-    m_downloadThread = new MusicDownLoadQuerySingleThread(this);
-#else
-    m_downloadThread = new MusicDownLoadQueryMultipleThread(this);
-#endif
+    ui->downloadPathEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
+    ui->pathChangedButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
+    ui->settingButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
+    ui->downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle06);
+
+    m_querySingleInfo = false;
+    m_downloadThread = M_DOWNLOAD_QUERY_PTR->getQueryThread(this);
     m_queryType = MusicDownLoadQueryThreadAbstract::MusicQuery;
 
     connect(ui->pathChangedButton, SIGNAL(clicked()), SLOT(downloadDirSelected()));
@@ -166,8 +164,14 @@ QString MusicDownloadWidget::getClassName()
 void MusicDownloadWidget::initWidget()
 {
     controlEnable(true);
-    QString path = M_SETTING_PTR->value(MusicSettingManager::DownloadMusicPathDirChoiced).toString();
-    ui->downloadPathEdit->setText(path.isEmpty() ? MUSIC_DIR_FULL : path);
+    if(m_queryType == MusicDownLoadQueryThreadAbstract::MovieQuery)
+    {
+        ui->downloadPathEdit->setText(MOVIE_DIR_FULL);
+    }
+    else
+    {
+        ui->downloadPathEdit->setText(M_SETTING_PTR->value(MusicSettingManager::DownloadMusicPathDirChoiced).toString());
+    }
 }
 
 void MusicDownloadWidget::controlEnable(bool enable)
@@ -180,16 +184,37 @@ void MusicDownloadWidget::controlEnable(bool enable)
 
 void MusicDownloadWidget::setSongName(const QString &name, MusicDownLoadQueryThreadAbstract::QueryType type)
 {
+    m_queryType = type;
     initWidget();
-    ui->downloadName->setText(MusicUtils::UWidget::elidedText(font(), name, Qt::ElideRight, 200));
+
+    ui->downloadName->setText(MusicUtils::Widget::elidedText(font(), name, Qt::ElideRight, 200));
     m_downloadThread->setQueryAllRecords(true);
-    m_downloadThread->startSearchSong(m_queryType = type, name);
+    m_downloadThread->startSearchSong(type, name);
+}
+
+void MusicDownloadWidget::setSongName(const MusicObject::MusicSongInfomation &info,
+                                      MusicDownLoadQueryThreadAbstract::QueryType type)
+{
+    m_queryType = type;
+    m_singleSongInfo = info;
+    m_querySingleInfo = true;
+
+    initWidget();
+    ui->downloadName->setText(MusicUtils::Widget::elidedText(font(), info.m_songName, Qt::ElideRight, 200));
+
+    if(type == MusicDownLoadQueryThreadAbstract::MusicQuery)
+    {
+        queryAllFinishedMusic(info.m_songAttrs);
+    }
+    else if(type == MusicDownLoadQueryThreadAbstract::MovieQuery)
+    {
+        queryAllFinishedMovie(info.m_songAttrs);
+    }
 }
 
 void MusicDownloadWidget::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveWidget::show();
 }
 
@@ -200,6 +225,7 @@ void MusicDownloadWidget::queryAllFinished()
         return;
     }
 
+    ui->viewArea->clearAllItems();
     if(m_queryType == MusicDownLoadQueryThreadAbstract::MusicQuery)
     {
         queryAllFinishedMusic();
@@ -216,10 +242,10 @@ void MusicDownloadWidget::queryAllFinishedMusic()
     if(!musicSongInfos.isEmpty())
     {
         QString filename = m_downloadThread->getSearchedText();
-        QString artistName = filename.split('-').front().trimmed();
-        QString songName = filename.split('-').back().trimmed();
+        QString artistName = MusicUtils::Core::artistName(filename);
+        QString songName = MusicUtils::Core::songName(filename);
         MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos.first();
-        foreach(MusicObject::MusicSongInfomation var, musicSongInfos)
+        foreach(const MusicObject::MusicSongInfomation &var, musicSongInfos)
         {
             if( var.m_singerName.contains(artistName, Qt::CaseInsensitive) &&
                 var.m_songName.contains(songName, Qt::CaseInsensitive) )
@@ -229,43 +255,47 @@ void MusicDownloadWidget::queryAllFinishedMusic()
             }
         }
 
-        MusicObject::MusicSongAttributes attrs = musicSongInfo.m_songAttrs;
-        foreach(MusicObject::MusicSongAttribute attr, attrs)
+        queryAllFinishedMusic(musicSongInfo.m_songAttrs);
+    }
+}
+
+void MusicDownloadWidget::queryAllFinishedMusic(const MusicObject::MusicSongAttributes &attrs)
+{
+    foreach(const MusicObject::MusicSongAttribute &attr, attrs)
+    {
+        if(attr.m_bitrate == MB_32)         ///st
         {
-            if(attr.m_bitrate == MB_32)         ///st
-            {
-                ui->viewArea->createItem(MB_32, tr("ST"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_st_quality"));
-            }
-            else if(attr.m_bitrate == MB_128)   ///sd
-            {
-                ui->viewArea->createItem(MB_128, tr("SD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_sd_quality"));
-            }
-            else if(attr.m_bitrate == MB_192)   ///hd
-            {
-                ui->viewArea->createItem(MB_192, tr("HD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_hd_quality"));
-            }
-            else if(attr.m_bitrate == MB_320)   ///sq
-            {
-                ui->viewArea->createItem(MB_320, tr("SQ"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_sq_quality"));
-            }
-            else if(attr.m_bitrate > MB_320)   ///cd
-            {
-                ui->viewArea->createItem(MB_500, tr("CD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_cd_quality"));
-            }
-            else
-            {
-                break;
-            }
+            ui->viewArea->createItem(MB_32, tr("ST"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_st_quality"));
+        }
+        else if(attr.m_bitrate == MB_128)   ///sd
+        {
+            ui->viewArea->createItem(MB_128, tr("SD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_sd_quality"));
+        }
+        else if(attr.m_bitrate == MB_192)   ///hd
+        {
+            ui->viewArea->createItem(MB_192, tr("HD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_hd_quality"));
+        }
+        else if(attr.m_bitrate == MB_320)   ///sq
+        {
+            ui->viewArea->createItem(MB_320, tr("SQ"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_sq_quality"));
+        }
+        else if(attr.m_bitrate > MB_320)   ///cd
+        {
+            ui->viewArea->createItem(MB_500, tr("CD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_cd_quality"));
+        }
+        else
+        {
+            continue;
         }
     }
     resizeWindow();
@@ -277,10 +307,10 @@ void MusicDownloadWidget::queryAllFinishedMovie()
     if(!musicSongInfos.isEmpty())
     {
         QString filename = m_downloadThread->getSearchedText();
-        QString artistName = filename.split('-').front().trimmed();
-        QString songName = filename.split('-').back().trimmed();
+        QString artistName = MusicUtils::Core::artistName(filename);
+        QString songName = MusicUtils::Core::songName(filename);
         MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos.first();
-        foreach(MusicObject::MusicSongInfomation var, musicSongInfos)
+        foreach(const MusicObject::MusicSongInfomation &var, musicSongInfos)
         {
             if( var.m_singerName.contains(artistName, Qt::CaseInsensitive) &&
                 var.m_songName.contains(songName, Qt::CaseInsensitive) )
@@ -290,31 +320,35 @@ void MusicDownloadWidget::queryAllFinishedMovie()
             }
         }
 
-        MusicObject::MusicSongAttributes attrs = musicSongInfo.m_songAttrs;
-        foreach(MusicObject::MusicSongAttribute attr, attrs)
+        queryAllFinishedMovie(musicSongInfo.m_songAttrs);
+    }
+}
+
+void MusicDownloadWidget::queryAllFinishedMovie(const MusicObject::MusicSongAttributes &attrs)
+{
+    foreach(const MusicObject::MusicSongAttribute &attr, attrs)
+    {
+        if(attr.m_bitrate == MB_500)       ///hd
         {
-            if(attr.m_bitrate == MB_500)       ///hd
-            {
-                ui->viewArea->createItem(MB_500, tr("SD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_sd_quality"));
-            }
-            else if(attr.m_bitrate == MB_750)  ///sq
-            {
-                ui->viewArea->createItem(MB_750, tr("HD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_hd_quality"));
-            }
-            else if(attr.m_bitrate == MB_1000) ///cd
-            {
-                ui->viewArea->createItem(MB_1000, tr("SQ"), QString("%1/%2KBPS/%3").arg(attr.m_size)
-                                         .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
-                                         QString(":/quality/lb_sq_quality"));
-            }
-            else
-            {
-                break;
-            }
+            ui->viewArea->createItem(MB_500, tr("SD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_sd_quality"));
+        }
+        else if(attr.m_bitrate == MB_750)  ///sq
+        {
+            ui->viewArea->createItem(MB_750, tr("HD"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_hd_quality"));
+        }
+        else if(attr.m_bitrate == MB_1000) ///cd
+        {
+            ui->viewArea->createItem(MB_1000, tr("SQ"), QString("%1/%2KBPS/%3").arg(attr.m_size)
+                                     .arg(attr.m_bitrate).arg(attr.m_format.toUpper()),
+                                     QString(":/quality/lb_sq_quality"));
+        }
+        else
+        {
+            continue;
         }
     }
     resizeWindow();
@@ -336,8 +370,7 @@ void MusicDownloadWidget::resizeWindow()
     setMoveWidget(ui->settingButton, delta);
     setMoveWidget(ui->downloadButton, delta);
 
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
 }
 
 void MusicDownloadWidget::setFixedHeightWidget(QWidget *w, int height)
@@ -361,8 +394,11 @@ void MusicDownloadWidget::downloadDirSelected()
         QString path;
         if(!(path = dialog.directory().absolutePath()).isEmpty())
         {
-            M_SETTING_PTR->setValue(MusicSettingManager::DownloadMusicPathDirChoiced, path);
-            ui->downloadPathEdit->setText(path);
+            if(m_queryType == MusicDownLoadQueryThreadAbstract::MusicQuery)
+            {
+                M_SETTING_PTR->setValue(MusicSettingManager::DownloadMusicPathDirChoiced, path + "/");
+            }
+            ui->downloadPathEdit->setText(path + "/");
         }
     }
 }
@@ -370,14 +406,22 @@ void MusicDownloadWidget::downloadDirSelected()
 void MusicDownloadWidget::startToDownload()
 {
     hide(); ///hide download widget
+    if(ui->viewArea->getCurrentBitrate() == -1)
+    {
+        MusicMessageBox message(tr("Please Select One Item First!"));
+        message.exec();
+        return;
+    }
+
     if(m_queryType == MusicDownLoadQueryThreadAbstract::MusicQuery)
     {
-        startToDownloadMusic();
+        m_querySingleInfo ? startToDownloadMusic(m_singleSongInfo) : startToDownloadMusic();
     }
     else if(m_queryType == MusicDownLoadQueryThreadAbstract::MovieQuery)
     {
-        startToDownloadMovie();
+        m_querySingleInfo ? startToDownloadMovie(m_singleSongInfo) : startToDownloadMovie();
     }
+    controlEnable(false);
 }
 
 void MusicDownloadWidget::dataDownloadFinished()
@@ -388,124 +432,121 @@ void MusicDownloadWidget::dataDownloadFinished()
 
 void MusicDownloadWidget::startToDownloadMusic()
 {
-    int bitrate = ui->viewArea->getCurrentBitrate();
-    if(bitrate == -1)
-    {
-        MusicMessageBox message(tr("Please Select One Item First!"));
-        message.exec();
-        return;
-    }
-
     MusicObject::MusicSongInfomations musicSongInfos(m_downloadThread->getMusicSongInfos());
     if(!musicSongInfos.isEmpty())
     {
-        MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos.first();
-        MusicObject::MusicSongAttributes musicAttrs = musicSongInfo.m_songAttrs;
-        foreach(MusicObject::MusicSongAttribute musicAttr, musicAttrs)
-        {
-            if(musicAttr.m_bitrate == bitrate ||
-               musicAttr.m_bitrate > 321)
-            {
-                if(!M_NETWORK_PTR->isOnline())
-                {
-                    return;
-                }
-                QString musicSong = musicSongInfo.m_singerName + " - " + musicSongInfo.m_songName;
-                QString downloadName = QString("%1%2.%3").arg(MUSIC_DIR_FULL).arg(musicSong).arg(musicAttr.m_format);
-                ////////////////////////////////////////////////
-                MusicDownloadRecord record;
-                MusicMyDownloadRecordConfigManager down(this);
-                if(!down.readDownloadXMLConfig())
-                {
-                    return;
-                }
+        startToDownloadMusic(musicSongInfos.first());
+    }
+}
 
-                down.readDownloadConfig( record );
-                record.m_names << musicSong;
-                record.m_paths << QFileInfo(downloadName).absoluteFilePath();
-                record.m_sizes << musicAttr.m_size;
-                down.writeDownloadConfig( record );
-                ////////////////////////////////////////////////
-                QFile file(downloadName);
-                if(file.exists())
-                {
-                    for(int i=1; i<99; ++i)
-                    {
-                        if(!QFile::exists(downloadName))
-                        {
-                            break;
-                        }
-                        if(i != 1)
-                        {
-                            musicSong.chop(3);
-                        }
-                        musicSong += QString("(%1)").arg(i);
-                        downloadName = QString("%1%2.%3").arg(MUSIC_DIR_FULL).arg(musicSong).arg(musicAttr.m_format);
-                    }
-                }
-                ////////////////////////////////////////////////
-                MusicDataDownloadThread *downSong = new MusicDataDownloadThread( musicAttr.m_url, downloadName,
-                                                                                 MusicDownLoadThreadAbstract::Download_Music, this);
-                connect(downSong, SIGNAL(downLoadDataChanged(QString)), SLOT(dataDownloadFinished()));
-                downSong->startToDownload();
-                break;
+void MusicDownloadWidget::startToDownloadMusic(const MusicObject::MusicSongInfomation &musicSongInfo)
+{
+    int bitrate = ui->viewArea->getCurrentBitrate();
+    MusicObject::MusicSongAttributes musicAttrs = musicSongInfo.m_songAttrs;
+    foreach(const MusicObject::MusicSongAttribute &musicAttr, musicAttrs)
+    {
+        if(musicAttr.m_bitrate == bitrate || musicAttr.m_bitrate > 321)
+        {
+            if(!M_NETWORK_PTR->isOnline())
+            {
+                return;
             }
+
+            QString musicSong = musicSongInfo.m_singerName + " - " + musicSongInfo.m_songName;
+            QString downloadPrefix = ui->downloadPathEdit->text().isEmpty() ? MUSIC_DIR_FULL : ui->downloadPathEdit->text();
+            QString downloadName = QString("%1%2.%3").arg(downloadPrefix).arg(musicSong).arg(musicAttr.m_format);
+            ////////////////////////////////////////////////
+            MusicDownloadRecords records;
+            MusicMyDownloadRecordConfigManager down(this);
+            if(!down.readDownloadXMLConfig())
+            {
+                return;
+            }
+
+            down.readDownloadConfig( records );
+            MusicDownloadRecord record;
+            record.m_name = musicSong;
+            record.m_path = QFileInfo(downloadName).absoluteFilePath();
+            record.m_size = musicAttr.m_size;
+            records << record;
+            down.writeDownloadConfig( records );
+            ////////////////////////////////////////////////
+            QFile file(downloadName);
+            if(file.exists())
+            {
+                for(int i=1; i<99; ++i)
+                {
+                    if(!QFile::exists(downloadName))
+                    {
+                        break;
+                    }
+                    if(i != 1)
+                    {
+                        musicSong.chop(3);
+                    }
+                    musicSong += QString("(%1)").arg(i);
+                    downloadName = QString("%1%2.%3").arg(downloadPrefix).arg(musicSong).arg(musicAttr.m_format);
+                }
+            }
+            ////////////////////////////////////////////////
+            MusicDataDownloadThread *downSong = new MusicDataDownloadThread( musicAttr.m_url, downloadName,
+                                                                             MusicDownLoadThreadAbstract::Download_Music, this);
+            connect(downSong, SIGNAL(downLoadDataChanged(QString)), SLOT(dataDownloadFinished()));
+            downSong->startToDownload();
+            break;
         }
     }
-    controlEnable(false);
 }
 
 void MusicDownloadWidget::startToDownloadMovie()
 {
-    int bitrate = ui->viewArea->getCurrentBitrate();
-    if(bitrate == -1)
-    {
-        MusicMessageBox message(tr("Please Select One Item First!"));
-        message.exec();
-        return;
-    }
-
     MusicObject::MusicSongInfomations musicSongInfos(m_downloadThread->getMusicSongInfos());
     if(!musicSongInfos.isEmpty())
     {
-        MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos.first();
-        MusicObject::MusicSongAttributes musicAttrs = musicSongInfo.m_songAttrs;
-        foreach(MusicObject::MusicSongAttribute musicAttr, musicAttrs)
+        startToDownloadMovie(musicSongInfos.first());
+    }
+}
+
+void MusicDownloadWidget::startToDownloadMovie(const MusicObject::MusicSongInfomation &musicSongInfo)
+{
+    int bitrate = ui->viewArea->getCurrentBitrate();
+    MusicObject::MusicSongAttributes musicAttrs = musicSongInfo.m_songAttrs;
+    foreach(const MusicObject::MusicSongAttribute &musicAttr, musicAttrs)
+    {
+        if(musicAttr.m_bitrate == bitrate)
         {
-            if(musicAttr.m_bitrate == bitrate)
+            if(!M_NETWORK_PTR->isOnline())
             {
-                if(!M_NETWORK_PTR->isOnline())
-                {
-                    return;
-                }
-                QString musicSong = musicSongInfo.m_singerName + " - " + musicSongInfo.m_songName;
-                QString downloadName = QString("%1%2.%3").arg(MOVIE_DIR_FULL).arg(musicSong).arg(musicAttr.m_format);
-                ////////////////////////////////////////////////
-                QFile file(downloadName);
-                if(file.exists())
-                {
-                    for(int i=1; i<99; ++i)
-                    {
-                        if(!QFile::exists(downloadName))
-                        {
-                            break;
-                        }
-                        if(i != 1)
-                        {
-                            musicSong.chop(3);
-                        }
-                        musicSong += QString("(%1)").arg(i);
-                        downloadName = QString("%1%2.%3").arg(MOVIE_DIR_FULL).arg(musicSong).arg(musicAttr.m_format);
-                    }
-                }
-                ////////////////////////////////////////////////
-                MusicDataDownloadThread* download = new MusicDataDownloadThread(musicAttr.m_url, downloadName,
-                                                                                MusicDownLoadThreadAbstract::Download_Video, this);
-                connect(download, SIGNAL(downLoadDataChanged(QString)), SLOT(dataDownloadFinished()));
-                download->startToDownload();
-                break;
+                return;
             }
+
+            QString musicSong = musicSongInfo.m_singerName + " - " + musicSongInfo.m_songName;
+            QString downloadPrefix = ui->downloadPathEdit->text().isEmpty() ? MOVIE_DIR_FULL : ui->downloadPathEdit->text();
+            QString downloadName = QString("%1%2.%3").arg(downloadPrefix).arg(musicSong).arg(musicAttr.m_format);
+            ////////////////////////////////////////////////
+            QFile file(downloadName);
+            if(file.exists())
+            {
+                for(int i=1; i<99; ++i)
+                {
+                    if(!QFile::exists(downloadName))
+                    {
+                        break;
+                    }
+                    if(i != 1)
+                    {
+                        musicSong.chop(3);
+                    }
+                    musicSong += QString("(%1)").arg(i);
+                    downloadName = QString("%1%2.%3").arg(downloadPrefix).arg(musicSong).arg(musicAttr.m_format);
+                }
+            }
+            ////////////////////////////////////////////////
+            MusicDataDownloadThread* download = new MusicDataDownloadThread(musicAttr.m_url, downloadName,
+                                                                            MusicDownLoadThreadAbstract::Download_Video, this);
+            connect(download, SIGNAL(downLoadDataChanged(QString)), SLOT(dataDownloadFinished()));
+            download->startToDownload();
+            break;
         }
     }
-    controlEnable(false);
 }

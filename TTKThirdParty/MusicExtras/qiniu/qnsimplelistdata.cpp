@@ -1,17 +1,9 @@
 #include "qnsimplelistdata.h"
 #include "qnmac.h"
 #include "qniohelper.h"
+#///QJson import
+#include "qjson/parser.h"
 
-#ifdef MUSIC_GREATER_NEW
-#   include <QJsonParseError>
-#   include <QJsonDocument>
-#   include <QJsonObject>
-#   include <QJsonArray>
-#else
-#   include <QtScript/QScriptEngine>
-#   include <QtScript/QScriptValue>
-#   include <QtScript/QScriptValueIterator>
-#endif
 #include <QDebug>
 
 class QNSimpleListDataPrivate : public TTKPrivate<QNSimpleListData>
@@ -52,69 +44,31 @@ void QNSimpleListData::listDataToServer(const QString &bucket)
 
 void QNSimpleListData::receiveDataFromServer()
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply*>(QObject::sender());
+    QNetworkReply *reply = MObject_cast(QNetworkReply*, QObject::sender());
     if(reply)
     {
         QNDataItems items;
         if(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
         {
-#ifdef MUSIC_GREATER_NEW
-            QJsonParseError jsonError;
-            QJsonDocument parseDoucment = QJsonDocument::fromJson(reply->readAll(), &jsonError);
-            ///Put the data into Json
-            if(jsonError.error != QJsonParseError::NoError ||
-               !parseDoucment.isObject())
+            QJson::Parser parser;
+            bool ok;
+            QVariant data = parser.parse(reply->readAll(), &ok);
+            if(ok)
             {
-                emit receiveFinshed( QNDataItems() );
-                return ;
-            }
-
-            QJsonObject jsonObject = parseDoucment.object();
-            if(jsonObject.contains("items"))
-            {
-                QJsonArray array = jsonObject.take("items").toArray();
-                foreach(QJsonValue value, array)
+                QVariantMap value = data.toMap();
+                QVariantList array = value["items"].toList();
+                foreach(const QVariant &var, array)
                 {
-                    if(!value.isObject())
-                    {
-                       continue;
-                    }
-                    QJsonObject object = value.toObject();
-
+                    value = var.toMap();
                     QNDataItem item;
-                    item.m_name = object.value("key").toString();
-                    item.m_hash = object.value("hash").toString();
-                    item.m_mimeType = object.value("mimeType").toString();
-                    item.m_size = object.value("fsize").toVariant().toInt();
-                    item.m_putTime = object.value("putTime").toVariant().toInt();
+                    item.m_name = value["key"].toString();
+                    item.m_hash = value["hash"].toString();
+                    item.m_mimeType = value["mimeType"].toString();
+                    item.m_size = value["fsize"].toInt();
+                    item.m_putTime = value["putTime"].toInt();
                     items << item;
                 }
             }
-#else
-            QScriptEngine engine;
-            QScriptValue sc = engine.evaluate("value=" + QString(reply->readAll()));
-            if(sc.property("items").isArray())
-            {
-                QScriptValueIterator it(sc.property("items"));
-                while(it.hasNext())
-                {
-                    it.next();
-                    QScriptValue value = it.value();
-                    if(value.isNull() || value.property("key").toString().isEmpty())
-                    {
-                        continue;
-                    }
-
-                    QNDataItem item;
-                    item.m_name = value.property("key").toString();
-                    item.m_hash = value.property("hash").toString();
-                    item.m_mimeType = value.property("mimeType").toString();
-                    item.m_size = value.property("fsize").toInt32();
-                    item.m_putTime = value.property("putTime").toInt32();
-                    items << item;
-                }
-            }
-#endif
         }
         reply->deleteLater();
         emit receiveFinshed( items );

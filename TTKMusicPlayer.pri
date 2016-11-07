@@ -13,7 +13,7 @@
 QT       += core gui xml sql
 
 equals(QT_MAJOR_VERSION, 4){
-QT       += network script
+QT       += network
 CONFIG   += gcc
 include(TTKExtra/Qt4/qmmp.pri)
 }
@@ -34,12 +34,14 @@ QT_VER_MAJOR = $$member(QT_VER_STRING, 0)
 QT_VER_MINOR = $$member(QT_VER_STRING, 1)
 QT_VER_PATCH = $$member(QT_VER_STRING, 2)
 
+include(TTKVersion.pri)
+
 win32{
     LIBS += -lIphlpapi -luser32
     equals(QT_MAJOR_VERSION, 5){
         greaterThan(QT_VER_MINOR, 1):QT  += winextras
         msvc{
-            LIBS += -L../bin -lqmmp1 -lMusicExtras -lzlib
+            LIBS += -L../bin/$$TTKMusicPlayer -lqmmp1 -lMusicUi -lMusicExtras -lzlib
             !contains(QMAKE_TARGET.arch, x86_64){
                  #support on windows XP
                  QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
@@ -48,7 +50,7 @@ win32{
         }
 
         gcc{
-            LIBS += -L../bin -lqmmp1 -lMusicExtras -lzlib
+            LIBS += -L../bin/$$TTKMusicPlayer -lqmmp1 -lMusicUi -lMusicExtras -lzlib
             QMAKE_CXXFLAGS += -std=c++11
             QMAKE_CXXFLAGS += -Wunused-function
             QMAKE_CXXFLAGS += -Wswitch
@@ -58,7 +60,7 @@ win32{
     equals(QT_MAJOR_VERSION, 4){
         QT  += multimedia
         gcc{
-            LIBS += -L../bin -lqmmp0 -lMusicExtras -lzlib
+            LIBS += -L../bin/$$TTKMusicPlayer -lqmmp0 -lMusicUi -lMusicExtras -lzlib
             QMAKE_CXXFLAGS += -std=c++11
             QMAKE_CXXFLAGS += -Wunused-function
             QMAKE_CXXFLAGS += -Wswitch
@@ -76,14 +78,10 @@ unix:!mac{
     QMAKE_CXXFLAGS += -std=c++11
     QMAKE_CXXFLAGS += -Wunused-function
     QMAKE_CXXFLAGS += -Wswitch
-    LIBS += -L../lib -lqmmp -lMusicExtras -lzlib
+    LIBS += -L../lib/$$TTKMusicPlayer -lqmmp -lMusicUi -lMusicExtras -lzlib
 }
 
-TTKMusicPlayer = 2.3.2.0
-
 DEFINES += MUSIC_LIBRARY
-DEFINES += USE_MULTIPLE_QUERY
-
 
 #########################################
 HEADERS += $$PWD/musicglobal.h
@@ -96,7 +94,9 @@ contains(CONFIG, TTK_BUILD_LIB){
 include(TTKThirdParty/TTKThirdParty.pri)
 #########################################
 include(TTKCore/musicCore/MusicCore.pri)
+include(TTKCore/musicNetwork/MusicNetwork.pri)
 include(TTKCore/musicWidget/MusicWidget.pri)
+include(TTKCore/musicWidgetCore/MusicWidgetCore.pri)
 include(TTKCore/musicLocalsearch/MusicLocalSearch.pri)
 include(TTKCore/musicLrcmanager/MusicLrc.pri)
 include(TTKCore/musicRemotewidget/MusicRemote.pri)

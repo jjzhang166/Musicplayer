@@ -1,9 +1,11 @@
 #include "musicvideoview.h"
-#include "musicvideocontrol.h"
 #include "musicmessagebox.h"
 #include "musiccoremplayer.h"
 #include "musicbarragewidget.h"
+#include "musicnumberdefine.h"
+#include "musicuiobject.h"
 
+#include <QMenu>
 #include <QTimer>
 #include <QMouseEvent>
 
@@ -54,7 +56,8 @@ void MusicViewWidget::contextMenuEvent(QContextMenuEvent *event)
 MusicVideoView::MusicVideoView(bool popup, QWidget *parent)
     : QGraphicsView(parent)
 {
-    setStyleSheet(MusicUIObject::MCustomStyle19);
+    setObjectName("MusicVideoView");
+    setStyleSheet(QString("#MusicVideoView{%1}").arg(MusicUIObject::MBackgroundStyle02));
 
     m_positionChanged = false;
     m_mediaPlayer = new MusicCoreMPlayer(this);
@@ -62,17 +65,14 @@ MusicVideoView::MusicVideoView(bool popup, QWidget *parent)
     m_barrageCore = new MusicBarrageWidget(this);
 
     connect(m_videoWidget, SIGNAL(setClick()), SLOT(play()));
-    connect(m_videoWidget, SIGNAL(setFullScreen()), SLOT(setFullScreen()));
+    connect(m_videoWidget, SIGNAL(setFullScreen()), parent, SLOT(fullscreenButtonClicked()));
     connect(m_videoWidget, SIGNAL(mediaIsPlaying(bool&)), SLOT(mediaIsPlaying(bool&)));
 
     m_videoControl = new MusicVideoControl(popup, this);
     connect(m_videoControl, SIGNAL(mvURLChanged(QString)), parent, SLOT(mvURLChanged(QString)));
     connect(m_videoControl, SIGNAL(sliderValueChanged(int)), SLOT(setPosition(int)));
-    connect(m_videoControl, SIGNAL(addBarrageChanged(QString)), SLOT(addBarrageChanged(QString)));
+    connect(m_videoControl, SIGNAL(addBarrageChanged(MusicBarrageRecord)), SLOT(addBarrageChanged(MusicBarrageRecord)));
     connect(m_videoControl, SIGNAL(pushBarrageChanged(bool)), SLOT(pushBarrageChanged(bool)));
-    connect(m_videoControl, SIGNAL(barrageSizeButtonChanged(int)), SLOT(barrageSizeButtonChanged(int)));
-    connect(m_videoControl, SIGNAL(barrageColorButtonChanged(QColor)), SLOT(barrageColorButtonChanged(QColor)));
-    m_videoControl->hide();
 
     resizeWindow(0, 0);
 
@@ -94,18 +94,6 @@ QString MusicVideoView::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicVideoView::enterEvent(QEvent *event)
-{
-    QWidget::enterEvent(event);
-    m_videoControl->show();
-}
-
-void MusicVideoView::leaveEvent(QEvent *event)
-{
-    QWidget::leaveEvent(event);
-    m_videoControl->hide();
-}
-
 void MusicVideoView::contextMenuEvent(QContextMenuEvent *event)
 {
     QWidget::contextMenuEvent(event);
@@ -124,22 +112,15 @@ void MusicVideoView::setMedia(const QString &data)
 {
     m_mediaPlayer->setMedia(MusicCoreMPlayer::VideoCategory, data,
                            (int)m_videoWidget->winId());
-    QTimer::singleShot(5*MT_S2MS, this, SLOT(stop()));
+    m_videoControl->setQualityActionState();
+    QTimer::singleShot(10*MT_S2MS, this, SLOT(stop()));
 }
 
 void MusicVideoView::resizeWindow(int width, int height)
 {
     m_videoWidget->setGeometry(10, 35, 635 + width, 355 + height);
-    m_videoControl->setGeometry(0, 410 + height, 660 + width, 40);
+    m_videoControl->setGeometry(0, 410 + height, 660 + width, 60);
     m_barrageCore->setSize(m_videoWidget->size());
-}
-
-void MusicVideoView::setFullScreen()
-{
-    if(m_videoControl->isPopup())
-    {
-        m_videoControl->fullButtonClicked();
-    }
 }
 
 void MusicVideoView::play()
@@ -165,6 +146,7 @@ void MusicVideoView::stop()
     {
         m_mediaPlayer->stop();
         m_barrageCore->stop();
+
         MusicMessageBox message;
         message.setText(tr("Session time out, try again!"));
         message.exec();
@@ -206,22 +188,12 @@ void MusicVideoView::mediaIsPlaying(bool &play)
     play = (m_mediaPlayer->state() == MusicCoreMPlayer::PlayingState);
 }
 
-void MusicVideoView::addBarrageChanged(const QString &string)
+void MusicVideoView::addBarrageChanged(const MusicBarrageRecord &record)
 {
-    m_barrageCore->addBarrage(string);
+    m_barrageCore->addBarrage(record);
 }
 
 void MusicVideoView::pushBarrageChanged(bool on)
 {
     m_barrageCore->barrageStateChanged(on);
-}
-
-void MusicVideoView::barrageSizeButtonChanged(int size)
-{
-    m_barrageCore->setLabelTextSize(size);
-}
-
-void MusicVideoView::barrageColorButtonChanged(const QColor &color)
-{
-    m_barrageCore->setLabelBackground(color);
 }

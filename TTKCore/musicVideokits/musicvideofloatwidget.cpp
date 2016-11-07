@@ -1,11 +1,12 @@
 #include "musicvideofloatwidget.h"
+#include "musicvideofloatuiobject.h"
 
 #include <QPushButton>
 
 MusicVideoFloatWidget::MusicVideoFloatWidget(QWidget *parent)
     : MusicFloatAbstractWidget(parent)
 {
-    setStyleSheet(MusicUIObject::MCustomStyle28);
+    setStyleSheet(MusicUIObject::MBackgroundStyle06);
 
     resizeWindow(0, 0);
     m_search = new QPushButton(tr(" Search"), this);
@@ -14,23 +15,17 @@ MusicVideoFloatWidget::MusicVideoFloatWidget(QWidget *parent)
     m_download = new QPushButton(tr(" Download"), this);
     m_share = new QPushButton(tr(" Share"), this);
 
-    m_search->setIcon(QIcon(":/video/btn_search"));
-    m_fresh->setIcon(QIcon(":/video/btn_fresh"));
-    m_fullscreen->setIcon(QIcon(":/video/btn_fullscreen"));
-    m_download->setIcon(QIcon(":/video/btn_download"));
-    m_share->setIcon(QIcon(":/video/btn_share"));
+    m_search->setGeometry(15, 10, 80, 20);
+    m_fresh->setGeometry(15, 50, 80, 20);
+    m_fullscreen->setGeometry(15, 90, 80, 20);
+    m_download->setGeometry(15, 130, 80, 20);
+    m_share->setGeometry(15, 170, 80, 20);
 
-    m_search->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_fresh->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_fullscreen->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_download->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-    m_share->setStyleSheet( MusicUIObject::MPushButtonStyle15 );
-
-    m_search->move(15, 10);
-    m_fresh->move(15, 50);
-    m_fullscreen->move(15, 90);
-    m_download->move(15, 130);
-    m_share->move(15, 170);
+    m_search->setStyleSheet(MusicUIObject::MKGVideoFloatSearch + MusicUIObject::MPushButtonStyle09);
+    m_fresh->setStyleSheet(MusicUIObject::MKGVideoFloatFresh + MusicUIObject::MPushButtonStyle09);
+    m_fullscreen->setStyleSheet(MusicUIObject::MKGVideoFloatFullscreen + MusicUIObject::MPushButtonStyle09);
+    m_download->setStyleSheet(MusicUIObject::MKGVideoFloatDownload + MusicUIObject::MPushButtonStyle09);
+    m_share->setStyleSheet(MusicUIObject::MKGVideoFloatShare + MusicUIObject::MPushButtonStyle09);
 
     m_search->setCursor(QCursor(Qt::PointingHandCursor));
     m_fresh->setCursor(QCursor(Qt::PointingHandCursor));

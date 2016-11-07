@@ -13,14 +13,10 @@
 #include "musicobject.h"
 #include "musicsongstoolboxwidget.h"
 
-#define MUSIC_NORMAL_LIST   0
-#define MUSIC_LOVEST_LIST   1
-#define MUSIC_NETWORK_LIST  2
-#define MUSIC_OTHER_LIST    3
+#define  ITEM_MAX_COUNT     10
 
 class QTableWidgetItem;
 class MusicSongsListWidget;
-class MusicSongsSummariziedFloatWidget;
 
 /*! @brief The class of the songs summarizied widget.
  * @author Greedysky <greedysky@163.com>
@@ -39,15 +35,19 @@ public:
     /*!
      * Get class object name.
      */
-    void setMusicLists(const MusicSongItems &names);
+    void addMusicLists(const MusicSongItems &names);
     /*!
-     * Set music datas into container.
+     * Add music datas into container.
+     */
+    void appendMusicLists(const MusicSongItems &names);
+    /*!
+     * Append music datas into container.
      */
     inline const MusicSongItems& getMusicLists() const  { return m_songItems;}
     /*!
      * Get music datas from container.
      */
-    void importOtherMusicSongs(const QStringList &filelist);
+    void importOtherMusicSongs(QStringList &filelist);
     /*!
      * Input orther imported music datas into container.
      */
@@ -81,7 +81,7 @@ public:
      * Get search file index from list by given row and clear cache.
      */
 
-    inline int getCurrentPlayToolIndex() const { return m_currentIndexs;}
+    inline int getCurrentPlayToolIndex() const { return m_currentPlayToolIndex;}
     /*!
      * Get current played tool index.
      */
@@ -107,17 +107,9 @@ public:
      */
 
 Q_SIGNALS:
-    void deleteItemAt(const MusicObject::MIntList &list, bool remove);
-    /*!
-     * Delete items from indexs if in current stack widget.
-     */
     void updatePlayLists(const QString &list);
     /*!
      * Update music song to lovest if in current stack widget.
-     */
-    void showCurrentSong(int index);
-    /*!
-     * Show current song some information.
      */
     void updateMediaLists(const QStringList &list, int index);
     /*!
@@ -126,6 +118,10 @@ Q_SIGNALS:
     void clearSearchText();
     /*!
      * Clear current search lineedit text.
+     */
+    void musicPlayIndex(int row);
+    /*!
+     * Set current row index music to play.
      */
     void musicPlayIndex(int row, int col);
     /*!
@@ -141,10 +137,35 @@ public Q_SLOTS:
     /*!
      * Delete selected play list item.
      */
+    void deleteRowItems();
+    /*!
+     * Delete all other item, left than three item.
+     */
+    void deleteRowItemAll(int index);
+    /*!
+     * Delete all items in play list item.
+     */
     void changRowItemName(int index, const QString &name);
     /*!
      * Open rename selected play list item widget.
      */
+    void addNewFiles(int index);
+    /*!
+     * Add new music file or files to list.
+     */
+    void addNewDir(int index);
+    /*!
+     * Add new music dir to list.
+     */
+    void musicImportSongsOnlyFile();
+    /*!
+     * Import music songs by file.
+     */
+    void musicImportSongsOnlyDir();
+    /*!
+     * Import music songs by dir.
+     */
+
     void setCurrentIndex();
     /*!
      * Set current play index from config file.
@@ -190,10 +211,6 @@ public Q_SLOTS:
     /*!
      * Set current music song play count by given song index.
      */
-    void deleteFloatWidget();
-    /*!
-     * Delete the float function widget.
-     */
     void getMusicLists(MusicSongItems &songs);
     /*!
      * Get music datas from container.
@@ -204,9 +221,9 @@ public Q_SLOTS:
      */
 
 protected:
-    int foundMappingIndex(int index);
+    void checkCurrentNameExist(QString &name);
     /*!
-     * Found mapped index in container.
+     * Check current name exist.
      */
     void addNewRowItem(const QString &name);
     /*!
@@ -220,18 +237,16 @@ protected:
     /*!
      * Delete all objects.
      */
-    virtual void wheelEvent(QWheelEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.
      */
 
-    int m_currentIndexs;
-    int m_searchFileListIndex;
-    QObject *m_supperClass;
+    int m_currentPlayToolIndex, m_searchFileListIndex;
+    int m_currentImportIndex, m_currentDeleteIndex;
+    bool m_toolDeleteChanged;
     MusicSongItems m_songItems;
     MusicObject::MIntsListMap m_searchfileListCache;
-    MusicSongsSummariziedFloatWidget *m_floatWidget;
 
 };
 

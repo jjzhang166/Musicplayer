@@ -55,15 +55,31 @@ Q_SIGNALS:
     /*!
      * Delete selected play list item.
      */
+    void deleteRowItemAll(int index);
+    /*!
+     * Delete all items in play list item.
+     */
     void renameFinished(int index, const QString &name);
     /*!
      * Open rename selected play list item widget.
+     */
+    void addNewFiles(int index);
+    /*!
+     * Add new music file or files to list.
+     */
+    void addNewDir(int index);
+    /*!
+     * Add new music dir to list.
      */
 
 public Q_SLOTS:
     void deleteRowItem();
     /*!
      * Delete selected play list item.
+     */
+    void deleteRowItemAll();
+    /*!
+     * Delete all items in play list item.
      */
     void changRowItemName();
     /*!
@@ -72,6 +88,18 @@ public Q_SLOTS:
     void setChangItemName(const QString &name);
     /*!
      * Rename item artist label is finised.
+     */
+    void addNewFiles();
+    /*!
+     * Add new music file or files to list.
+     */
+    void addNewDir();
+    /*!
+     * Add new music dir to list.
+     */
+    void exportSongsItemList();
+    /*!
+     * Export music songs by item list.
      */
     void showMenu();
     /*!
@@ -134,13 +162,13 @@ public:
      * Get title text.
      */
 
-    void setItemHide(bool hide);
+    void setItemExpand(bool expand);
     /*!
      * Set item widget to hide or not.
      */
-    bool itemHide() const;
+    bool itemExpand() const;
     /*!
-     * Get item widget hide state.
+     * Get item widget expand state.
      */
 
     int count() const;
@@ -157,9 +185,21 @@ Q_SIGNALS:
     /*!
      * Delete selected play list item.
      */
+    void deleteRowItemAll(int index);
+    /*!
+     * Delete all items in play list item.
+     */
     void changRowItemName(int index, const QString &name);
     /*!
      * Open rename selected play list item widget.
+     */
+    void addNewFiles(int index);
+    /*!
+     * Add new music file or files to list.
+     */
+    void addNewDir(int index);
+    /*!
+     * Add new music dir to list.
      */
 
 protected:
@@ -177,6 +217,18 @@ protected:
 
 
 class QScrollArea;
+
+typedef struct MUSIC_TOOL_EXPORT MusicToolBoxWidgetItem
+{
+    int m_itemIndex;
+    MusicSongsToolBoxWidgetItem* m_widgetItem;
+
+    MusicToolBoxWidgetItem()
+    {
+        m_itemIndex = -1;
+        m_widgetItem = nullptr;
+    }
+}MusicToolBoxWidgetItem;
 
 /*! @brief The class of the tool box widget.
  * @author Greedysky <greedysky@163.com>
@@ -243,11 +295,15 @@ protected:
     /*!
      * Override the widget event.
      */
+    int foundMappingIndex(int index);
+    /*!
+     * Found mapped index in container.
+     */
 
-    int m_currentIndex;
+    int m_currentIndex, m_itemIndexRaise;
     QVBoxLayout *m_layout;
     QScrollArea *m_scrollArea;
-    QList<MusicSongsToolBoxWidgetItem*> m_itemList;
+    QList<MusicToolBoxWidgetItem> m_itemList;
 
 };
 

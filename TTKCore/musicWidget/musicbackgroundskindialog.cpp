@@ -2,8 +2,9 @@
 #include "ui_musicbackgroundskindialog.h"
 #include "musicbackgroundmanager.h"
 #include "musicbackgroundpalettewidget.h"
+#include "musicfunctionuiobject.h"
 #include "musicobject.h"
-#include "musicutils.h"
+#include "musicapplicationobject.h"
 
 #include <QFileDialog>
 
@@ -17,15 +18,19 @@ MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
     ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
     ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->topTitleCloseButton->setToolTip(tr("Close"));
-    ui->mySkin->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->netSkin->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->paletteButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->customSkin->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->mySkin->setStyleSheet(MusicUIObject::MLabelStyle02 + MusicUIObject::MLabelStyle03);
+    ui->netSkin->setStyleSheet(MusicUIObject::MLabelStyle02);
+    ui->paletteButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->customSkin->setStyleSheet(MusicUIObject::MPushButtonStyle04);
 
     addThemeListWidgetItem();
 
-    ui->skinTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle10);
-    ui->listTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle10);
+    ui->arrowLabel->setPixmap(QPixmap(":/usermanager/lb_top_arrow"));
+    ui->stackedWidget->setLength(ui->stackedWidget->width(), MusicAnimationStackedWidget::LeftToRight);
+
+    ui->resetWindowButton->setStyleSheet(MusicUIObject::MKGBtnResetWindow);
+    ui->skinTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle05);
+    ui->listTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle05);
 
     connect(ui->skinTransparentButton, SIGNAL(valueChanged(int)), parent,
                                        SLOT(musicBgTransparentChanged(int)));
@@ -43,6 +48,8 @@ MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
                   SLOT(musicBackgroundSkinChanged(QString)));
     connect(this, SIGNAL(currentColorChanged(QString)), parent,
                   SLOT(musicBgTransparentChanged(QString)));
+    connect(ui->resetWindowButton, SIGNAL(clicked()), MusicApplicationObject::instance(),
+                                   SLOT(musicResetWindow()));
 }
 
 MusicBackgroundSkinDialog::~MusicBackgroundSkinDialog()
@@ -59,7 +66,7 @@ void MusicBackgroundSkinDialog::addThemeListWidgetItem()
 {
     QList<QFileInfo> file(QDir(THEME_DIR_FULL)
                          .entryInfoList(QDir::Files | QDir::NoDotAndDotDot));
-    foreach(QFileInfo info, file)
+    foreach(const QFileInfo &info, file)
     {
         QString fileName = info.fileName();
         fileName.chop(4);
@@ -100,12 +107,18 @@ void MusicBackgroundSkinDialog::setListTransToolText(int value)
 
 void MusicBackgroundSkinDialog::changeToMySkin()
 {
-    ui->stackedWidget->setCurrentIndex(0);
+    ui->mySkin->setStyleSheet(MusicUIObject::MLabelStyle02 + MusicUIObject::MLabelStyle03);
+    ui->netSkin->setStyleSheet(MusicUIObject::MLabelStyle02);
+    ui->stackedWidget->start(0);
+    ui->arrowLabel->move(75, ui->arrowLabel->y());
 }
 
 void MusicBackgroundSkinDialog::changeToNetSkin()
 {
-    ui->stackedWidget->setCurrentIndex(1);
+    ui->netSkin->setStyleSheet(MusicUIObject::MLabelStyle02 + MusicUIObject::MLabelStyle03);
+    ui->mySkin->setStyleSheet(MusicUIObject::MLabelStyle02);
+    ui->stackedWidget->start(1);
+    ui->arrowLabel->move(160, ui->arrowLabel->y());
 }
 
 void MusicBackgroundSkinDialog::showPaletteDialog()

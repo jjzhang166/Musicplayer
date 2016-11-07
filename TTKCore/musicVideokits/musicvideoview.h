@@ -11,8 +11,8 @@
 
 #include <QGraphicsView>
 #include "musicglobaldefine.h"
+#include "musicvideocontrol.h"
 
-class MusicVideoControl;
 class MusicCoreMPlayer;
 class MusicBarrageWidget;
 
@@ -87,10 +87,6 @@ public Q_SLOTS:
     /*!
      * Player to play.
      */
-    void setFullScreen();
-    /*!
-     * Set widget to fullScreen.
-     */
 
 private Q_SLOTS:
     void stop();
@@ -122,7 +118,7 @@ private Q_SLOTS:
      * Current media is playing.
      */
 
-    void addBarrageChanged(const QString &string);
+    void addBarrageChanged(const MusicBarrageRecord &record);
     /*!
      * Add barrage text to mv.
      */
@@ -130,18 +126,8 @@ private Q_SLOTS:
     /*!
      * Open barrage on or not.
      */
-    void barrageSizeButtonChanged(int size);
-    /*!
-     * Change barrage size button clicked by size.
-     */
-    void barrageColorButtonChanged(const QColor &color);
-    /*!
-     * Change barrage color button clicked by color.
-     */
 
 protected:
-    virtual void enterEvent(QEvent *event) override;
-    virtual void leaveEvent(QEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.

@@ -34,7 +34,6 @@ public:
         VolumeChoiced,                  ///*Volume Parameter*/
 
         AutoPlayChoiced,                ///*Auto Play Parameter*/
-        EnhancedMusicChoiced,           ///*Enhanced Music Parameter*/
         CurrentLanIndexChoiced,         ///*Current LanIndex Parameter*/
         CloseEventChoiced,              ///*Close Event Parameter*/
         LastPlayIndexChoiced,           ///*Last Play Index Parameter*/
@@ -64,12 +63,23 @@ public:
         DLrcFgColorChoiced,             ///*Desktop Lrc Fg Color Parameter*/
         DLrcBgColorChoiced,             ///*Desktop Lrc Bg Color Parameter*/
         DLrcColorTransChoiced,          ///*Desktop Lrc Color Trans Parameter*/
+        DLrcWindowTypeChoiced,          ///*Desktop Lrc Window Type Parameter*/
         DLrcLockedChoiced,              ///*Desktop Lrc Locked Parameter*/
         DLrcGeometryChoiced,            ///*Desktop Lrc Geometry Parameter*/
 
         EqualizerEnableChoiced,         ///*Equalizer Enable Parameter*/
         EqualizerValueChoiced,          ///*Equalizer Value Parameter*/
         EqualizerIndexChoiced,          ///*Equalizer Index Parameter*/
+        EnhancedMusicChoiced,           ///*Enhanced Music Parameter*/
+        EnhancedBalanceChoiced,         ///*Enhanced Balance Parameter*/
+        EnhancedFadeEnableChoiced,      ///*Enhanced Fade Enable Parameter*/
+        EnhancedFadeInValueChoiced,     ///*Enhanced Fade In Value Parameter*/
+        EnhancedFadeOutValueChoiced,    ///*Enhanced Fade Out Value Parameter*/
+        EnhancedBS2BChoiced,            ///*Enhanced BS2B Parameter*/
+        EnhancedCrossfadeChoiced,       ///*Enhanced Crossfade Parameter*/
+        EnhancedStereoChoiced,          ///*Enhanced Stereo Parameter*/
+        EnhancedLADSPAChoiced,          ///*Enhanced LADSPA Parameter*/
+        EnhancedSOXChoiced,             ///*Enhanced SOX Parameter*/
 
         TimerAutoIndexChoiced,          ///*Timer Auto Index Parameter*/
         TimerAutoPlayChoiced,           ///*Timer Auto Play Parameter*/
@@ -95,6 +105,7 @@ public:
         DownloadCacheSizeChoiced,       ///*Download Cache Size Parameter*/
         DownloadLimitChoiced,           ///*Download Limit Parameter*/
         DownloadServerChoiced,          ///*Download Server Parameter*/
+        DownloadServerMultipleChoiced,  ///*Download Multiple Server Parameter*/
         DownloadDLoadLimitChoiced,      ///*Download DLoad Limit Parameter*/
         DownloadULoadLimitChoiced       ///*Download ULoad Limit Parameter*/
 
@@ -164,12 +175,6 @@ public:
      */
 
 protected:
-    MusicSettingManager(){}
-    /*!
-     * Object contsructor.
-     */
-    ~MusicSettingManager(){}
-
     ConfigType typeStringToEnum(const QString &stype) const
     {
         int index = staticMetaObject.indexOfEnumerator("ConfigType");

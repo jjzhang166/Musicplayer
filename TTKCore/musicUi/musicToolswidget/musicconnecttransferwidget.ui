@@ -161,7 +161,7 @@ QLabel{background:transparent;}</string>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="mobileModeWidget">
      <widget class="QLabel" name="iconUSBLabel">
@@ -281,6 +281,21 @@ QLabel{background:transparent;}</string>
     <property name="text">
      <string>wifi</string>
     </property>
+   </widget>
+   <widget class="QWidget" name="playListLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>90</width>
+      <height>300</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="playListLayout">
+     <property name="spacing">
+      <number>2</number>
+     </property>
+    </layout>
    </widget>
   </widget>
   <zorder>background</zorder>

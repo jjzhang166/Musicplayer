@@ -66,11 +66,15 @@ endif()
 
 set(MUSIC_HEADERS
     musicextrasglobaldefine.h
-    shortcut/qxtglobal.h
-    shortcut/qxtglobalshortcut.h
-    shortcut/qxtglobalshortcut_p.h
-    kugou/kugouurl.h
-    kugou/kugouwindow.h
+    qhz2py/pinyinresource.h
+    qhz2py/chinesehelper.h
+    qhz2py/pinyinhelper.h
+    qshortcut/qxtglobal.h
+    qshortcut/qxtglobalshortcut.h
+    qshortcut/qxtglobalshortcut_p.h
+    qkugou/kugouurl.h
+    qkugou/kugouwindow.h
+    qkugou/kugouuiobject.h
     qrencode/bitstream.h
     qrencode/config.h
     qrencode/mask.h
@@ -93,13 +97,21 @@ set(MUSIC_HEADERS
     qiniu/qnsimplelistdata.h
     qiniu/qnsimpleuploaddata.h
     qiniu/qnsimpledeletedata.h
-
+    qjson/parser.h
+    qjson/parserrunnable.h
+    qjson/qobjecthelper.h
+    qjson/serializer.h
+    qjson/serializerrunnable.h
+    
   )
 
 set(MUSIC_SOURCES
-    shortcut/qxtglobalshortcut.cpp
-    kugou/kugouurl.cpp
-    kugou/kugouwindow.cpp
+    qshortcut/qxtglobalshortcut.cpp
+    qhz2py/pinyinresource.cpp
+    qhz2py/chinesehelper.cpp
+    qhz2py/pinyinhelper.cpp
+    qkugou/kugouurl.cpp
+    qkugou/kugouwindow.cpp
     qrencode/bitstream.c
     qrencode/mask.c
     qrencode/mmask.c
@@ -120,29 +132,31 @@ set(MUSIC_SOURCES
     qiniu/qnsimplelistdata.cpp
     qiniu/qnsimpleuploaddata.cpp
     qiniu/qnsimpledeletedata.cpp
-
+    qjson/parser.cpp
+    qjson/qobjecthelper.cpp
+    qjson/json_scanner.cpp
+    qjson/json_parser.cc
+    qjson/parserrunnable.cpp
+    qjson/serializer.cpp
+    qjson/serializerrunnable.cpp
+    
   )
 
-SET(MUSIC_QRC
-    ${MUSIC_QRC_DIR}/MusicThirdParty.qrc
-)
-
 if(WIN32)
-    list(APPEND MUSIC_SOURCES shortcut/qxtglobalshortcut_win.cpp)
+    list(APPEND MUSIC_SOURCES qshortcut/qxtglobalshortcut_win.cpp)
 else(UNIX)
-    list(APPEND MUSIC_SOURCES shortcut/qxtglobalshortcut_x11.cpp)
+    list(APPEND MUSIC_SOURCES qshortcut/qxtglobalshortcut_x11.cpp)
 endif()
 
 if(TTK_QT_VERSION VERSION_GREATER "4")
   QT5_WRAP_CPP(MUSIC_MOC_H ${MUSIC_HEADERS})
-  QT5_ADD_RESOURCES(MUSIC_RCC_SRCS ${MUSIC_QRC})
 
   if(TTK_BUILD_SHARED)
-    add_library(${TARGET_NAME} SHARED ${MUSIC_SOURCES} ${MUSIC_RCC_SRCS} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
+    add_library(${TARGET_NAME} SHARED ${MUSIC_SOURCES} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
   else()
-    add_library(${TARGET_NAME} STATIC ${MUSIC_SOURCES} ${MUSIC_RCC_SRCS} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
+    add_library(${TARGET_NAME} STATIC ${MUSIC_SOURCES}  ${MUSIC_MOC_H} ${MUSIC_HEADERS})
   endif()
-  list(APPEND QT5_LIBS Qt5::Core Qt5::Gui Qt5::Widgets Qt5::WebKit Qt5::WebKitWidgets -luser32)
+  list(APPEND QT5_LIBS Qt5::Core Qt5::Gui Qt5::Widgets Qt5::WebKit Qt5::WebKitWidgets MusicUi -luser32)
   if(UNIX)
     list(REMOVE_ITEM QT5_LIBS -luser32)
     list(APPEND QT5_LIBS Qt5::X11Extras)
@@ -150,14 +164,13 @@ if(TTK_QT_VERSION VERSION_GREATER "4")
   target_link_libraries(${TARGET_NAME} ${QT5_LIBS})
 else()
   QT4_WRAP_CPP(MUSIC_MOC_H ${MUSIC_HEADERS})
-  QT4_ADD_RESOURCES(MUSIC_RCC_SRCS ${MUSIC_QRC})
   
   if(TTK_BUILD_SHARED)
-    add_library(${TARGET_NAME} SHARED ${MUSIC_SOURCES} ${MUSIC_RCC_SRCS} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
+    add_library(${TARGET_NAME} SHARED ${MUSIC_SOURCES} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
   else()
-    add_library(${TARGET_NAME} STATIC ${MUSIC_SOURCES} ${MUSIC_RCC_SRCS} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
+    add_library(${TARGET_NAME} STATIC ${MUSIC_SOURCES} ${MUSIC_MOC_H} ${MUSIC_HEADERS})
   endif()
-  list(APPEND QT4_LIBS ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTWEBKIT_LIBRARY} -luser32)
+  list(APPEND QT4_LIBS ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTNETWORK_LIBRARY} ${QT_QTWEBKIT_LIBRARY} MusicUi -luser32)
   if(UNIX)
     list(REMOVE_ITEM QT4_LIBS -luser32)
   endif()

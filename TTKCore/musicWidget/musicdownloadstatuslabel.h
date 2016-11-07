@@ -9,12 +9,8 @@
  * works are strictly forbiden.
    =================================================*/
 
-#ifndef USE_MULTIPLE_QUERY
-#  include "musicdownloadquerysinglethread.h"
-#else
-#  include "musicdownloadquerymultiplethread.h"
-#endif
 #include "musicglobaldefine.h"
+#include "musicdownloadquerythreadabstract.h"
 
 class MusicApplication;
 
@@ -25,7 +21,7 @@ class MUSIC_WIDGET_EXPORT MusicDownloadStatusLabel : public QObject
 {
     Q_OBJECT
 public:
-    explicit MusicDownloadStatusLabel(QWidget *w);
+    explicit MusicDownloadStatusLabel(QObject *w);
     /*!
      * Object contsructor.
      */
@@ -66,6 +62,7 @@ public Q_SLOTS:
      */
 
 protected:
+    bool m_previousState;
     MusicApplication *m_parentWidget;
     MusicDownLoadQueryThreadAbstract *m_downloadLrcThread;
 

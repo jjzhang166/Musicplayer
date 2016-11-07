@@ -1,12 +1,11 @@
 #include "musicsongringtonemakerwidget.h"
 #include "ui_musicsongringtonemakerwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musiccutsliderwidget.h"
 #include "musiccoremplayer.h"
 #include "musicmessagebox.h"
 #include "musicuiobject.h"
 #include "musicsongtag.h"
-#include "musicutils.h"
+#include "musicwidgetutils.h"
 #include "musictime.h"
 
 #include <QProcess>
@@ -25,10 +24,10 @@ MusicSongRingtoneMaker::MusicSongRingtoneMaker(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    ui->addSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->playSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->playRingButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->saveSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->addSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->playSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->playRingButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->saveSongButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->formatCombo->setItemDelegate(new QStyledItemDelegate(ui->formatCombo));
     ui->formatCombo->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
     ui->formatCombo->view()->setStyleSheet(MusicUIObject::MScrollBarStyle01);
@@ -98,7 +97,7 @@ void MusicSongRingtoneMaker::initInputPath()
     {
         QString name = QFileInfo(m_inputFilePath).fileName();
         ui->songLabelValue->setToolTip( name );
-        name = MusicUtils::UWidget::elidedText(font(), name, Qt::ElideRight, 220);
+        name = MusicUtils::Widget::elidedText(font(), name, Qt::ElideRight, 220);
         ui->songLabelValue->setText(tr("SongName: %1 ( %2, %3, %4)").arg(name)
                 .arg(tag.getLengthString()).arg(tag.getSamplingRate()).arg(tag.getBitrate()));
     }
@@ -197,8 +196,7 @@ int MusicSongRingtoneMaker::exec()
         return -1;
     }
 
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }
 

@@ -2,14 +2,14 @@
 #include "ui_musicwebmusicradiowidget.h"
 #include "musiccoremplayer.h"
 #include "musicuiobject.h"
-#include "musicbackgroundmanager.h"
 #include "musicradioplaylistthread.h"
 #include "musicradiosongsthread.h"
 #include "musictextdownloadthread.h"
 #include "musicdatadownloadthread.h"
 #include "musiclrcanalysis.h"
 #include "musictime.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
+#include "musicwidgetutils.h"
 
 MusicWebMusicRadioWidget::MusicWebMusicRadioWidget(QWidget *parent)
     : MusicAbstractMoveWidget(parent),
@@ -22,6 +22,7 @@ MusicWebMusicRadioWidget::MusicWebMusicRadioWidget(QWidget *parent)
     m_currentPlayListIndex = 0;
     m_isPlaying = false;
     m_analysis = new MusicLrcAnalysis(this);
+    m_analysis->setLineMax(9);
 
     m_autoNextTimer.setInterval(3*MT_S2MS);
     connect(&m_autoNextTimer, SIGNAL(timeout()), SLOT(radioNext()));
@@ -34,13 +35,13 @@ MusicWebMusicRadioWidget::MusicWebMusicRadioWidget(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    ui->playButton->setIcon(QIcon(":/functions/btn_play_hover"));
+    ui->playButton->setIcon(QIcon(":/functions/btn_pause_hover"));
     ui->previousButton->setIcon(QIcon(":/functions/btn_previous_hover"));
     ui->nextButton->setIcon(QIcon(":/functions/btn_next_hover"));
 
-    ui->playButton->setStyleSheet("background:transparent;");
-    ui->previousButton->setStyleSheet("background:transparent;");
-    ui->nextButton->setStyleSheet("background:transparent;");
+    ui->playButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
+    ui->previousButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
+    ui->nextButton->setStyleSheet(MusicUIObject::MBackgroundStyle01);
 
     ui->playButton->setIconSize(QSize(31, 31));
     ui->previousButton->setIconSize(QSize(31, 31));
@@ -212,7 +213,7 @@ void MusicWebMusicRadioWidget::startToPlay()
     ui->volumeSlider->setValue(0);
     ui->volumeSlider->setValue(v);
 
-    QString name = LRC_DIR_FULL + info.m_artistName + " - " + info.m_songName + LRC_FILE;
+    QString name = MusicUtils::Core::lrcPrefix() + info.m_artistName + " - " + info.m_songName + LRC_FILE;
     if(!QFile::exists(name))
     {
         MusicTextDownLoadThread* lrcDownload = new MusicTextDownLoadThread(info.m_lrcUrl, name,
@@ -254,7 +255,7 @@ void MusicWebMusicRadioWidget::lrcDownloadStateChanged()
     QString name = info.m_artistName + " - " + info.m_songName;
     name = name.trimmed();
     ui->titleWidget->setText(name);
-    m_analysis->transLrcFileToTime(LRC_DIR_FULL + name + LRC_FILE);
+    m_analysis->transLrcFileToTime(MusicUtils::Core::lrcPrefix() + name + LRC_FILE);
 }
 
 void MusicWebMusicRadioWidget::picDownloadStateChanged()
@@ -275,7 +276,7 @@ void MusicWebMusicRadioWidget::picDownloadStateChanged()
     {
         pix.load(":/image/lb_defaultArt");
     }
-    pix = MusicUtils::UWidget::pixmapToRound(pix, QSize(150, 150), 100, 100);
+    pix = MusicUtils::Widget::pixmapToRound(pix, QSize(150, 150), 100, 100);
     ui->artistLabel->setPixmap(pix);
     ui->artistLabel->start();
 }
@@ -302,9 +303,9 @@ void MusicWebMusicRadioWidget::positionChanged(qint64 position)
     if(time < position*MT_S2MS && time != -1)
     {
         QString lrc;
-        for(int i=0; i<LRC_LINEMAX_COUNT; ++i)
+        for(int i=0; i<m_analysis->getLineMax(); ++i)
         {
-            if(i == LRC_CURRENT_LINR)
+            if(i == m_analysis->getMiddle())
             {
                 lrc += QString("<p style='font-weight:600;' align='center'>");
             }
@@ -331,7 +332,6 @@ void MusicWebMusicRadioWidget::durationChanged(qint64 duration)
 
 void MusicWebMusicRadioWidget::show()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     MusicAbstractMoveWidget::show();
 }

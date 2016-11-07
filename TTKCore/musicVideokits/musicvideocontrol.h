@@ -9,17 +9,17 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QMenu>
-#include <QWidget>
-#include "musicuiobject.h"
+#include <QLabel>
 #include "musicobject.h"
 #include "musicglobaldefine.h"
-#include "musicnumberdefine.h"
+#include "musicbarragerecordconfigmanager.h"
 
-class QLabel;
-class QToolButton;
 class QPushButton;
+class MusicVolumePopWidget;
 class MusicMovingLabelSlider;
+class MusicVideoQualityPopWidget;
+class MusicVideoBarrageStylePopWidget;
+class MusicLocalSongSearchEdit;
 
 /*! @brief The class of the video controller.
  * @author Greedysky <greedysky@163.com>
@@ -62,24 +62,12 @@ public:
     /*!
      * Resize width bound by given width and height.
      */
+    void setQualityActionState();
+    /*!
+     * Set quality action state enable or disable.
+     */
 
 Q_SIGNALS:
-    void musicVideoSetPopup(bool popup);
-    /*!
-     * Set video widget popop or not.
-     */
-    void musicVideoFullscreen(bool full);
-    /*!
-     * Set video widget fullScreen or not.
-     */
-    void getMusicMvInfo(MusicObject::MusicSongAttributes &data);
-    /*!
-     * Get music mv information data.
-     */
-    void downloadLocalByControl();
-    /*!
-     * Download current mv by controller.
-     */
     void mvURLChanged(const QString &data);
     /*!
      * Set current media url by selected quality.
@@ -89,93 +77,42 @@ Q_SIGNALS:
      * Slider value changed at value.
      */
 
-    void addBarrageChanged(const QString &string);
-    /*!
-     * Add barrage text to mv.
-     */
     void pushBarrageChanged(bool on);
     /*!
      * Open barrage on or not.
      */
-    void barrageSizeButtonChanged(int size);
+    void addBarrageChanged(const MusicBarrageRecord &record);
     /*!
-     * Change barrage size button clicked by size.
-     */
-    void barrageColorButtonChanged(const QColor &color);
-    /*!
-     * Change barrage color button clicked by color.
+     * Add barrage text to mv.
      */
 
 public Q_SLOTS:
-    void show();
-    /*!
-     * Override show function.
-     */
-    void insideButtonClicked();
-    /*!
-     * Inside button clicked.
-     */
-    void fullButtonClicked();
-    /*!
-     * Full button clicked.
-     */
-    void movieQualityChoiced(QAction *action);
-    /*!
-     * Movie quality choiced by index.
-     */
     void pushBarrageClicked();
     /*!
      * Push barrage clicked.
      */
-    void barrageSizeButtonClicked(int index);
+    void sendBarrageClicked();
     /*!
-     * Barrage size button clicked by index.
-     */
-    void barrageColorButtonClicked(int index);
-    /*!
-     * Barrage color button clicked by index.
+     * Send barrage clicked.
      */
 
 protected:
-    void setQualityActionState();
+    QWidget *createVideoBarrageWidget();
     /*!
-     * Set quality action state enable or disable.
-     */
-    QString findMVUrlByBitrate(int bitrate);
-    /*!
-     * Find mv url by given bitrate.
-     */
-    int findMVBitrateByUrl(const QString &url);
-    /*!
-     * Find mv bitrate by given url.
-     */
-    bool findExistByBitrate(int bitrate);
-    /*!
-     * Check given bitrate is exist or not.
-     */
-    QWidget* createBarrageWidget();
-    /*!
-     * Create barrage widget.
-     */
-    QPushButton* createBarrageSizeButton(int index);
-    /*!
-     * Create barrage size button by index.
-     */
-    QPushButton* createBarrageColorButton(int index);
-    /*!
-     * Create barrage color button by index.
+     * Create video barrage widget.
      */
 
     bool m_widgetPopup;
-    QMenu m_popupQuality, m_popupBarrage;
+    QLabel *m_timeLabel;
+    QPushButton *m_playButton;
     MusicMovingLabelSlider *m_timeSlider;
-    QToolButton *m_volumeButton;
-    QPushButton *m_playButton, *m_inSideButton, *m_fullButton;
-    QPushButton *m_qualityButton, *m_downloadButton;
-    QAction *m_mvSd, *m_mvHd, *m_mvSq;
+    MusicVolumePopWidget *m_volumeButton;
+    MusicVideoQualityPopWidget *m_qualityButton;
 
-    QPushButton *m_pushBarrage;
     bool m_pushBarrageOn;
+    QPushButton *m_pushBarrage, *m_barrageSend;
+    MusicVideoBarrageStylePopWidget *m_menuBarrage;
+    MusicLocalSongSearchEdit *m_lineEditBarrage;
 
 };
 

@@ -12,9 +12,6 @@
 #include "musicobject.h"
 #include "musicglobaldefine.h"
 
-#define LRC_LINEMAX_COUNT 11
-#define LRC_CURRENT_LINR 5
-
 class MusicTranslationThread;
 
 /*! @brief The class of the core lrc analysis.
@@ -59,6 +56,24 @@ public:
     /*!
      * Get class object name.
      */
+
+    inline void setLineMax(int max) { m_lineMax = max;}
+    /*!
+     * Set current line maximum value.
+     */
+    inline int getLineMax() const { return m_lineMax;}
+    /*!
+     * Get current line maximum value.
+     */
+    inline int getMiddle() const { return m_lineMax/2;}
+    /*!
+     * Get current line middle number.
+     */
+
+    void setLrcData(const MusicObject::MIntStringMap &data);
+    /*!
+     * Set lrc container data from other raw data.
+     */
     State transLrcFileToTime(const QString &lrcFileName);
     /*!
      * Analysis lrc file to map return the state.
@@ -67,6 +82,7 @@ public:
     /*!
      * Analysis krc file to map return the state.
      */
+
     qint64 setSongSpeedAndSlow(qint64 time);
     /*!
      * Set song speed and slow by given time, return new time.
@@ -88,7 +104,11 @@ public:
     /*!
      * Get current middle index.
      */
-    QString getCurrentFileName() const { return m_currentLrcFileName;}
+    inline void setCurrentFileName(const QString &name) { m_currentLrcFileName = name;}
+    /*!
+     * Set current file name.
+     */
+    inline QString getCurrentFileName() const { return m_currentLrcFileName;}
     /*!
      * Get current file name.
      */
@@ -151,7 +171,7 @@ protected:
      * Lrc analysis by match lrc line three[xx.(:)xx.(:)x(xx)].
      */
 
-    int m_currentLrcIndex;
+    int m_lineMax, m_currentLrcIndex;
     QString m_currentLrcFileName;
     MusicObject::MIntStringMap m_lrcContainer;
     QStringList m_currentShowLrcContainer;

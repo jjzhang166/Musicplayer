@@ -1,10 +1,8 @@
 #include "musictransformwidget.h"
 #include "ui_musictransformwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
-#include "musicutils.h"
+#include "musicwidgetutils.h"
 
-#include <QMovie>
 #include <QSound>
 #include <QProcess>
 #include <QFileDialog>
@@ -12,7 +10,7 @@
 
 MusicTransformWidget::MusicTransformWidget(QWidget *parent)
     : MusicAbstractMoveDialog(parent),
-      ui(new Ui::MusicTransformWidget), m_movie(nullptr)
+      ui(new Ui::MusicTransformWidget)
 {
     ui->setupUi(this);
     
@@ -23,8 +21,8 @@ MusicTransformWidget::MusicTransformWidget(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    ui->inputButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->outputButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->inputButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->outputButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->formatCombo->setItemDelegate(new QStyledItemDelegate(ui->formatCombo));
     ui->formatCombo->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
     ui->formatCombo->view()->setStyleSheet(MusicUIObject::MScrollBarStyle01);
@@ -37,7 +35,7 @@ MusicTransformWidget::MusicTransformWidget(QWidget *parent)
     ui->msCombo->setItemDelegate(new QStyledItemDelegate(ui->msCombo));
     ui->msCombo->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
     ui->msCombo->view()->setStyleSheet(MusicUIObject::MScrollBarStyle01);
-    ui->transformButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->transformButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->inputLineEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
     ui->outputLineEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
 
@@ -55,6 +53,7 @@ MusicTransformWidget::MusicTransformWidget(QWidget *parent)
     ui->krc2lrcBox->setStyleSheet(MusicUIObject::MCheckBoxStyle01);
     connect(ui->krc2lrcBox, SIGNAL(clicked(bool)), SLOT(krc2lrcBoxChecked(bool)));
 
+    ui->loadingLabel->setType(MusicGifLabelWidget::Gif_Cicle_Blue);
     m_currentType = Music;
     initControlParameter();
 }
@@ -62,7 +61,6 @@ MusicTransformWidget::MusicTransformWidget(QWidget *parent)
 MusicTransformWidget::~MusicTransformWidget()
 {
     m_process->kill();
-    delete m_movie;
     delete m_process;
     delete ui;
 }
@@ -107,7 +105,7 @@ void MusicTransformWidget::initInputPath()
             return;
         }
 
-        ui->listWidget->addItem(MusicUtils::UWidget::elidedText(font(), path, Qt::ElideLeft, LINE_WIDTH));
+        ui->listWidget->addItem(MusicUtils::Widget::elidedText(font(), path, Qt::ElideLeft, LINE_WIDTH));
         ui->listWidget->setToolTip(path);
         m_path << path;
     }
@@ -119,12 +117,12 @@ void MusicTransformWidget::initInputPath()
         if(dialog.exec())
         {
             path = dialog.directory().absolutePath();
-            foreach(QFileInfo var, getFileList(path))
+            foreach(const QFileInfo &var, getFileList(path))
             {
                 if(!m_path.contains(var.absoluteFilePath()) && supportedFormat.contains(var.suffix()))
                 {
                     m_path << var.absoluteFilePath();
-                    ui->listWidget->addItem(MusicUtils::UWidget::elidedText(font(), m_path.last(), Qt::ElideLeft, LINE_WIDTH));
+                    ui->listWidget->addItem(MusicUtils::Widget::elidedText(font(), m_path.last(), Qt::ElideLeft, LINE_WIDTH));
                     ui->listWidget->setToolTip(m_path.last());
                 }
             }
@@ -144,7 +142,7 @@ QFileInfoList MusicTransformWidget::getFileList(const QString &path)
     QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
     QFileInfoList folderList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    foreach(QFileInfo fileInfo, folderList)
+    foreach(const QFileInfo &fileInfo, folderList)
     {
         fileList.append( getFileList(fileInfo.absoluteFilePath()) );
     }
@@ -171,15 +169,15 @@ QString MusicTransformWidget::getTransformSongName() const
 
 void MusicTransformWidget::transformFinish()
 {
-    QSound::play("sound.wav");
+    QSound::play(SOUNDPATH_FULL);
     m_path.removeAt(0);
     ui->listWidget->clear();
 
     if(!m_path.isEmpty())
     {
-        foreach(QString path, m_path)
+        foreach(const QString &path, m_path)
         {
-            ui->listWidget->addItem(MusicUtils::UWidget::elidedText(font(), path, Qt::ElideLeft, LINE_WIDTH));
+            ui->listWidget->addItem(MusicUtils::Widget::elidedText(font(), path, Qt::ElideLeft, LINE_WIDTH));
             ui->listWidget->setToolTip(path);
         }
         if(!processTransform((m_currentType == Music) ? MAKE_TRANSFORM_FULL : MAKE_KRC2LRC_FULL))
@@ -196,8 +194,7 @@ void MusicTransformWidget::transformFinish()
         }
         ui->inputLineEdit->clear();
         ui->loadingLabel->hide();
-        delete m_movie;
-        m_movie = nullptr;
+        ui->loadingLabel->stop();
     }
 }
 
@@ -260,8 +257,7 @@ void MusicTransformWidget::startTransform()
     }
     ///////////////////////////////////////////////////////////
     ui->loadingLabel->show();
-    ui->loadingLabel->setMovie(m_movie = new QMovie(":/toolSets/ib_loading", QByteArray(), this));
-    m_movie->start();
+    ui->loadingLabel->start();
     setCheckedControl(false);
 }
 
@@ -309,7 +305,6 @@ int MusicTransformWidget::exec()
         return -1;
     }
 
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

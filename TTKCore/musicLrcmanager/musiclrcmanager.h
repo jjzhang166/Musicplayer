@@ -84,11 +84,11 @@ public:
     /*!
      * Stop timer clock to draw lrc mask.
      */
-    void setLinearGradientColor(QColor = CL_Origin);
+    void setLinearGradientColor(const QList<QColor> &colors);
     /*!
      * Set linear gradient color.
      */
-    void setMaskLinearGradientColor(QColor = CL_Mask);
+    void setMaskLinearGradientColor(const QList<QColor> &colors);
     /*!
      * Set mask linear gradient color.
      */
@@ -106,7 +106,11 @@ public:
      */
     inline void setFontTransparent(int t) { m_transparent = t;}
     /*!
-     * Set lrc font transparent by given valu.e
+     * Set lrc font transparent by given value.
+     */
+    inline void setSpeedLevel(int l) { m_speedLevel = l;}
+    /*!
+     * Set lrc font speed level by given value.
      */
 
 public Q_SLOTS:
@@ -125,7 +129,7 @@ protected:
     QTimer *m_timer;
     qreal m_lrcMaskWidth, m_lrcMaskWidthInterval, m_intervalCount;
 
-    int m_lrcPerWidth, m_transparent, m_speedLeve;
+    int m_lrcPerWidth, m_transparent, m_speedLevel;
     QPoint m_geometry;
 
 };

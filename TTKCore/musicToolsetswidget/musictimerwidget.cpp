@@ -2,8 +2,6 @@
 #include "ui_musictimerwidget.h"
 #include "musicsettingmanager.h"
 #include "musicuiobject.h"
-#include "musicbackgroundmanager.h"
-#include "musicconnectionpool.h"
 #include "musicnumberdefine.h"
 #include "musicapplicationobject.h"
 
@@ -29,11 +27,11 @@ MusicTimerWidget::MusicTimerWidget(QWidget *parent)
     ui->timerToPlay->setIcon(QIcon(":/toolSets/btn_timer_play"));
     ui->timerToStop->setIcon(QIcon(":/toolSets/btn_timer_stop"));
     ui->timerToShutdown->setIcon(QIcon(":/toolSets/btn_timer_down"));
-    ui->timerToPlay->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->timerToStop->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->timerToShutdown->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->confirm->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->cancel->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->timerToPlay->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->timerToStop->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->timerToShutdown->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->confirm->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->cancel->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->timerToPlay->setCursor(QCursor(Qt::PointingHandCursor));
     ui->timerToStop->setCursor(QCursor(Qt::PointingHandCursor));
     ui->timerToShutdown->setCursor(QCursor(Qt::PointingHandCursor));
@@ -65,14 +63,10 @@ MusicTimerWidget::MusicTimerWidget(QWidget *parent)
     group3->addButton(ui->noSetRadioButton3, 4);
     group3->addButton(ui->setRadioButton3, 5);
     connect(group3, SIGNAL(buttonClicked(int)), SLOT(buttonClicked(int)));
-
-    M_CONNECTION_PTR->setValue(getClassName(), this);
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicApplicationObject::getClassName());
 }
 
 MusicTimerWidget::~MusicTimerWidget()
 {
-    M_CONNECTION_PTR->poolDisConnect(getClassName());
     delete ui;
 }
 
@@ -256,7 +250,7 @@ void MusicTimerWidget::initThreeWidget()
 void MusicTimerWidget::commitTheResults()
 {
     writeParemeter();
-    emit timerParameterChanged();
+    MusicApplicationObject::instance()->musicToolSetsParameter();
     close();
 }
 
@@ -299,7 +293,6 @@ void MusicTimerWidget::setEnabledThreeControl(bool enable)
 
 int MusicTimerWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

@@ -110,7 +110,7 @@
            <widget class="QWidget" name="horizontalLayoutWidget">
             <property name="geometry">
              <rect>
-              <x>20</x>
+              <x>10</x>
               <y>10</y>
               <width>101</width>
               <height>31</height>
@@ -666,7 +666,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="QToolButton" name="musicSearchBackButton">
+                <widget class="QToolButton" name="musicBackButton">
                  <property name="minimumSize">
                   <size>
                    <width>20</width>
@@ -688,7 +688,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="musicSearchRefreshButton">
+                <widget class="QToolButton" name="musicRefreshButton">
                  <property name="minimumSize">
                   <size>
                    <width>20</width>
@@ -886,6 +886,25 @@
              </widget>
             </item>
             <item>
+             <widget class="Line" name="line">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>1</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background:rgba(210, 210, 210)</string>
+              </property>
+              <property name="lineWidth">
+               <number>1</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QStackedWidget" name="surfaceStackedWidget">
               <property name="minimumSize">
                <size>
@@ -969,13 +988,13 @@
           <widget class="QWidget" name="bottomLeftWidget" native="true">
            <property name="minimumSize">
             <size>
-             <width>240</width>
+             <width>220</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>240</width>
+             <width>220</width>
              <height>16777215</height>
             </size>
            </property>
@@ -983,6 +1002,25 @@
             <property name="spacing">
              <number>0</number>
             </property>
+            <item>
+             <widget class="QLabel" name="musicLabelMargin">
+              <property name="minimumSize">
+               <size>
+                <width>1</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>1</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QToolButton" name="musicPrevious">
               <property name="minimumSize">
@@ -1071,13 +1109,13 @@
              <widget class="QLabel" name="rightMargin">
               <property name="minimumSize">
                <size>
-                <width>20</width>
+                <width>10</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>20</width>
+                <width>10</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -1195,13 +1233,13 @@
              <widget class="QLabel" name="leftMargin">
               <property name="minimumSize">
                <size>
-                <width>1</width>
+                <width>10</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>1</width>
+                <width>10</width>
                 <height>16777215</height>
                </size>
               </property>

@@ -1,11 +1,19 @@
 #include "musiccloudsharedsongwidget.h"
 #include "musicdatadownloadthread.h"
-#include "musicuploadfilewidget.h"
+#include "musicsourcedownloadthread.h"
+#include "musicopenfilewidget.h"
+#include "musicleftareawidget.h"
 #include "musicnumberdefine.h"
 #include "musicmessagebox.h"
 #include "musicuiobject.h"
 #include "musicplayer.h"
+#include "musicnumberutils.h"
+#include "musiccoreutils.h"
+#include "musictoastlabel.h"
+
 #include "qnconf.h"
+#///QJson import
+#include "qjson/parser.h"
 
 #include <QPainter>
 #include <QBoxLayout>
@@ -15,9 +23,8 @@
 #include <QPushButton>
 
 #define QN_BUCKET       "music"
-#define QN_PRFIX        "http://o9zmxm4rh.bkt.clouddn.com"
-#define QN_ACCESS_KEY   "L2GGQ-ttIlTScXVtXOdwPF2ftQAEiVK1qor5KCu3"
-#define QN_SECRET_KEY   "FXiQ8EWibo-9tIlWRS3UAJOqv94pM1QViU2Gw25y"
+#define QN_PRFIX        "bkdIdE5FTXFpalU3MmxKMG5OOFVLS0lWZ0tCdDRzOGtQemJ6QnN3TlN2VUc3SGp4"
+#define QN_UA_URL       "VlQxWWhUSjJzWjFTSkZRRFFqdnlPK3FJZ0JxbmlrcFoydjVCRlZ2a3hRdlBuRFhmOUZObW1STmxqNVVEWUJsdA=="
 
 MusicCloudSharedSongTableWidget::MusicCloudSharedSongTableWidget(QWidget *parent)
     : MusicAbstractTableWidget(parent)
@@ -28,34 +35,23 @@ MusicCloudSharedSongTableWidget::MusicCloudSharedSongTableWidget(QWidget *parent
     headerview->resizeSection(1, 266);
     headerview->resizeSection(2, 35);
 
-    QNConf::ACCESS_KEY = QN_ACCESS_KEY;
-    QNConf::SECRET_KEY = QN_SECRET_KEY;
-
     m_uploading = false;
     m_uploadFileWidget = nullptr;
+    m_currentUploadIndex = 0;
 
     m_fileDialog = new MusicCloudFileManagerDialog(this);
-    m_timerToUpload = new QTimer(this);
-    m_timerToUpload->setInterval(MT_S2MS);
     m_networkManager = new QNetworkAccessManager(this);
     m_qnListData = new QNSimpleListData(m_networkManager, this);
     m_qnDeleteData = new QNSimpleDeleteData(m_networkManager, this);
     m_qnUploadData = new QNSimpleUploadData(m_networkManager, this);
-    connect(m_timerToUpload, SIGNAL(timeout()), SLOT(startToUploadFile()));
     connect(m_qnListData, SIGNAL(receiveFinshed(QNDataItems)), SLOT(receiveDataFinshed(QNDataItems)));
     connect(m_qnDeleteData, SIGNAL(deleteFileFinished(bool)), SLOT(deleteFileFinished(bool)));
     connect(m_qnUploadData, SIGNAL(uploadFileFinished(QString)), SLOT(uploadFileFinished(QString)));
-    connect(this, SIGNAL(uploadDone()), &m_eventLoop, SLOT(quit()));
-
-    QTimer::singleShot(MT_MS*100, this, SLOT(updateListToServer()));
 }
 
 MusicCloudSharedSongTableWidget::~MusicCloudSharedSongTableWidget()
 {
-    m_eventLoop.quit();
-    m_timerToUpload->stop();
     delete m_fileDialog;
-    delete m_timerToUpload;
     delete m_uploadFileWidget;
     delete m_qnListData;
     delete m_qnDeleteData;
@@ -68,10 +64,39 @@ QString MusicCloudSharedSongTableWidget::getClassName()
     return staticMetaObject.className();
 }
 
+bool MusicCloudSharedSongTableWidget::getKey()
+{
+    QEventLoop loop;
+    connect(this, SIGNAL(getKeyFinished()), &loop, SLOT(quit()));
+
+    MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
+    connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(keyDownLoadFinished(QByteArray)));
+    download->startToDownload(MusicCryptographicHash::decryptData(QN_UA_URL, URL_KEY));
+
+    loop.exec();
+    updateListToServer();
+
+    return !QNConf::ACCESS_KEY.isEmpty() && !QNConf::SECRET_KEY.isEmpty();
+}
+
 void MusicCloudSharedSongTableWidget::listCellClicked(int row, int column)
 {
     Q_UNUSED(row);
     Q_UNUSED(column);
+}
+
+void MusicCloudSharedSongTableWidget::keyDownLoadFinished(const QByteArray &data)
+{
+    QJson::Parser parser;
+    bool ok;
+    QVariant dt = parser.parse(data, &ok);
+    if(ok)
+    {
+        QVariantMap value = dt.toMap();
+        QNConf::ACCESS_KEY = value["key"].toString();
+        QNConf::SECRET_KEY = value["secret"].toByteArray();
+    }
+    emit getKeyFinished();
 }
 
 void MusicCloudSharedSongTableWidget::receiveDataFinshed(const QNDataItems &items)
@@ -96,15 +121,15 @@ void MusicCloudSharedSongTableWidget::receiveDataFinshed(const QNDataItems &item
         setItem(i, 0, item);
 
                           item = new QTableWidgetItem;
-        item->setText(MusicUtils::UWidget::elidedText(font(), dataItem.m_name, Qt::ElideRight, 260));
+        item->setText(MusicUtils::Widget::elidedText(font(), dataItem.m_name, Qt::ElideRight, 260));
         item->setToolTip(dataItem.m_name);
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         setItem(i, 1, item);
 
                           item = new QTableWidgetItem;
-        item->setText(MusicUtils::UWidget::elidedText(font(), MusicUtils::UNumber::size2Number(dataItem.m_size),
+        item->setText(MusicUtils::Widget::elidedText(font(), MusicUtils::Number::size2Number(dataItem.m_size),
                                                               Qt::ElideRight, 30));
-        item->setToolTip(MusicUtils::UNumber::size2Label(dataItem.m_size));
+        item->setToolTip(MusicUtils::Number::size2Label(dataItem.m_size));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         setItem(i, 2, item);
 
@@ -118,6 +143,8 @@ void MusicCloudSharedSongTableWidget::receiveDataFinshed(const QNDataItems &item
             m_waitedFiles << data;
         }
     }
+
+    m_currentUploadIndex = m_waitedFiles.count();
     emit updateLabelMessage(tr("List Update Finished!"));
 }
 
@@ -126,14 +153,15 @@ void MusicCloudSharedSongTableWidget::uploadFileFinished(const QString &name)
     for(int i=0; i<m_waitedFiles.count(); ++i)
     {
         UploadData *data = &m_waitedFiles[i];
-        if(data->m_path == m_currentUploadData.m_path)
+        if(data->m_path == m_waitedFiles[m_currentUploadIndex].m_path)
         {
             data->m_state = (data->m_name == name) ? UploadData::Successed : UploadData::Errored;
             m_fileDialog->updateItemProgress(100, *data);
+            ++m_currentUploadIndex;
+            startToUploadFile();
             break;
         }
     }
-    emit uploadDone();
 }
 
 void MusicCloudSharedSongTableWidget::deleteFileFinished(bool state)
@@ -174,6 +202,30 @@ void MusicCloudSharedSongTableWidget::deleteFileToServer()
     data.m_state = UploadData::Successed;
     m_waitedFiles.removeOne(data);
     m_qnDeleteData->deleteDataToServer(QN_BUCKET, data.m_name);
+
+    if(--m_currentUploadIndex < 0)
+    {
+        m_currentUploadIndex = 0;
+    }
+    if(m_fileDialog->isVisible())
+    {
+        m_fileDialog->creatFilesManager(m_waitedFiles);
+    }
+}
+
+void MusicCloudSharedSongTableWidget::deleteFilesToServer()
+{
+    foreach(const UploadData &data, m_waitedFiles)
+    {
+        m_waitedFiles.removeOne(data);
+        m_qnDeleteData->deleteDataToServer(QN_BUCKET, data.m_name);
+    }
+
+    m_currentUploadIndex = 0;
+    if(m_fileDialog->isVisible())
+    {
+        m_fileDialog->creatFilesManager(m_waitedFiles);
+    }
 }
 
 void MusicCloudSharedSongTableWidget::downloadFileToServer()
@@ -189,8 +241,8 @@ void MusicCloudSharedSongTableWidget::downloadFileToServer()
         return;
     }
 
-    QString url = m_qnUploadData->getDownloadUrl(QN_PRFIX, it->toolTip());
-    (new MusicDataDownloadThread( url, MUSIC_DIR_FULL + it->toolTip(),
+    QString url = m_qnUploadData->getDownloadUrl(MusicCryptographicHash::decryptData(QN_PRFIX, URL_KEY), it->toolTip());
+    (new MusicDataDownloadThread( url, MusicUtils::Core::musicPrefix() + it->toolTip(),
          MusicDownLoadThreadAbstract::Download_Music, this))->startToDownload();
 }
 
@@ -200,7 +252,7 @@ void MusicCloudSharedSongTableWidget::uploadFileToServer()
                        QString(), "./", "File (*.mp3)");
     if(!path.isEmpty())
     {
-        foreach(QString file, path)
+        foreach(const QString &file, path)
         {
             UploadData data;
             data.m_path = file.trimmed();
@@ -209,11 +261,17 @@ void MusicCloudSharedSongTableWidget::uploadFileToServer()
             if(!m_waitedFiles.contains(data))
             {
                 m_waitedFiles << data;
+                if(m_fileDialog->isVisible())
+                {
+                    m_fileDialog->creatFileManager(data);
+                }
             }
         }
+        if(!m_uploading)
+        {
+            startToUploadFile();
+        }
     }
-    m_timerToUpload->stop();
-    m_timerToUpload->start();
 }
 
 void MusicCloudSharedSongTableWidget::uploadFilesToServer()
@@ -221,7 +279,7 @@ void MusicCloudSharedSongTableWidget::uploadFilesToServer()
     QString path =  QFileDialog::getExistingDirectory(this, QString(), "./");
     if(!path.isEmpty())
     {
-        foreach(QFileInfo file, MusicUtils::UCore::findFile(path, MusicPlayer::supportFormatsFilterString()))
+        foreach(const QFileInfo &file, MusicUtils::Core::findFile(path, MusicPlayer::supportFormatsFilterString()))
         {
             UploadData data;
             data.m_path = file.absoluteFilePath().trimmed();
@@ -230,59 +288,28 @@ void MusicCloudSharedSongTableWidget::uploadFilesToServer()
             if(!m_waitedFiles.contains(data))
             {
                 m_waitedFiles << data;
+                if(m_fileDialog->isVisible())
+                {
+                    m_fileDialog->creatFileManager(data);
+                }
             }
         }
+        if(!m_uploading)
+        {
+            startToUploadFile();
+        }
     }
-    m_timerToUpload->stop();
-    m_timerToUpload->start();
 }
 
-void MusicCloudSharedSongTableWidget::startToUploadFile()
+void MusicCloudSharedSongTableWidget::reuploadFileToServer()
 {
-    if(m_waitedFiles.isEmpty() || m_uploading)
-    {
-        return;
-    }
-
-    m_uploading = true;
-    m_timerToUpload->stop();
-    bool needUpload;
-    foreach(UploadData data, m_waitedFiles)
-    {
-        if(data.m_state == UploadData::Waited)
-        {
-            needUpload = true;
-            break;
-        }
-    }
-    if(!needUpload)
-    {
-        m_currentUploadData = UploadData();
-        return;
-    }
-
-    emit updateLabelMessage(tr("Files Is Uploading!"));
-    foreach(UploadData data, m_waitedFiles)
-    {
-        m_currentUploadData = data;
-        QFile file(data.m_path);
-        if(!file.open(QIODevice::ReadOnly) || data.m_state == UploadData::Successed)
-        {
-            continue;
-        }
-
-        m_qnUploadData->uploadDataToServer(file.readAll(), QN_BUCKET, data.m_name, data.m_name);
-        m_eventLoop.exec();
-        file.close();
-    }
-    m_uploading = false;
-
-    updateListToServer();
+    m_currentUploadIndex = 0;
+    startToUploadFile();
 }
 
 void MusicCloudSharedSongTableWidget::openFileManagerDialog()
 {
-    m_fileDialog->creatFileManager(m_waitedFiles);
+    m_fileDialog->creatFilesManager(m_waitedFiles);
     m_fileDialog->show();
 }
 
@@ -291,8 +318,18 @@ void MusicCloudSharedSongTableWidget::uploadProgress(qint64 bytesSent, qint64 by
     if(bytesTotal != 0)
     {
         int value = MStatic_cast(int, (bytesSent*1.0/bytesTotal)*100);
-        m_fileDialog->updateItemProgress(value, m_currentUploadData);
+        m_fileDialog->updateItemProgress(value, m_waitedFiles[m_currentUploadIndex]);
     }
+}
+
+void MusicCloudSharedSongTableWidget::uploadDone()
+{
+    m_uploading = false;
+    m_currentUploadIndex = m_waitedFiles.count();
+    updateListToServer();
+    m_fileDialog->setReuploadState( uploadHasFailed() );
+
+    QTimer::singleShot(MT_MS, MusicLeftAreaWidget::instance(), SLOT(cloudSharedSongUploadAllDone()));
 }
 
 void MusicCloudSharedSongTableWidget::contextMenuEvent(QContextMenuEvent *event)
@@ -308,6 +345,8 @@ void MusicCloudSharedSongTableWidget::contextMenuEvent(QContextMenuEvent *event)
 
     menu.addMenu(&uploadMenu);
     menu.addAction(tr("deleteFile"), this, SLOT(deleteFileToServer()))->setEnabled(!m_uploading);
+    menu.addAction(tr("deleteFiles"), this, SLOT(deleteFilesToServer()))->setEnabled(!m_uploading);
+    menu.addSeparator();
     menu.addAction(tr("download"), this, SLOT(downloadFileToServer()))->setEnabled(!m_uploading);
     menu.addSeparator();
     menu.addAction(tr("updateFiles"), this, SLOT(updateListToServer()))->setEnabled(!m_uploading);
@@ -318,13 +357,48 @@ void MusicCloudSharedSongTableWidget::createUploadFileWidget()
 {
     if(m_uploadFileWidget == nullptr)
     {
-        m_uploadFileWidget = new MusicUploadFileWidget(this);
+        m_uploadFileWidget = new MusicOpenFileWidget(this);
         connect(m_uploadFileWidget, SIGNAL(uploadFileClicked()), SLOT(uploadFileToServer()));
         connect(m_uploadFileWidget, SIGNAL(uploadFilesClicked()), SLOT(uploadFilesToServer()));
         m_uploadFileWidget->adjustRect(width(), height());
     }
     m_uploadFileWidget->raise();
     m_uploadFileWidget->show();
+}
+
+void MusicCloudSharedSongTableWidget::startToUploadFile()
+{
+    if(m_waitedFiles.isEmpty() || m_currentUploadIndex < 0 || m_currentUploadIndex >= m_waitedFiles.count())
+    {
+        uploadDone();
+        return;
+    }
+
+    m_uploading = true;
+    emit updateLabelMessage(tr("Files Is Uploading!"));
+
+    UploadData data = m_waitedFiles[m_currentUploadIndex];
+    QFile file(data.m_path);
+    if(!file.open(QIODevice::ReadOnly) || data.m_state == UploadData::Successed)
+    {
+        ++m_currentUploadIndex;
+        startToUploadFile();
+    }
+
+    m_qnUploadData->uploadDataToServer(file.readAll(), QN_BUCKET, data.m_name, data.m_name);
+    file.close();
+}
+
+bool MusicCloudSharedSongTableWidget::uploadHasFailed()
+{
+    foreach(const UploadData &data, m_waitedFiles)
+    {
+        if(data.m_state != UploadData::Successed)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -347,7 +421,7 @@ MusicCloudSharedSongWidget::MusicCloudSharedSongWidget(QWidget *parent)
     QPushButton *button = new QPushButton(this);
     button->setIcon(QIcon(":/desktopTool/btn_setting_hover"));
     button->setCursor(QCursor(Qt::PointingHandCursor));
-    button->setStyleSheet(MusicUIObject::MPushButtonStyle03);
+    button->setStyleSheet(MusicUIObject::MPushButtonStyle01);
     button->setFixedWidth(40);
 
     bottomLayout->addWidget(m_statusLabel);
@@ -371,6 +445,22 @@ MusicCloudSharedSongWidget::~MusicCloudSharedSongWidget()
 QString MusicCloudSharedSongWidget::getClassName()
 {
     return staticMetaObject.className();
+}
+
+void MusicCloudSharedSongWidget::getKey()
+{
+    if(!m_tableWidget->getKey())
+    {
+        MusicToastLabel *toast = new MusicToastLabel(this);
+        toast->setFontSize(15);
+        toast->setFontMargin(20, 20);
+        toast->setText(tr("Init Error!"));
+
+        QPoint globalPoint = mapToGlobal(QPoint(0, 0));
+        toast->move(globalPoint.x() + (width() - toast->width())/2,
+                    globalPoint.y() + (height() - toast->height())/2);
+        toast->show();
+    }
 }
 
 void MusicCloudSharedSongWidget::paintEvent(QPaintEvent *event)

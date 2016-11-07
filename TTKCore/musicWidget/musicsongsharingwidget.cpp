@@ -1,11 +1,11 @@
 #include "musicsongsharingwidget.h"
 #include "ui_musicsongsharingwidget.h"
+#include "musicdownloadquerywythread.h"
+#include "musicmessagebox.h"
 #include "musicuiobject.h"
 #include "musicobject.h"
-#include "musicbackgroundmanager.h"
-#include "musicdata2downloadthread.h"
-#include "musicmessagebox.h"
-#include "musicutils.h"
+#include "musiccoreutils.h"
+#include "musicwidgetutils.h"
 
 #include "qrcodewidget.h"
 
@@ -24,10 +24,10 @@ MusicSongSharingWidget::MusicSongSharingWidget(QWidget *parent)
     ui->qqButton->setChecked(true);
     ui->textEdit->setStyleSheet(MusicUIObject::MTextEditStyle01);
 
-    QRCodeQWidget *code = new QRCodeQWidget(QByteArray(), QSize(90, 90), this);
-    code->setMargin(2);
-    code->setIcon(":/image/lb_player_logo", 0.23);
-    ui->QRCodeIconWidgetLayout->addWidget(code);
+    m_qrCodeWidget = new QRCodeQWidget(QByteArray(), QSize(90, 90), this);
+    m_qrCodeWidget->setMargin(2);
+    m_qrCodeWidget->setIcon(":/image/lb_player_logo", 0.23);
+    ui->QRCodeIconWidgetLayout->addWidget(m_qrCodeWidget);
 
     connect(ui->textEdit, SIGNAL(textChanged()), SLOT(textAreaChanged()));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
@@ -37,6 +37,7 @@ MusicSongSharingWidget::MusicSongSharingWidget(QWidget *parent)
 
 MusicSongSharingWidget::~MusicSongSharingWidget()
 {
+    delete m_qrCodeWidget;
     delete ui;
 }
 
@@ -47,9 +48,10 @@ QString MusicSongSharingWidget::getClassName()
 
 void MusicSongSharingWidget::setSongName(const QString &name)
 {
-    ui->sharedName->setText(MusicUtils::UWidget::elidedText(font(), name, Qt::ElideRight, 200));
+    ui->sharedName->setToolTip(name);
+    ui->sharedName->setText(MusicUtils::Widget::elidedText(font(), name, Qt::ElideRight, 200));
 
-    QString path = ART_DIR_FULL + name.split('-').front().trimmed() + SKN_FILE;
+    QString path = ART_DIR_FULL + MusicUtils::Core::artistName(name) + SKN_FILE;
     ui->sharedNameIcon->setPixmap(QPixmap(QFile::exists(path)
                                   ? path : ":/image/lb_defaultArt").scaled(50, 50));
 
@@ -59,26 +61,28 @@ void MusicSongSharingWidget::setSongName(const QString &name)
 
 int MusicSongSharingWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }
 
 void MusicSongSharingWidget::confirmButtonClicked()
 {
-    QStringList infos = ui->sharedName->text().split('-');
-    if(infos.count() != 0)
+    MusicDownLoadQueryWYThread *down = new MusicDownLoadQueryWYThread(this);
+    down->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, ui->sharedName->text().trimmed());
+
+    QEventLoop loop;
+    connect(down, SIGNAL(downLoadDataChanged(QString)), &loop, SLOT(quit()));
+    loop.exec();
+
+    if(!down->getMusicSongInfos().isEmpty())
     {
-        ///download art picture
-        MusicData2DownloadThread *down = new MusicData2DownloadThread(
-                    SML_BG_ART_URL.arg(infos.front().trimmed()),
-                    ART_DIR_FULL + TEMPORARY_DIR,
-                    MusicDownLoadThreadAbstract::Download_SmlBG, this);
-        connect(down, SIGNAL(data2urlHasChanged(QString)),
-                      SLOT(data2urlHasChanged(QString)), Qt::QueuedConnection);
-        down->startToDownload();
+        MusicObject::MusicSongInfomation info(down->getMusicSongInfos().first());
+        downLoadDataChanged(MusicCryptographicHash::decryptData(WEB_PLAYER, URL_KEY) + info.m_songId, info.m_smallPicUrl);
     }
-    QTimer::singleShot(5*MT_S2MS, this, SLOT(queryUrlTimeout()));
+    else
+    {
+        QTimer::singleShot(2*MT_S2MS, this, SLOT(queryUrlTimeout()));
+    }
 }
 
 void MusicSongSharingWidget::queryUrlTimeout()
@@ -88,34 +92,42 @@ void MusicSongSharingWidget::queryUrlTimeout()
     message.exec();
 }
 
-void MusicSongSharingWidget::data2urlHasChanged(const QString &imageUrl)
+void MusicSongSharingWidget::downLoadDataChanged(const QString &playUrl, const QString &imageUrl)
 {
     QString url;
     if(ui->qqButton->isChecked())
     {
-        url = QString(QQ_SHARE).arg(ui->textEdit->toPlainText()).arg(imageUrl)
+        url = QString(MusicCryptographicHash::decryptData(QQ_SHARE, URL_KEY)).arg(playUrl).arg(ui->textEdit->toPlainText()).arg(imageUrl)
                                .arg(ui->sharedName->text()).arg(tr("TTKMusicPlayer"));
     }
     else if(ui->renrenButton->isChecked())
     {
-        url = QString(RENREN_SHARE).arg(ui->textEdit->toPlainText()).arg(imageUrl);
+        url = QString(MusicCryptographicHash::decryptData(RENREN_SHARE, URL_KEY)).arg(playUrl).arg(ui->textEdit->toPlainText()).arg(imageUrl);
     }
     else if(ui->qqspaceButton->isChecked())
     {
-        url = QString(QQ_SPACE_SHARE).arg(tr("TTKMusicPlayer")).arg(imageUrl)
+        url = QString(MusicCryptographicHash::decryptData(QQ_SPACE_SHARE, URL_KEY)).arg(playUrl).arg(tr("TTKMusicPlayer")).arg(imageUrl)
                                      .arg(ui->textEdit->toPlainText());
     }
     else if(ui->qqblogButton->isChecked())
     {
-        url = QString(QQ_MICBG_SHARE).arg(ui->textEdit->toPlainText()).arg(imageUrl);
+        url = QString(MusicCryptographicHash::decryptData(QQ_MICBG_SHARE, URL_KEY)).arg(playUrl).arg(ui->textEdit->toPlainText()).arg(imageUrl);
     }
     else if(ui->sinaButton->isChecked())
     {
-        url = QString(SINA_SHARE).arg(imageUrl).arg(ui->textEdit->toPlainText());
+        url = QString(MusicCryptographicHash::decryptData(SINA_SHARE, URL_KEY)).arg(playUrl).arg(imageUrl).arg(ui->textEdit->toPlainText());
+    }
+    else if(ui->weixingButton->isChecked())
+    {
+        m_qrCodeWidget->setText(playUrl.toUtf8());
+        m_qrCodeWidget->update();
+        return;
     }
 
+    url.replace("player?song=", "player%3Fsong%3D");
     url.replace('#', "%23");
-    MusicUtils::UCore::openUrl(url, false);
+
+    MusicUtils::Core::openUrl(url, false);
     QTimer::singleShot(MT_S2MS, this, SLOT(close()));
 }
 

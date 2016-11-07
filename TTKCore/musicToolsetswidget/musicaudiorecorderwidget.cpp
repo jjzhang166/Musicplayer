@@ -1,8 +1,7 @@
 #include "musicaudiorecorderwidget.h"
 #include "ui_musicaudiorecorderwidget.h"
 #include "musictime.h"
-#include "musicutils.h"
-#include "musicbackgroundmanager.h"
+#include "musiccoreutils.h"
 #include "musicmessagebox.h"
 #include "musicaudiorecordercore.h"
 
@@ -21,16 +20,16 @@ MusicAudioRecorderWidget::MusicAudioRecorderWidget(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
 
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
-    ui->startButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->startButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->startButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->startButton->setToolTip(tr("startAudio"));
-    ui->stopButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->stopButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->stopButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->stopButton->setToolTip(tr("stopAudio"));
-    ui->playButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->playButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->playButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->playButton->setToolTip(tr("playAudio"));
-    ui->saveButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->saveButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->saveButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->saveButton->setToolTip(tr("saveButton"));
 
@@ -68,7 +67,7 @@ MusicAudioRecorderWidget::MusicAudioRecorderWidget(QWidget *parent)
     m_mpAudioOutputSound = nullptr;
 
     m_mpInputDevSound = nullptr;
-    m_mpInputDevSound = nullptr;
+    m_mpOutputDevSound = nullptr;
 
     m_recordCore = new MusicAudioRecorderCore(this);
 
@@ -170,7 +169,7 @@ void MusicAudioRecorderWidget::onRecordSave()
         tr("choose a filename to save under"), QDir::currentPath(), "Wav(*.wav)");
     if(!filename.isEmpty())
     {
-        m_recordCore->addWavHeader(MusicUtils::UCore::toLocal8Bit(filename));
+        m_recordCore->addWavHeader(MusicUtils::Core::toLocal8Bit(filename));
     }
 }
 
@@ -184,10 +183,10 @@ void MusicAudioRecorderWidget::onStateChange(QAudio::State state)
 
 void MusicAudioRecorderWidget::createAudioInput()
 {
-    if (m_mpInputDevSound != 0)
+    if (m_mpInputDevSound != nullptr)
     {
         disconnect(m_mpInputDevSound, 0, this, 0);
-        m_mpInputDevSound = 0;
+        m_mpInputDevSound = nullptr;
     }
     QAudioDeviceInfo inputDevice(QAudioDeviceInfo::defaultInputDevice());
     m_mpAudioInputSound = new QAudioInput(inputDevice, m_mFormatSound, this);
@@ -262,7 +261,6 @@ void MusicAudioRecorderWidget::onTimeOut()
 
 int MusicAudioRecorderWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

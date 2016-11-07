@@ -1,7 +1,7 @@
 #include "musiclocalsongsearchdialog.h"
 #include "musiclocalsongsearchedit.h"
 #include "musicuiobject.h"
-#include "musicttkuiobject.h"
+#include "musictinyuiobject.h"
 
 #include <QLabel>
 #include <QBoxLayout>
@@ -22,12 +22,13 @@ MusicLocalSongSearchDialog::MusicLocalSongSearchDialog(QWidget *parent)
     layout->setContentsMargins(10, 4, 10, 4);
 
     QWidget *searchPair = new QWidget(this);
-    searchPair->setStyleSheet("border: 1px solid #666666");
+    searchPair->setStyleSheet(MusicUIObject::MBorderStyle02);
     QHBoxLayout *searchPairLayout = new QHBoxLayout(searchPair);
-    searchPairLayout->setContentsMargins(5, 0, 5, 0);
+    searchPairLayout->setContentsMargins(5, 2, 5, 0);
     QLabel *showIcon = new QLabel(searchPair);
     showIcon->setFixedSize(16, 16);
-    showIcon->setStyleSheet(MusicUIObject::MCustomStyle05);
+    showIcon->setStyleSheet(MusicUIObject::MBackgroundStyle01 +
+                            "border-image: url(:/tiny/btn_search_line_normal);");
     m_searchLine = new MusicLocalSongSearchEdit(searchPair);
     searchPairLayout->addWidget(showIcon);
     searchPairLayout->addWidget(m_searchLine);
@@ -36,7 +37,7 @@ MusicLocalSongSearchDialog::MusicLocalSongSearchDialog(QWidget *parent)
     QToolButton *closeButton = new QToolButton(this);
     closeButton->setFixedSize(16, 16);
     closeButton->setCursor(QCursor(Qt::PointingHandCursor));
-    closeButton->setStyleSheet(MusicTTKUIObject::MKGTinyBtnClose);
+    closeButton->setStyleSheet(MusicUIObject::MKGTinyBtnClose);
 
     layout->addWidget(searchPair);
     layout->addWidget(closeButton);

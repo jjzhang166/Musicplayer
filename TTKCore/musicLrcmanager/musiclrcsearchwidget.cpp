@@ -2,7 +2,6 @@
 #include "ui_musiclrcsearchwidget.h"
 #include "musicuiobject.h"
 #include "musiclrcsearchtablewidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicmessagebox.h"
 
 MusicLrcSearchWidget::MusicLrcSearchWidget(QWidget *parent)
@@ -18,9 +17,9 @@ MusicLrcSearchWidget::MusicLrcSearchWidget(QWidget *parent)
 
     ui->label_checkBox->setStyleSheet(MusicUIObject::MCheckBoxStyle01);
     ui->songSearchEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
-    ui->lrcSearchButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->lrcSearchDownload->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->closeButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->lrcSearchButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->lrcSearchDownload->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->closeButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
 
     ui->lrcSearchButton->setCursor(QCursor(Qt::PointingHandCursor));
     ui->lrcSearchDownload->setCursor(QCursor(Qt::PointingHandCursor));
@@ -66,13 +65,13 @@ void MusicLrcSearchWidget::lrcSearchButtonClicked() const
     QString text = ui->songSearchEdit->text().trimmed();
     ui->tableWidget->startSearchQuery( text );
     ui->functionTopLabel->setText(tr("&nbsp;find <font color=red> %1 </font> result")
-                                  .arg(MusicUtils::UWidget::elidedText(font(), text, Qt::ElideRight, 245)));
+                                  .arg(MusicUtils::Widget::elidedText(font(), text, Qt::ElideRight, 245)));
 }
 
 void MusicLrcSearchWidget::lrcSearchDownloadClicked()
 {
-    ui->stateLabel->setText(tr("lrc is downloading now!"));
     MusicObject::MIntList list = ui->tableWidget->getSelectedItems();
+    list.removeOne(ui->tableWidget->rowCount() - 1);
     if(list.isEmpty())
     {
         MusicMessageBox message;
@@ -80,10 +79,12 @@ void MusicLrcSearchWidget::lrcSearchDownloadClicked()
         message.exec();
         return;
     }
+
     foreach(int row, list)
     {
         ui->tableWidget->musicDownloadLocal(row);
     }
+    ui->stateLabel->setText(tr("lrc is downloading now!"));
 }
 
 void MusicLrcSearchWidget::lrcDownloadStateChanged(const QString &string)
@@ -96,7 +97,6 @@ void MusicLrcSearchWidget::lrcDownloadStateChanged(const QString &string)
 
 int MusicLrcSearchWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

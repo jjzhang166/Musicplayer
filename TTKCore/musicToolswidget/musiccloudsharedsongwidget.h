@@ -15,7 +15,7 @@
 #include "qnsimpledeletedata.h"
 #include "musiccloudfilemanagerdialog.h"
 
-class MusicUploadFileWidget;
+class MusicOpenFileWidget;
 
 /*! @brief The class of the cloud shared song table widget.
  * @author Greedysky <greedysky@163.com>
@@ -35,6 +35,10 @@ public:
      * Get class object name.
      */
 
+    bool getKey();
+    /*!
+     * Get query cloud id keys.
+     */
     inline const UploadDatas& getUploadDatas() const { return m_waitedFiles;}
     /*!
      * Get upload datas.
@@ -45,15 +49,19 @@ Q_SIGNALS:
     /*!
      * To update message label text.
      */
-    void uploadDone();
+    void getKeyFinished();
     /*!
-     * One file upload finsihed.
+     * Get key data from net finished.
      */
 
 public Q_SLOTS:
     virtual void listCellClicked(int row, int column) override;
     /*!
      * Table widget list cell click.
+     */
+    void keyDownLoadFinished(const QByteArray &data);
+    /*!
+     * Download key data from net finished.
      */
     void receiveDataFinshed(const QNDataItems &items);
     /*!
@@ -76,7 +84,14 @@ public Q_SLOTS:
     /*!
      * Delete file to server.
      */
+    void deleteFilesToServer();
+    /*!
+     * Delete files to server.
+     */
     void downloadFileToServer();
+    /*!
+     * Download file to server.
+     */
 
     void uploadFileToServer();
     /*!
@@ -86,9 +101,9 @@ public Q_SLOTS:
     /*!
      * Upload files to server.
      */
-    void startToUploadFile();
+    void reuploadFileToServer();
     /*!
-     * Start to upload files to server.
+     * Reupload files to server.
      */
 
     void openFileManagerDialog();
@@ -98,6 +113,10 @@ public Q_SLOTS:
     void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
     /*!
      * Show upload progress.
+     */
+    void uploadDone();
+    /*!
+     * All files upload finsihed.
      */
 
 protected:
@@ -109,17 +128,23 @@ protected:
     /*!
      * Create upload file widget.
      */
+    void startToUploadFile();
+    /*!
+     * Start to upload files to server.
+     */
+    bool uploadHasFailed();
+    /*!
+     * Check upload has failed.
+     */
 
     bool m_uploading;
-    QEventLoop m_eventLoop;
-    QTimer *m_timerToUpload;
-    UploadData m_currentUploadData;
+    int m_currentUploadIndex;
     UploadDatas m_waitedFiles;
     QNSimpleListData *m_qnListData;
     QNSimpleDeleteData *m_qnDeleteData;
     QNSimpleUploadData *m_qnUploadData;
     QNetworkAccessManager *m_networkManager;
-    MusicUploadFileWidget *m_uploadFileWidget;
+    MusicOpenFileWidget *m_uploadFileWidget;
     MusicCloudFileManagerDialog *m_fileDialog;
 
 };
@@ -141,6 +166,10 @@ public:
     static QString getClassName();
     /*!
      * Get class object name.
+     */
+    void getKey();
+    /*!
+     * Get query cloud id keys.
      */
 
 protected:

@@ -1,9 +1,9 @@
 #include "musiclrclocallinkwidget.h"
 #include "ui_musiclrclocallinkwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicconnectionpool.h"
 #include "musicmessagebox.h"
 #include "musicuiobject.h"
+#include "musiccoreutils.h"
 #include "musicdownloadstatuslabel.h"
 
 #include <QDir>
@@ -42,13 +42,13 @@ void MusicLrcLocalLinkTableWidget::createAllItems(const LocalDataItems &items)
     for(int i=0; i<items.count(); ++i)
     {
         QTableWidgetItem *item = new QTableWidgetItem;
-        item->setText(MusicUtils::UWidget::elidedText(font(), items[i].m_name, Qt::ElideRight, 128));
+        item->setText(MusicUtils::Widget::elidedText(font(), items[i].m_name, Qt::ElideRight, 128));
         item->setToolTip( items[i].m_name );
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         setItem(count + i, 0, item);
 
                           item = new QTableWidgetItem;
-        item->setText(MusicUtils::UWidget::elidedText(font(), items[i].m_path, Qt::ElideRight, 195));
+        item->setText(MusicUtils::Widget::elidedText(font(), items[i].m_path, Qt::ElideRight, 195));
         item->setToolTip( items[i].m_path );
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         setItem(count + i, 1, item);
@@ -76,10 +76,10 @@ MusicLrcLocalLinkWidget::MusicLrcLocalLinkWidget(QWidget *parent)
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
     ui->fuzzyButton->setStyleSheet(MusicUIObject::MCheckBoxStyle01);
-    ui->localSearchButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->commitButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->previewButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->deleteButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->localSearchButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->commitButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->previewButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->deleteButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     ui->titleEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
 
     ui->fuzzyButton->setChecked(true);
@@ -96,7 +96,7 @@ MusicLrcLocalLinkWidget::MusicLrcLocalLinkWidget(QWidget *parent)
 
 MusicLrcLocalLinkWidget::~MusicLrcLocalLinkWidget()
 {
-    M_CONNECTION_PTR->poolDisConnect(getClassName());
+    M_CONNECTION_PTR->removeValue(getClassName());
     delete ui;
 }
 
@@ -120,16 +120,16 @@ void MusicLrcLocalLinkWidget::searchInLocalMLrc()
     }
 
     ui->fuzzyButton->isChecked();
-    QStringList list = QDir(LRC_DIR_FULL).entryList(QDir::Files |  QDir::Hidden |
+    QStringList list = QDir(MusicUtils::Core::lrcPrefix()).entryList(QDir::Files |  QDir::Hidden |
                                                        QDir::NoSymLinks | QDir::NoDotAndDotDot);
     LocalDataItems items;
-    foreach(QString var, list)
+    foreach(const QString &var, list)
     {
         if(var.contains(title, ui->fuzzyButton->isChecked() ? Qt::CaseInsensitive : Qt::CaseSensitive))
         {
             LocalDataItem item;
             item.m_name = var;
-            item.m_path = LRC_DIR_FULL + var;
+            item.m_path = MusicUtils::Core::lrcPrefix() + var;
             items << item;
         }
     }
@@ -220,7 +220,6 @@ void MusicLrcLocalLinkWidget::confirmButtonClicked()
 
 int MusicLrcLocalLinkWidget::exec()
 {
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }

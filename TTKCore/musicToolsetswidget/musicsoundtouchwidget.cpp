@@ -1,11 +1,10 @@
 #include "musicsoundtouchwidget.h"
 #include "ui_musicsoundtouchwidget.h"
-#include "musicbackgroundmanager.h"
 #include "musicaudiorecordercore.h"
 #include "musicmessagebox.h"
 #include "musicobject.h"
 #include "musicuiobject.h"
-#include "musicutils.h"
+#include "musicwidgetutils.h"
 
 #include <QSound>
 #include <QProcess>
@@ -23,9 +22,9 @@ MusicSoundTouchWidget::MusicSoundTouchWidget(QWidget *parent)
     ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    ui->playButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->stopButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->openButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->playButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->stopButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->openButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
 
     ui->tempoSlider->setStyleSheet(MusicUIObject::MSliderStyle01);
     ui->pitchSlider->setStyleSheet(MusicUIObject::MSliderStyle01);
@@ -37,8 +36,8 @@ MusicSoundTouchWidget::MusicSoundTouchWidget(QWidget *parent)
     connect(ui->pitchSlider, SIGNAL(valueChanged(int)), SLOT(pitchSliderValueChanged(int)));
     connect(ui->rateSlider, SIGNAL(valueChanged(int)), SLOT(rateSliderValueChanged(int)));
 
-    ui->playWavButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
-    ui->transformButton->setStyleSheet(MusicUIObject::MPushButtonStyle08);
+    ui->playWavButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+    ui->transformButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     connect(ui->playWavButton, SIGNAL(clicked()), SLOT(onRecordPlay()));
     connect(ui->transformButton, SIGNAL(clicked()), SLOT(transformButtonClicked()));
 
@@ -86,8 +85,7 @@ int MusicSoundTouchWidget::exec()
         return -1;
     }
 
-    QPixmap pix(M_BACKGROUND_PTR->getMBackground());
-    ui->background->setPixmap(pix.scaled( size() ));
+    setBackgroundPixmap(ui->background, size());
     return MusicAbstractMoveDialog::exec();
 }
 
@@ -178,6 +176,6 @@ void MusicSoundTouchWidget::finished(int code)
 
 void MusicSoundTouchWidget::setText(const QString &text)
 {
-    ui->pathLabel->setText(MusicUtils::UWidget::elidedText(font(), text, Qt::ElideLeft, 390) );
+    ui->pathLabel->setText(MusicUtils::Widget::elidedText(font(), text, Qt::ElideLeft, 390) );
     ui->pathLabel->setToolTip(text);
 }

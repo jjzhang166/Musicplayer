@@ -38,6 +38,10 @@ public:
     /*!
      * Get class object name.
      */
+    static MusicTopAreaWidget *instance();
+    /*!
+     * Get class object instance.
+     */
     void setupUi(Ui::MusicApplication* ui);
     /*!
      * Set up app ui.
@@ -168,6 +172,10 @@ public Q_SLOTS:
      */
 
 protected:
+    void createRemoteWidget();
+    /*!
+     * Create remote widget.
+     */
     void drawWindowBackgroundRect();
     /*!
      * Draw window background rect.
@@ -176,23 +184,26 @@ protected:
     /*!
      * Draw window background rect by picture.
      */
-    void createRemoteWidget();
+    void reRenderImage(int delta, const QImage *input, QImage *output);
     /*!
-     * Create remote widget.
+     * Rerender the image by color burn transform.
+     */
+    uint colorBurnTransform(int c, int delta);
+    /*!
+     * Image color burn transform.
      */
 
-    QWidget *m_supperClass;
     Ui::MusicApplication *m_ui;
     MusicUserWindow *m_musicUserWindow;
     MusicBackgroundSkinDialog *m_musicbgskin;
     MusicRemoteWidget *m_musicRemoteWidget;
 
     QString m_currentBgSkin;
-    int m_alpha;
-    int m_listAlpha;
+    int m_alpha, m_listAlpha;
     QTimer m_pictureCarouselTimer;
     bool m_currentPlayStatus;
 
+    static MusicTopAreaWidget *m_instance;
 };
 
 #endif // MUSICTOPAREAWIDGET_H

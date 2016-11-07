@@ -1,11 +1,14 @@
 #include "musiclrcanalysis.h"
+#ifndef MUSIC_MOBILE
 #include "musiclrcfromkrc.h"
+#endif
 #include "musictime.h"
 #include "musictranslationthread.h"
 
 MusicLrcAnalysis::MusicLrcAnalysis(QObject *parent)
     : QObject(parent)
 {
+    m_lineMax = 0;
     m_currentLrcIndex = 0;
     m_translationThread = nullptr;
 }
@@ -20,10 +23,39 @@ QString MusicLrcAnalysis::getClassName()
     return staticMetaObject.className();
 }
 
+void MusicLrcAnalysis::setLrcData(const MusicObject::MIntStringMap &data)
+{
+    m_lrcContainer = data;
+    m_currentLrcIndex = 0;
+    m_currentShowLrcContainer.clear();
+
+    for(int i=0; i<getMiddle(); ++i)
+    {
+        m_currentShowLrcContainer << QString();
+    }
+    if(m_lrcContainer.find(0) == m_lrcContainer.end())
+    {
+       m_lrcContainer.insert(0, QString());
+    }
+
+    MusicObject::MIntStringMapIterator it(m_lrcContainer);
+    while(it.hasNext())
+    {
+        it.next();
+        m_currentShowLrcContainer << it.value();
+    }
+    for(int i=0; i<getMiddle(); ++i)
+    {
+        m_currentShowLrcContainer << QString();
+    }
+}
+
 MusicLrcAnalysis::State MusicLrcAnalysis::transLrcFileToTime(const QString &lrcFileName)
 {
+    m_currentLrcIndex = 0;
     m_lrcContainer.clear();
     m_currentShowLrcContainer.clear();
+
     QFile file(m_currentLrcFileName = lrcFileName);
 
     if(!file.open(QIODevice::ReadOnly))
@@ -34,7 +66,7 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transLrcFileToTime(const QString &lrcF
     QString getAllText = QString(file.readAll());
     file.close();
     //The lyrics by line into the lyrics list
-    foreach(QString oneLine, getAllText.split("\n"))
+    foreach(const QString &oneLine, getAllText.split("\n"))
     {
         matchLrcLine(oneLine);
     }
@@ -45,10 +77,7 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transLrcFileToTime(const QString &lrcF
         return LrcEmpty;
     }
 
-    m_currentShowLrcContainer.clear();
-    m_currentLrcIndex = 0;
-
-    for(int i=0; i<LRC_LINEMAX_COUNT/2; ++i)
+    for(int i=0; i<getMiddle(); ++i)
     {
         m_currentShowLrcContainer << QString();
     }
@@ -63,7 +92,7 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transLrcFileToTime(const QString &lrcF
         it.next();
         m_currentShowLrcContainer << it.value();
     }
-    for(int i=0; i<LRC_LINEMAX_COUNT/2; ++i)
+    for(int i=0; i<getMiddle(); ++i)
     {
         m_currentShowLrcContainer << QString();
     }
@@ -73,8 +102,10 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transLrcFileToTime(const QString &lrcF
 
 MusicLrcAnalysis::State MusicLrcAnalysis::transKrcFileToTime(const QString &krcFileName)
 {
+#ifndef MUSIC_MOBILE
     m_lrcContainer.clear();
     m_currentShowLrcContainer.clear();
+    m_currentLrcIndex = 0;
     m_currentLrcFileName = krcFileName;
 
     MusicLrcFromKrc krc;
@@ -85,7 +116,7 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transKrcFileToTime(const QString &krcF
 
     QString getAllText = QString(krc.getDecodeString());
     //The lyrics by line into the lyrics list
-    foreach(QString oneLine, getAllText.split("\r\n"))
+    foreach(const QString &oneLine, getAllText.split("\r\n"))
     {
         matchLrcLine(oneLine);
     }
@@ -96,10 +127,7 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transKrcFileToTime(const QString &krcF
         return LrcEmpty;
     }
 
-    m_currentShowLrcContainer.clear();
-    m_currentLrcIndex = 0;
-
-    for(int i=0; i<LRC_LINEMAX_COUNT/2; ++i)
+    for(int i=0; i<getMiddle(); ++i)
     {
         m_currentShowLrcContainer << QString();
     }
@@ -114,12 +142,16 @@ MusicLrcAnalysis::State MusicLrcAnalysis::transKrcFileToTime(const QString &krcF
         it.next();
         m_currentShowLrcContainer << it.value();
     }
-    for(int i=0; i<LRC_LINEMAX_COUNT/2; ++i)
+    for(int i=0; i<getMiddle(); ++i)
     {
         m_currentShowLrcContainer << QString();
     }
 
     return OpenFileSuccess;
+#else
+    Q_UNUSED(krcFileName);
+    return OpenFileFail;
+#endif
 }
 
 void MusicLrcAnalysis::matchLrcLine(const QString &oneLine)
@@ -323,7 +355,7 @@ void MusicLrcAnalysis::matchLrcLine(const QString &oneLine, QString cap,
 qint64 MusicLrcAnalysis::setSongSpeedAndSlow(qint64 time)
 {
     QList<qint64> keys(m_lrcContainer.keys());
-    qint64 beforeTime;
+    qint64 beforeTime = 0;
     if(!keys.isEmpty())
     {
         beforeTime = keys[0];
@@ -343,7 +375,7 @@ qint64 MusicLrcAnalysis::setSongSpeedAndSlow(qint64 time)
     {
         if(m_currentShowLrcContainer[i] == m_lrcContainer.value(time))
         {
-            if((m_currentLrcIndex = i - LRC_CURRENT_LINR - 1) < 0 )
+            if((m_currentLrcIndex = i - getMiddle() - 1) < 0 )
             {
                 m_currentLrcIndex = 0;
             }
@@ -391,7 +423,7 @@ void MusicLrcAnalysis::saveLrcTimeChanged()
 bool MusicLrcAnalysis::valid() const
 {
     return (!isEmpty()) &&
-           (m_currentLrcIndex + LRC_LINEMAX_COUNT <= m_currentShowLrcContainer.count());
+           (m_currentLrcIndex + m_lineMax <= m_currentShowLrcContainer.count());
 }
 
 bool MusicLrcAnalysis::isEmpty() const
@@ -429,7 +461,7 @@ bool MusicLrcAnalysis::findText(qint64 current, qint64 total,
     qint64 previous = 0;
     qint64 later = 0;
     //Keys () method returns a list of lrcContainer
-    foreach (qint64 value, m_lrcContainer.keys())
+    foreach(const qint64 &value, m_lrcContainer.keys())
     {
         if(current >= value)
         {
@@ -456,7 +488,7 @@ bool MusicLrcAnalysis::findText(qint64 current, qint64 total,
 
 qint64 MusicLrcAnalysis::findTime(int index) const
 {
-    if(index + LRC_LINEMAX_COUNT < m_currentShowLrcContainer.count())
+    if(index + m_lineMax < m_currentShowLrcContainer.count())
     {
         MusicObject::MIntStringMapIterator it(m_lrcContainer);
         for(int i=0; i<index + 1; ++i)
@@ -477,7 +509,7 @@ qint64 MusicLrcAnalysis::findTime(int index) const
 QString MusicLrcAnalysis::getAllLrcs() const
 {
     QString clipString;
-    foreach(QString s, m_lrcContainer.values())
+    foreach(const QString &s, m_lrcContainer.values())
     {
         clipString.append(s + "\n");
     }
@@ -497,10 +529,10 @@ void MusicLrcAnalysis::getTranslatedLrc()
     }
 
     QString data;
-    foreach(QString s, m_lrcContainer.values())
+    foreach(const QString &s, m_lrcContainer.values())
     {
         data.append(s);
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
         data.append("\r");
 #endif
     }
