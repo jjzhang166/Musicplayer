@@ -1,8 +1,7 @@
 #include "musicidentifysongswidget.h"
 #include "musictoolsetsuiobject.h"
 #include "musicidentifysongsthread.h"
-#include "musicdownloadquerywythread.h"
-#include "musicwytextdownloadthread.h"
+#include "musicdownloadqueryfactory.h"
 #include "musicdatadownloadthread.h"
 #include "musicaudiorecordercore.h"
 #include "musicsongsharingwidget.h"
@@ -80,11 +79,7 @@ void MusicIdentifySongsWidget::getKey()
         toast->setFontSize(15);
         toast->setFontMargin(20, 20);
         toast->setText(tr("Init Error!"));
-
-        QPoint globalPoint = mapToGlobal(QPoint(0, 0));
-        toast->move(globalPoint.x() + (width() - toast->width())/2,
-                    globalPoint.y() + (height() - toast->height())/2);
-        toast->show();
+        toast->popup(this);
     }
 }
 
@@ -289,7 +284,7 @@ void MusicIdentifySongsWidget::createDetectedSuccessedWidget()
     textLabel->setAlignment(Qt::AlignCenter);
     /////////////////////////////////////////////////////////////////////
     QEventLoop loop;
-    MusicDownLoadQueryWYThread *down = new MusicDownLoadQueryWYThread(this);
+    MusicDownLoadQueryThreadAbstract *down = M_DOWNLOAD_QUERY_PTR->getQueryThread(this);
     connect(down, SIGNAL(downLoadDataChanged(QString)), &loop, SLOT(quit()));
     down->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, textLabel->text().trimmed());
     loop.exec();
@@ -364,7 +359,7 @@ void MusicIdentifySongsWidget::createDetectedSuccessedWidget()
         QString name = MusicUtils::Core::lrcPrefix() + m_currentSong.m_singerName + " - " + m_currentSong.m_songName + LRC_FILE;
         if(!QFile::exists(name))
         {
-            MusicWYTextDownLoadThread* lrcDownload = new MusicWYTextDownLoadThread(m_currentSong.m_lrcUrl, name,
+            MusicDownLoadThreadAbstract* lrcDownload = M_DOWNLOAD_QUERY_PTR->getDownloadLrc(m_currentSong.m_lrcUrl, name,
                                                                         MusicDownLoadThreadAbstract::Download_Lrc, this);
             connect(lrcDownload, SIGNAL(downLoadDataChanged(QString)), &loop, SLOT(quit()));
             lrcDownload->startToDownload();

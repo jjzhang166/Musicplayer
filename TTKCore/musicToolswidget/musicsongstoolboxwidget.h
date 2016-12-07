@@ -32,6 +32,15 @@ public:
      * Get class object name.
      */
 
+    inline void setItemIndex(int index) { m_index = index; }
+    /*!
+     * Set Item index.
+     */
+    inline int getItemIndex() const { return m_index; }
+    /*!
+     * Get Item index.
+     */
+
     void setItemExpand(bool expand);
     /*!
      * Set Item expand.
@@ -47,6 +56,10 @@ public:
      */
 
 Q_SIGNALS:
+    void addNewRowItem();
+    /*!
+     * Add new play list item.
+     */
     void mousePressAt(int index);
     /*!
      * Current top widget is pressed.
@@ -105,6 +118,10 @@ public Q_SLOTS:
     /*!
      * Show menu items.
      */
+    void showShareListDialog();
+    /*!
+     * Show share list dialog.
+     */
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
@@ -118,6 +135,32 @@ protected:
     QString m_suffixString;
     QLabel *m_labelIcon, *m_labelText;
     MusicSongsToolItemRenamedWidget *m_renameLine;
+
+};
+
+
+/*! @brief The class of the tool box mask widget.
+ * @author Greedysky <greedysky@163.com>
+ */
+class MUSIC_TOOL_EXPORT MusicSongsToolBoxMaskWidget : public MusicSongsToolBoxTopWidget
+{
+    Q_OBJECT
+public:
+    explicit MusicSongsToolBoxMaskWidget(QWidget *parent = 0);
+    /*!
+     * Object contsructor.
+     */
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
+protected:
+    virtual void paintEvent(QPaintEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
 
 };
 
@@ -288,6 +331,10 @@ public Q_SLOTS:
     /*!
      * Current top widget is pressed.
      */
+    void setTransparent(int alpha);
+    /*!
+     * Set background transparent.
+     */
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
@@ -303,6 +350,7 @@ protected:
     int m_currentIndex, m_itemIndexRaise;
     QVBoxLayout *m_layout;
     QScrollArea *m_scrollArea;
+    QWidget *m_contentsWidget;
     QList<MusicToolBoxWidgetItem> m_itemList;
 
 };

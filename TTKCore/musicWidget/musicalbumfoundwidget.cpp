@@ -1,7 +1,7 @@
 #include "musicalbumfoundwidget.h"
 #include "musicdownloadqueryfactory.h"
 #include "musicsourcedownloadthread.h"
-#include "musicsongssummarizied.h"
+#include "musicsongssummariziedwidget.h"
 #include "musicconnectionpool.h"
 #include "musicsettingmanager.h"
 #include "musicuiobject.h"
@@ -28,7 +28,7 @@ MusicAlbumFoundTableWidget::MusicAlbumFoundTableWidget(QWidget *parent)
     headerview->resizeSection(5, 26);
 
     M_CONNECTION_PTR->setValue(getClassName(), this);
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicSongsSummarizied::getClassName());
+    M_CONNECTION_PTR->poolConnect(getClassName(), MusicSongsSummariziedWidget::getClassName());
 }
 
 MusicAlbumFoundTableWidget::~MusicAlbumFoundTableWidget()
@@ -51,9 +51,8 @@ void MusicAlbumFoundTableWidget::setQueryInput(MusicDownLoadQueryThreadAbstract 
     }
 }
 
-void MusicAlbumFoundTableWidget::resizeEvent(QResizeEvent *event)
+void MusicAlbumFoundTableWidget::resizeWindow()
 {
-    MusicQueryFoundTableWidget::resizeEvent(event);
     int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
     QHeaderView *headerview = horizontalHeader();
     headerview->resizeSection(1, (width - WINDOW_WIDTH_MIN)*0.9 + 449);
@@ -64,6 +63,12 @@ void MusicAlbumFoundTableWidget::resizeEvent(QResizeEvent *event)
         QTableWidgetItem *it = item(i, 1);
         it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, headerview->sectionSize(1) - 31));
     }
+}
+
+void MusicAlbumFoundTableWidget::resizeEvent(QResizeEvent *event)
+{
+    MusicQueryFoundTableWidget::resizeEvent(event);
+    resizeWindow();
 }
 
 
@@ -114,6 +119,11 @@ void MusicAlbumFoundWidget::setSongName(const QString &name)
     m_downloadThread->setQueryAllRecords(false);
     m_downloadThread->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery,
                                       MusicUtils::Core::artistName(name));
+}
+
+void MusicAlbumFoundWidget::resizeWindow()
+{
+    m_albumTableWidget->resizeWindow();
 }
 
 void MusicAlbumFoundWidget::queryAllFinished()
@@ -258,7 +268,7 @@ void MusicAlbumFoundWidget::queryAlbumFinished()
         MusicTime::timeSRand();
         QLabel *numberLabel = new QLabel(topRightWidget);
         numberLabel->setAlignment(Qt::AlignCenter);
-        numberLabel->setStyleSheet(MusicUIObject::MFontStyle06 + MusicUIObject::MColorStyle08);
+        numberLabel->setStyleSheet(MusicUIObject::MFontStyle06 + MusicUIObject::MColorStyle05);
         int number = qrand()%10;
         numberLabel->setText(QString("%1.%2").arg(number).arg(qrand()%10));
         topRightLayout->addWidget(numberLabel, 0, 0);

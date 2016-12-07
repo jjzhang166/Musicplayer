@@ -1,14 +1,10 @@
 #include "musicremotewidgetfordiamond.h"
-#include "musicsettingmanager.h"
 
 MusicRemoteWidgetForDiamond::MusicRemoteWidgetForDiamond(QWidget *parent)
     : MusicRemoteWidget(parent)
 {
     setGeometry(200, 200, 100, 100);
-    setAttribute(Qt::WA_TranslucentBackground);
-
-    QSize windowSize = M_SETTING_PTR->value(MusicSettingManager::ScreenSize).toSize();
-    move( windowSize.width() - width() - 150, height() + 70);
+    adjustPostion(this);
 
     QGridLayout* grid = new QGridLayout(this);
     m_mainWidget->setFixedSize(70, 70);
@@ -41,6 +37,6 @@ void MusicRemoteWidgetForDiamond::paintEvent(QPaintEvent* event)
     pts.setPoints(4, 8, 80 , 80, 8, 154, 81, 80, 154);
     QPainterPath path;
     path.addPolygon(pts);
-    painter.fillPath(path,QBrush(QColor(0, 0, 0, 50)));
+    painter.fillPath(path, QBrush(QColor(0, 0, 0, 50)));
     painter.end();
 }

@@ -1,10 +1,11 @@
 #include "musicabstractmoveresizewidget.h"
 #include "musicsettingmanager.h"
 
+#include <QPainter>
 #include <QMouseEvent>
 #include <QApplication>
 
-#define DISTANCE    5
+#define DISTANCE  5
 
 MusicAbstractMoveResizeWidget::MusicAbstractMoveResizeWidget(QWidget *parent)
     : QWidget(parent)
@@ -197,7 +198,7 @@ void MusicAbstractMoveResizeWidget::moveDirection()
                 yValue = m_struct.m_windowPos.y() + m_struct.m_pressedSize.height() - height();
                 hValue = maximumHeight();
             }
-            if(wValue <= minimumHeight())
+            if(hValue <= minimumHeight())
             {
                 yValue = m_struct.m_windowPos.y() + m_struct.m_pressedSize.height() - height();
                 hValue = minimumHeight();

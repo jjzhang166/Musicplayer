@@ -32,7 +32,7 @@ HEADERS  += \
 
 FORMS    += \
     $$PWD/musicApplication/musicapplication.ui \
-    $$PWD/musicLrcmanager/musiclrcartphotoupload.ui \
+    $$PWD/musicLrcmanager/musiclrcartphotouploadwidget.ui \
     $$PWD/musicLrcmanager/musiclrcmakerwidget.ui \
     $$PWD/musicLrcmanager/musiclrcerrorwidget.ui \
     $$PWD/musicLrcmanager/musiclrcsearchwidget.ui \
@@ -44,16 +44,18 @@ FORMS    += \
     $$PWD/musicToolsetswidget/musiclocalsongsmanagerwidget.ui \
     $$PWD/musicToolsetswidget/musictimerwidget.ui \
     $$PWD/musicToolsetswidget/musictransformwidget.ui \
-    $$PWD/musicToolsetswidget/musicnetworktestwidget.ui \
+    $$PWD/musicToolsetswidget/musicnetworkspeedtestwidget.ui \
+    $$PWD/musicToolsetswidget/musicnetworkconnectiontestwidget.ui \
     $$PWD/musicToolsetswidget/musicvolumegainwidget.ui \
     $$PWD/musicToolsetswidget/musicsoundtouchwidget.ui \
+    $$PWD/musicToolsetswidget/musicsongchecktoolswidget.ui \
     $$PWD/musicToolsetswidget/musicsongringtonemakerwidget.ui \
     $$PWD/musicToolswidget/musicwebentainradiowidget.ui \
     $$PWD/musicToolswidget/musicwebmusicradiowidget.ui \
     $$PWD/musicToolswidget/musicconnecttransferwidget.ui \
     $$PWD/musicToolswidget/musiccloudfilemanagerdialog.ui \
     $$PWD/musicUsermanager/musicuserdialog.ui \
-    $$PWD/musicUsermanager/musicusermanager.ui \
+    $$PWD/musicUsermanager/musicusermanagerdialog.ui \
     $$PWD/musicUsermanager/musicuserrecordwidget.ui \
     $$PWD/musicUsermanager/musicuserwindow.ui \
     $$PWD/musicWidget/musicbackgroundskindialog.ui \
@@ -64,6 +66,7 @@ FORMS    += \
     $$PWD/musicWidget/musicmessagebox.ui \
     $$PWD/musicWidget/musicsettingwidget.ui \
     $$PWD/musicWidget/musicsongsharingwidget.ui \
+    $$PWD/musicWidget/musicsonglistsharingwidget.ui \
     $$PWD/musicWidget/musicsongslistiteminfowidget.ui \
     $$PWD/musicWidget/musicsourceupdatewidget.ui \
     $$PWD/musicWidget/musicsoundeffectswidget.ui

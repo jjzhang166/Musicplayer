@@ -3,6 +3,7 @@
 #include "musicdownloadwidget.h"
 #include "musicsettingmanager.h"
 #include "musicleftareawidget.h"
+#include "musicapplication.h"
 #include "musiccoreutils.h"
 
 MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
@@ -20,7 +21,6 @@ MusicDownloadResetWidget::MusicDownloadResetWidget(QWidget *parent)
     connect(ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
     setAttribute(Qt::WA_DeleteOnClose);
-    setAttribute(Qt::WA_TranslucentBackground);
 
     ui->downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     ui->openDetailButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
@@ -71,7 +71,12 @@ void MusicDownloadResetWidget::openDetailInfo()
 
 void MusicDownloadResetWidget::openFileLocation()
 {
-    MusicUtils::Core::openUrl(M_SETTING_PTR->value(MusicSettingManager::DownloadMusicExistPathChoiced).toString(), true);
+    bool exist = false;
+    QString path = MusicApplication::instance()->musicDownloadContains(exist);
+    if(exist)
+    {
+        MusicUtils::Core::openUrl( path, true );
+    }
     close();
 }
 
@@ -91,7 +96,8 @@ void MusicDownloadMgmtWidget::setSongName(const QString &name, MusicDownLoadQuer
 {
     if(type == MusicDownLoadQueryThreadAbstract::MusicQuery)
     {
-        bool exist = M_SETTING_PTR->value(MusicSettingManager::DownloadMusicExistChoiced).toBool();
+        bool exist = false;
+        MusicApplication::instance()->musicDownloadContains(exist);
         if(exist)
         {
             MusicDownloadResetWidget *resetWidget = new MusicDownloadResetWidget(m_parentClass);
@@ -100,11 +106,11 @@ void MusicDownloadMgmtWidget::setSongName(const QString &name, MusicDownLoadQuer
             return;
         }
     }
+
     MusicDownloadWidget *download = new MusicDownloadWidget(m_parentClass);
     if(parent()->metaObject()->indexOfSlot("musicDownloadSongFinished()") != -1)
     {
-        connect(download, SIGNAL(dataDownloadChanged()), parent(),
-                          SLOT(musicDownloadSongFinished()));
+        connect(download, SIGNAL(dataDownloadChanged()), parent(), SLOT(musicDownloadSongFinished()));
     }
     download->setSongName(name, type);
     download->show();

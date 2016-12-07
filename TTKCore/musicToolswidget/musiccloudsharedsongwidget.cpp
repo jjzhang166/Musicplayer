@@ -6,7 +6,7 @@
 #include "musicnumberdefine.h"
 #include "musicmessagebox.h"
 #include "musicuiobject.h"
-#include "musicplayer.h"
+#include "musicformats.h"
 #include "musicnumberutils.h"
 #include "musiccoreutils.h"
 #include "musictoastlabel.h"
@@ -15,10 +15,11 @@
 #///QJson import
 #include "qjson/parser.h"
 
-#include <QPainter>
-#include <QBoxLayout>
-#include <QTimer>
 #include <QMenu>
+#include <QTimer>
+#include <QPainter>
+#include <QScrollBar>
+#include <QBoxLayout>
 #include <QFileDialog>
 #include <QPushButton>
 
@@ -36,8 +37,10 @@ MusicCloudSharedSongTableWidget::MusicCloudSharedSongTableWidget(QWidget *parent
     headerview->resizeSection(2, 35);
 
     m_uploading = false;
-    m_uploadFileWidget = nullptr;
+    m_openFileWidget = nullptr;
     m_currentUploadIndex = 0;
+
+    verticalScrollBar()->setStyleSheet(MusicUIObject::MScrollBarStyle03.arg(50));
 
     m_fileDialog = new MusicCloudFileManagerDialog(this);
     m_networkManager = new QNetworkAccessManager(this);
@@ -52,7 +55,7 @@ MusicCloudSharedSongTableWidget::MusicCloudSharedSongTableWidget(QWidget *parent
 MusicCloudSharedSongTableWidget::~MusicCloudSharedSongTableWidget()
 {
     delete m_fileDialog;
-    delete m_uploadFileWidget;
+    delete m_openFileWidget;
     delete m_qnListData;
     delete m_qnDeleteData;
     delete m_qnUploadData;
@@ -110,8 +113,8 @@ void MusicCloudSharedSongTableWidget::receiveDataFinshed(const QNDataItems &item
         return;
     }
 
-    delete m_uploadFileWidget;
-    m_uploadFileWidget = nullptr;
+    delete m_openFileWidget;
+    m_openFileWidget = nullptr;
 
     setRowCount(count);
     for(int i=0; i<count; ++i)
@@ -279,7 +282,7 @@ void MusicCloudSharedSongTableWidget::uploadFilesToServer()
     QString path =  QFileDialog::getExistingDirectory(this, QString(), "./");
     if(!path.isEmpty())
     {
-        foreach(const QFileInfo &file, MusicUtils::Core::findFile(path, MusicPlayer::supportFormatsFilterString()))
+        foreach(const QFileInfo &file, MusicUtils::Core::findFile(path, MusicFormats::supportFormatsFilterString()))
         {
             UploadData data;
             data.m_path = file.absoluteFilePath().trimmed();
@@ -355,15 +358,15 @@ void MusicCloudSharedSongTableWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void MusicCloudSharedSongTableWidget::createUploadFileWidget()
 {
-    if(m_uploadFileWidget == nullptr)
+    if(m_openFileWidget == nullptr)
     {
-        m_uploadFileWidget = new MusicOpenFileWidget(this);
-        connect(m_uploadFileWidget, SIGNAL(uploadFileClicked()), SLOT(uploadFileToServer()));
-        connect(m_uploadFileWidget, SIGNAL(uploadFilesClicked()), SLOT(uploadFilesToServer()));
-        m_uploadFileWidget->adjustRect(width(), height());
+        m_openFileWidget = new MusicOpenFileWidget(this);
+        connect(m_openFileWidget, SIGNAL(uploadFileClicked()), SLOT(uploadFileToServer()));
+        connect(m_openFileWidget, SIGNAL(uploadFilesClicked()), SLOT(uploadFilesToServer()));
+        m_openFileWidget->adjustRect(width(), height());
     }
-    m_uploadFileWidget->raise();
-    m_uploadFileWidget->show();
+    m_openFileWidget->raise();
+    m_openFileWidget->show();
 }
 
 void MusicCloudSharedSongTableWidget::startToUploadFile()
@@ -455,11 +458,7 @@ void MusicCloudSharedSongWidget::getKey()
         toast->setFontSize(15);
         toast->setFontMargin(20, 20);
         toast->setText(tr("Init Error!"));
-
-        QPoint globalPoint = mapToGlobal(QPoint(0, 0));
-        toast->move(globalPoint.x() + (width() - toast->width())/2,
-                    globalPoint.y() + (height() - toast->height())/2);
-        toast->show();
+        toast->popup(this);
     }
 }
 

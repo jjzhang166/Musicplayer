@@ -199,6 +199,10 @@ public Q_SLOTS:
     /*!
      * Test current network connection available.
      */
+    void checkNetworkConnection();
+    /*!
+     * Check current network connection available.
+     */
     void testNetworkConnectionStateChanged(const QString &name);
     /*!
      * Test current network connection available changed.
@@ -264,7 +268,7 @@ protected:
      * Set network proxy by type.
      */
 
-    Ui::MusicSettingWidget *ui;
+    Ui::MusicSettingWidget *m_ui;
     QList<QColor> m_lrcSelectedFg, m_lrcSelectedBg;
     QList<QColor> m_DlrcSelectedFg, m_DlrcSelectedBg;
 

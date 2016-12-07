@@ -14,6 +14,11 @@ include(../TTKVersion.pri)
 
 QT       += core gui xml qml quick multimedia
 
+UI_DIR = ./.build/ui/
+MOC_DIR = ./.build/moc/
+OBJECTS_DIR = ./.build/obj
+RCC_DIR = ./.build/rcc
+
 greaterThan(QT_MAJOR_VERSION, 4){
     QT += widgets
     include(../TTKExtra/Qt5/qmmp.pri)
@@ -40,6 +45,10 @@ win32:exists($$[QT_INSTALL_BINS]/lrelease.exe){
     system(for /r %i in (*.qm) do ren %i *.ln)
     system(for /r %i in (*.ln) do copy /y %i $$output)
     system(for /r %i in (*.ln) do move /y %i $$PWD/extra)
+}else{
+    output = $$OUT_PWD/bin/$$TTKMusicPlayer
+    output = $$replace(output, /, \\)
+    !exists($$output):system(md $$output)
 }
 
 TEMPLATE = app
@@ -56,7 +65,6 @@ INCLUDEPATH += \
     ../ \
     ../TTKCore/musicCore \
     ../TTKCore/musicCore/utils \
-    ../TTKCore/musicCore/utils \
     ../TTKCore/musicLrcmanager \
     ../TTKCore/musicNetwork \
     ../TTKCore/musicToolsetswidget/core \
@@ -69,8 +77,10 @@ HEADERS += \
     musicmobileglobaldefine.h \
     ../TTKCore/musicCore/utils/musiccoreutils.h \
     ../TTKCore/musicCore/utils/musicnumberutils.h \
+    ../TTKCore/musicCore/utils/musicstringutils.h \
     ../TTKCore/musicCore/musicsong.h \
     ../TTKCore/musicCore/musictime.h \
+    ../TTKCore/musicCore/musicformats.h \
     ../TTKCore/musicCore/musicsettingmanager.h \
     ../TTKCore/musicCore/musicabstractxml.h \
     ../TTKCore/musicCore/musiccryptographichash.h \
@@ -96,8 +106,10 @@ SOURCES += \
     musicapplication.cpp \
     ../TTKCore/musicCore/utils/musiccoreutils.cpp \
     ../TTKCore/musicCore/utils/musicnumberutils.cpp \
+    ../TTKCore/musicCore/utils/musicstringutils.cpp \
     ../TTKCore/musicCore/musicsong.cpp \
     ../TTKCore/musicCore/musictime.cpp \
+    ../TTKCore/musicCore/musicformats.cpp \
     ../TTKCore/musicCore/musicabstractxml.cpp \
     ../TTKCore/musicCore/musiccryptographichash.cpp \
     ../TTKCore/musicCore/musicconnectionpool.cpp \

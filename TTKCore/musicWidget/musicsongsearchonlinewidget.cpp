@@ -11,10 +11,10 @@
 #include "musicdatadownloadthread.h"
 #include "musicdownloadqueryfactory.h"
 #include "musicrightareawidget.h"
+#include "musicgiflabelwidget.h"
 
 #include <QDateTime>
 #include <QVBoxLayout>
-#include <QLabel>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QButtonGroup>
@@ -71,6 +71,8 @@ void MusicSongSearchOnlineTableWidget::startSearchQuery(const QString &text)
     {
         MusicQueryItemTableWidget::startSearchQuery(text);
     }
+    m_loadingLabel->show();
+    m_loadingLabel->start();
     m_downLoadManager->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, text);
 }
 
@@ -133,6 +135,24 @@ void MusicSongSearchOnlineTableWidget::setSearchQuality(const QString &quality)
 {
     MusicQueryItemTableWidget::startSearchQuery(QString());
     m_downLoadManager->setSearchQuality(quality);
+}
+
+void MusicSongSearchOnlineTableWidget::resizeWindow()
+{
+    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
+    QHeaderView *headerview = horizontalHeader();
+    headerview->resizeSection(1, (width - WINDOW_WIDTH_MIN)*0.4 + 315);
+    headerview->resizeSection(2, (width - WINDOW_WIDTH_MIN)*0.4 + 195);
+    headerview->resizeSection(3, (width - WINDOW_WIDTH_MIN)*0.2 + 60);
+
+    for(int i=0; i<rowCount(); ++i)
+    {
+        QTableWidgetItem *it = item(i, 1);
+        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 300));
+
+        it = item(i, 2);
+        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 180));
+    }
 }
 
 void MusicSongSearchOnlineTableWidget::listCellEntered(int row, int column)
@@ -243,21 +263,8 @@ void MusicSongSearchOnlineTableWidget::searchDataDwonloadFinished()
 
 void MusicSongSearchOnlineTableWidget::resizeEvent(QResizeEvent *event)
 {
-    QWidget::resizeEvent(event);
-    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
-    QHeaderView *headerview = horizontalHeader();
-    headerview->resizeSection(1, (width - WINDOW_WIDTH_MIN)*0.4 + 315);
-    headerview->resizeSection(2, (width - WINDOW_WIDTH_MIN)*0.4 + 195);
-    headerview->resizeSection(3, (width - WINDOW_WIDTH_MIN)*0.2 + 60);
-
-    for(int i=0; i<rowCount(); ++i)
-    {
-        QTableWidgetItem *it = item(i, 1);
-        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 300));
-
-        it = item(i, 2);
-        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, width - WINDOW_WIDTH_MIN + 180));
-    }
+    MusicQueryItemTableWidget::resizeEvent(event);
+    resizeWindow();
 }
 
 void MusicSongSearchOnlineTableWidget::contextMenuEvent(QContextMenuEvent *event)
@@ -323,7 +330,7 @@ MusicSongSearchOnlineWidget::MusicSongSearchOnlineWidget(QWidget *parent)
     boxLayout->setSpacing(0);
 
     QWidget *toolWidget = new QWidget(this);
-    toolWidget->setFixedHeight(65);
+    toolWidget->setFixedHeight(80);
     QPalette pal(palette());
     pal.setColor(QPalette::Background, Qt::white);
     toolWidget->setAutoFillBackground(true);
@@ -362,6 +369,12 @@ void MusicSongSearchOnlineWidget::researchQueryByQuality(const QString &name, co
 {
     m_searchTableWidget->setSearchQuality(quality);
     startSearchQuery(name);
+}
+
+void MusicSongSearchOnlineWidget::resizeWindow()
+{
+    setResizeLabelText( m_textLabel->toolTip() );
+    m_searchTableWidget->resizeWindow();
 }
 
 void MusicSongSearchOnlineWidget::buttonClicked(int index)
@@ -427,19 +440,19 @@ void MusicSongSearchOnlineWidget::createToolWidget(QWidget *widget)
     m_playButton = new QPushButton(tr("Play"), this);
     m_playButton->setIcon(QIcon(":/contextMenu/btn_play_white"));
     m_playButton->setIconSize(QSize(14, 14));
-    m_playButton->setFixedSize(70, 20);
+    m_playButton->setFixedSize(70, 25);
     m_playButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     m_playButton->setCursor(QCursor(Qt::PointingHandCursor));
     funcLayout->addWidget(m_playButton);
 
     QPushButton *addButton = new QPushButton(tr("Add"), this);
-    addButton->setFixedSize(70, 20);
+    addButton->setFixedSize(70, 25);
     addButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     addButton->setCursor(QCursor(Qt::PointingHandCursor));
     funcLayout->addWidget(addButton);
 
     QPushButton *downloadButton = new QPushButton(tr("Download"), this);
-    downloadButton->setFixedSize(70, 20);
+    downloadButton->setFixedSize(70, 25);
     downloadButton->setStyleSheet(MusicUIObject::MPushButtonStyle03);
     downloadButton->setCursor(QCursor(Qt::PointingHandCursor));
     funcLayout->addWidget(downloadButton);

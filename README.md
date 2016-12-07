@@ -5,7 +5,7 @@
 
 ![LOGO](https://github.com/Greedysky/Resource/blob/master/Screen/logo_pic.png?raw=true)
 
-### **|[About](https://github.com/Greedysky/TTKMusicplayer#usage)|[License](https://github.com/Greedysky/TTKMusicplayer#license)|[Download](https://github.com/Greedysky/TTKMusicplayer#download)|[Features](https://github.com/Greedysky/TTKMusicplayer#features)|[Mobile](https://github.com/Greedysky/TTKMusicplayer#mobile)|[Screenshots](https://github.com/Greedysky/TTKMusicplayer#screenshots)|[Copyright](https://github.com/Greedysky/TTKMusicplayer#copyright)|[Contribute](https://github.com/Greedysky/TTKMusicplayer#how-to-contribute)|**
+### **|[About](https://github.com/Greedysky/TTKMusicplayer#usage)|[License](https://github.com/Greedysky/TTKMusicplayer#license)|[Download](https://github.com/Greedysky/TTKMusicplayer#download)|[Features](https://github.com/Greedysky/TTKMusicplayer#features)|[Mobile](https://github.com/Greedysky/TTKMusicplayer#mobile)|[Screenshots](https://github.com/Greedysky/TTKMusicplayer#screenshots)|[Copyright](https://github.com/Greedysky/TTKMusicplayer#copyright)|[Contribute](https://github.com/Greedysky/TTKMusicplayer#how-to-contribute)|[Donate](https://github.com/Greedysky/TTKMusicplayer#donate)|**
 
 Usage
 ----
@@ -36,11 +36,17 @@ TTKMusicPlayer is free software licensed under the term of [Licence GPL v2](http
 
 Download
 ---
+Github: **<u>https://github.com/Greedysky/TTKMusicplayer</u>**
+
+Oschina: **<u>http://git.oschina.net/greedysky/Musicplayer</u>**
+
 Qmmp Player You Can See Here: **<u>http://qmmp.ylsoftware.com</u>**
 
 Qmmp Core Library URL: **<u>http://pan.baidu.com/s/1bv4iSY</u>**
 
 Executable Download URL: **<u>http://download.csdn.net/album/detail/3094</u>**
+
+Android Executable Download URL: **<u>http://pan.baidu.com/s/1eS9imHW</u>**
 
 KuGou Resource Download URL: **<u>https://github.com/Greedysky/KugouResource</u>**
 
@@ -140,3 +146,10 @@ How To Contribute
  * Create an issue if you have any problem when using project or you find a bug, etc.
  * What you can do: translation, write document, wiki, find or fix bugs, give your idea for this project etc.
  * If you want to join the project developed together, please send e-mail to me.
+
+Donate
+-------
+**捐赠: 愿意支持开发的可以支持下哦**
+
+![alipay](https://github.com/Greedysky/Resource/blob/master/Donate/1.jpg?raw=true)
+![wechat](https://github.com/Greedysky/Resource/blob/master/Donate/2.jpg?raw=true)

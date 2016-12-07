@@ -4,7 +4,8 @@
 #include "musiclocalsongsmanagerwidget.h"
 #include "musictransformwidget.h"
 #include "musicdesktopwallpaperwidget.h"
-#include "musicnetworktestwidget.h"
+#include "musicnetworkspeedtestwidget.h"
+#include "musicnetworkconnectiontestwidget.h"
 #include "musicconnecttransferwidget.h"
 #include "musicvolumegainwidget.h"
 #include "musicsoundtouchwidget.h"
@@ -20,13 +21,15 @@
 MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
     : QListWidget(parent)
 {
-    setAttribute(Qt::WA_TranslucentBackground, true);
-    setFrameShape(QFrame::NoFrame);//Set No Border
-    setStyleSheet(MusicUIObject::MScrollBarStyle01);
+    setAttribute(Qt::WA_TranslucentBackground);
+    setFrameShape(QFrame::NoFrame);
+    setStyleSheet(MusicUIObject::MScrollBarStyle02 + \
+                  MusicUIObject::MScrollBarStyle03.arg(50));
     setIconSize(QSize(60, 60));
     setViewMode(QListView::IconMode);
     setMovement(QListView::Static);
 
+    m_containItem = nullptr;
 #ifdef Q_OS_WIN
     setSpacing(17);
     addListWidgetItem();
@@ -41,6 +44,7 @@ MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
 
 MusicToolSetsWidget::~MusicToolSetsWidget()
 {
+    delete m_containItem;
     clearAllItems();
 }
 
@@ -95,6 +99,10 @@ void MusicToolSetsWidget::addListWidgetItem()
     addItem(item);
                      item = new QListWidgetItem(QIcon(":/tools/lb_speed")
                                                 ,tr("speed"), this);
+    item->setSizeHint(QSize(80, 90));
+    addItem(item);
+                     item = new QListWidgetItem(QIcon(":/tools/lb_connections")
+                                                ,tr("connections"), this);
     item->setSizeHint(QSize(80, 90));
     addItem(item);
                      item = new QListWidgetItem(QIcon(":/tools/lb_gain")
@@ -156,7 +164,10 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
         case 6:
             {
 #ifdef Q_OS_WIN
-                (new MusicDesktopWallpaperWidget(this))->show();
+                delete m_containItem;
+                MusicDesktopWallpaperWidget *w = new MusicDesktopWallpaperWidget(this);
+                m_containItem = w;
+                w->show();
 #endif
                 break;
             }
@@ -167,25 +178,36 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 8:
             {
-                (new MusicNetworkTestWidget(this))->show();
+                delete m_containItem;
+                MusicNetworkSpeedTestWidget *w = new MusicNetworkSpeedTestWidget(this);
+                m_containItem = w;
+                w->show();
                 break;
             }
         case 9:
             {
-                MusicVolumeGainWidget(this).exec();
+                delete m_containItem;
+                MusicNetworkConnectionTestWidget *w = new MusicNetworkConnectionTestWidget(this);
+                m_containItem = w;
+                w->show();
                 break;
             }
         case 10:
             {
-                MusicRightAreaWidget::instance()->musicFunctionClicked(MusicRightAreaWidget::IndentifyWidget);
+                MusicVolumeGainWidget(this).exec();
                 break;
             }
         case 11:
             {
-                MusicSoundTouchWidget(this).exec();
+                MusicRightAreaWidget::instance()->musicFunctionClicked(MusicRightAreaWidget::IndentifyWidget);
                 break;
             }
         case 12:
+            {
+                MusicSoundTouchWidget(this).exec();
+                break;
+            }
+        case 13:
             {
                 (new MusicGrabWidget)->show();
                 break;

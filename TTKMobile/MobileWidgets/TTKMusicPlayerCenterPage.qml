@@ -114,6 +114,7 @@ Item {
 
     onXChanged: {
         ttkMusicPlayerCenterSettingPage.visible = false;
+        ttkMusicPlayerCenterLrcPage.visible = false;
         ttkMusicSongDownloadPage.visible = false;
         ttkMusicSongSharedPage.visible = false;
     }
@@ -121,6 +122,10 @@ Item {
     TTKMusicPlayerCenterSettingPage {
         id: ttkMusicPlayerCenterSettingPage
         text: TTK_APP.mediaName( TTK_APP.mediaName() );
+    }
+
+    TTKMusicPlayerCenterLrcPage {
+        id: ttkMusicPlayerCenterLrcPage
     }
 
     TTKMusicSongDownloadPage {
@@ -291,7 +296,7 @@ Item {
                                 from: 0
                                 to: 360
                                 direction: RotationAnimation.Clockwise
-                                duration: 16000
+                                duration: 40000
                                 loops: Animation.Infinite
                             }
                         }
@@ -300,7 +305,7 @@ Item {
                     TTKMarquee {
                         id: musicPlayerShowLrc
                         Layout.alignment: Qt.AlignCenter
-                        width: ttkMusicPlayerCenter.width
+                        width: ttkMusicPlayerCenter.width - ttkGlobal.dpWidth(50)
                         height: ttkGlobal.dpHeight(70)
                         textColor: ttkTheme.color_green
                         color: ttkTheme.color_alpha_lv0
@@ -318,7 +323,7 @@ Item {
                 TTKMusicLyricPage {
                     id: musicLrcShow
                     anchors.centerIn: parent
-                    width: parent.width
+                    width: parent.width - ttkGlobal.dpHeight(50)
                     height: parent.height - ttkGlobal.dpHeight(40)
                     color: ttkTheme.color_alpha_lv0
 
@@ -346,7 +351,7 @@ Item {
                     height: ttkGlobal.dpHeight(40)
                     source: "qrc:/image/player_btn_lrc"
                     onPressed: {
-                        console.log("clicked");
+                        ttkMusicPlayerCenterLrcPage.visible = true;
                     }
                 }
             }

@@ -16,6 +16,7 @@
 #include "musicsoundeffectswidget.h"
 #include "musicnumberdefine.h"
 #include "musicapplication.h"
+#include "musictopareawidget.h"
 
 #include <QPropertyAnimation>
 #include <QApplication>
@@ -77,11 +78,12 @@ void MusicApplicationObject::getParameterSetting()
 
 void MusicApplicationObject::windowStartAnimationOpacity()
 {
-    m_animation = new QPropertyAnimation(MusicApplication::instance(), "windowOpacity");
+    m_animation = new QPropertyAnimation(MusicApplication::instance(), "windowOpacity", this);
     m_animation->setDuration(MT_S2MS);
     m_animation->setStartValue(0);
     m_animation->setEndValue(1);
     m_animation->start();
+    QTimer::singleShot(MT_S2MS, this, SLOT(musicBackgroundSliderStateChanged()));
 }
 
 void MusicApplicationObject::windowCloseAnimationOpacity()
@@ -239,6 +241,11 @@ void MusicApplicationObject::musicSetSoundEffect()
     MusicSoundEffectsWidget sound;
     sound.setParentConnect(this);
     sound.exec();
+}
+
+void MusicApplicationObject::musicBackgroundSliderStateChanged()
+{
+    MusicTopAreaWidget::instance()->musicBackgroundSliderStateChanged(false);
 }
 
 bool MusicApplicationObject::closeCurrentEqualizer()

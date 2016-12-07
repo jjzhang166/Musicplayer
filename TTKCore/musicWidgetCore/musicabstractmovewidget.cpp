@@ -3,11 +3,15 @@
 
 #include <QPainter>
 
+#define WIDTH  4
+#define HEIGHT 4
+
 MusicAbstractMoveWidget::MusicAbstractMoveWidget(QWidget *parent)
     : QWidget(parent)
 {
     ///Remove the title bar
     setWindowFlags( Qt::Window | Qt::FramelessWindowHint );
+    setAttribute(Qt::WA_TranslucentBackground);
 
     m_moveOption = false;
     m_leftButtonPress = false;

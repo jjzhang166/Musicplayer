@@ -1,16 +1,20 @@
 #include "musicsongstoolboxwidget.h"
 #include "musicsongstoolitemrenamedwidget.h"
+#include "musicsonglistsharingwidget.h"
 #include "musicclickedlabel.h"
 #include "musicuiobject.h"
+#include "musictinyuiobject.h"
 #include "musicsong.h"
 #include "musicwidgetutils.h"
 #include "musicapplication.h"
+#include "musictopareawidget.h"
 
 #include <QMenu>
 #include <QPainter>
 #include <QScrollBar>
 #include <QScrollArea>
 #include <QMouseEvent>
+#include <QPushButton>
 
 MusicSongsToolBoxTopWidget::MusicSongsToolBoxTopWidget(int index, const QString &text, QWidget *parent)
     : QWidget(parent)
@@ -28,10 +32,26 @@ MusicSongsToolBoxTopWidget::MusicSongsToolBoxTopWidget(int index, const QString 
     m_labelText->setText(text);
     MusicUtils::Widget::setLabelFontStyle(m_labelText, MusicObject::FT_Bold);
 
-    MusicClickedLabel *menuLabel = new MusicClickedLabel(this);
-    connect(menuLabel, SIGNAL(clicked()), SLOT(showMenu()));
-    menuLabel->setPixmap(QPixmap(":/tiny/btn_list_menu"));
-    menuLabel->setGeometry(290, 10, 16, 16);
+    QPushButton *enhanceButton = new QPushButton(this);
+    enhanceButton->setToolTip(tr("enhanceLossless"));
+    enhanceButton->setStyleSheet(MusicUIObject::MKGTinyBtnEnhanceLossless);
+    enhanceButton->setCursor(QCursor(Qt::PointingHandCursor));
+    enhanceButton->setGeometry(240, 10, 16, 16);
+
+    QPushButton *shareListButton = new QPushButton(this);
+    shareListButton->setToolTip(tr("shareList"));
+    shareListButton->setStyleSheet(MusicUIObject::MKGTinyBtnShare);
+    shareListButton->setCursor(QCursor(Qt::PointingHandCursor));
+    shareListButton->setGeometry(265, 10, 16, 16);
+    connect(shareListButton, SIGNAL(clicked()), SLOT(showShareListDialog()));
+
+    QPushButton *menuButton = new QPushButton(this);
+    menuButton->setToolTip(tr("listMenu"));
+    menuButton->setStyleSheet(MusicUIObject::MKGTinyBtnListMenu);
+    menuButton->setCursor(QCursor(Qt::PointingHandCursor));
+    menuButton->setGeometry(290, 10, 16, 16);
+    connect(menuButton, SIGNAL(clicked()), SLOT(showMenu()));
+
     topLayout->addWidget(m_labelIcon);
     topLayout->addWidget(m_labelText);
     topLayout->addStretch(1);
@@ -123,26 +143,32 @@ void MusicSongsToolBoxTopWidget::showMenu()
 {
     QMenu menu(this);
     menu.setStyleSheet(MusicUIObject::MMenuStyle02);
-    menu.addAction(tr("addNewItem"), parent(), SIGNAL(addNewRowItem()));
+    menu.addAction(tr("addNewItem"), this, SIGNAL(addNewRowItem()));
     menu.addSeparator();
 
     QMenu musicAddNewFiles(tr("addNewFiles"), &menu);
-    menu.addMenu(&musicAddNewFiles)->setEnabled(m_index != MUSIC_LOVEST_LIST && m_index != MUSIC_NETWORK_LIST);
+    bool disable = !(m_index == MUSIC_LOVEST_LIST || m_index == MUSIC_NETWORK_LIST || m_index == MUSIC_RECENT_LIST);
+    menu.addMenu(&musicAddNewFiles)->setEnabled(disable);
     musicAddNewFiles.addAction(tr("openOnlyFiles"), this, SLOT(addNewFiles()));
     musicAddNewFiles.addAction(tr("openOnlyDir"), this, SLOT(addNewDir()));
     menu.addAction(tr("playLater"));
     menu.addAction(tr("addToPlayList"));
     menu.addAction(tr("collectAll"));
-    menu.addAction(tr("exportList"), this, SLOT(exportSongsItemList()))
-                   ->setEnabled(m_index != MUSIC_LOVEST_LIST && m_index != MUSIC_NETWORK_LIST);
+    menu.addAction(tr("exportList"), this, SLOT(exportSongsItemList()));
     menu.addSeparator();
 
-    bool disable = !(m_index == MUSIC_NORMAL_LIST || m_index == MUSIC_LOVEST_LIST || m_index == MUSIC_NETWORK_LIST);
+    disable = !(m_index == MUSIC_NORMAL_LIST || m_index == MUSIC_LOVEST_LIST || m_index == MUSIC_NETWORK_LIST ||
+                m_index == MUSIC_RECENT_LIST);
     menu.addAction(tr("deleteAll"), this, SLOT(deleteRowItemAll()));
     menu.addAction(QIcon(":/contextMenu/btn_delete"), tr("deleteItem"), this, SLOT(deleteRowItem()))->setEnabled(disable);
     menu.addAction(tr("changItemName"), this, SLOT(changRowItemName()))->setEnabled(disable);
 
     menu.exec(QCursor::pos());
+}
+
+void MusicSongsToolBoxTopWidget::showShareListDialog()
+{
+    MusicSongListSharingWidget(this).exec();
 }
 
 void MusicSongsToolBoxTopWidget::mousePressEvent(QMouseEvent *event)
@@ -160,13 +186,51 @@ void MusicSongsToolBoxTopWidget::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     painter.setPen(QPen(QBrush(QColor(0, 0, 0)), 0.1, Qt::SolidLine));
+    painter.drawLine(0, 0, width(), 0);
     painter.drawLine(0, height(), width(), height());
 }
 
 void MusicSongsToolBoxTopWidget::contextMenuEvent(QContextMenuEvent *event)
 {
-    QWidget::contextMenuEvent(event);
+//    QWidget::contextMenuEvent(event);
+    Q_UNUSED(event);
     showMenu();
+}
+
+
+MusicSongsToolBoxMaskWidget::MusicSongsToolBoxMaskWidget(QWidget *parent)
+    : MusicSongsToolBoxTopWidget(-1, QString(), parent)
+{
+    move(0, 0);
+    setFixedWidth(320);
+
+    hide();
+}
+
+QString MusicSongsToolBoxMaskWidget::getClassName()
+{
+    return staticMetaObject.className();
+}
+
+void MusicSongsToolBoxMaskWidget::paintEvent(QPaintEvent *event)
+{
+    QWidget::paintEvent(event);
+    QPainter painter(this);
+
+    QLinearGradient gradient;
+    gradient.setStart(0, 32);
+    gradient.setFinalStop(0, height());
+    gradient.setColorAt(0.1, QColor(150, 150, 150, 150));
+    gradient.setColorAt(0.9, QColor(180, 180, 180, 50));
+
+    painter.setPen(Qt::transparent);
+    painter.setBrush(gradient);
+    painter.drawRect(0, 32, width(), height());
+
+    QPixmap pix(MusicTopAreaWidget::instance()->getBgSkinPixmap());
+    painter.drawPixmap(0, 0, width(), height() - 3, pix.copy(51, 51, width(), height() - 3));
+    painter.fillRect(QRect(0, 0, width(), height() - 3),
+                     QColor(255, 255, 255, 2.55*MusicTopAreaWidget::instance()->getListBgSkinAlpha()));
 }
 
 
@@ -175,6 +239,7 @@ MusicSongsToolBoxWidgetItem::MusicSongsToolBoxWidgetItem(int index, const QStrin
 {
     m_topWidget = new MusicSongsToolBoxTopWidget(index, text, this);
     connect(m_topWidget, SIGNAL(mousePressAt(int)), parent, SLOT(mousePressAt(int)));
+    connect(m_topWidget, SIGNAL(addNewRowItem()), SIGNAL(addNewRowItem()));
     connect(m_topWidget, SIGNAL(deleteRowItem(int)), SIGNAL(deleteRowItem(int)));
     connect(m_topWidget, SIGNAL(deleteRowItemAll(int)), SIGNAL(deleteRowItemAll(int)));
     connect(m_topWidget, SIGNAL(renameFinished(int,QString)), SIGNAL(changRowItemName(int,QString)));
@@ -276,23 +341,21 @@ MusicSongsToolBoxWidget::MusicSongsToolBoxWidget(QWidget *parent)
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    QWidget *contentsWidget = new QWidget(this);
-    m_layout = new QVBoxLayout(contentsWidget);
+    m_contentsWidget = new QWidget(this);
+    m_contentsWidget->setObjectName("contentsWidget");
+    m_contentsWidget->setStyleSheet(QString("#contentsWidget{%1}").arg(MusicUIObject::MBackgroundStyle01));
+
+    m_layout = new QVBoxLayout(m_contentsWidget);
     m_layout->setContentsMargins(0, 0, 0 ,0);
     m_layout->setSpacing(0);
-    contentsWidget->setLayout(m_layout);
+    m_contentsWidget->setLayout(m_layout);
 
     m_scrollArea = new QScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
+    m_scrollArea->setFrameShadow(QFrame::Plain);
     m_scrollArea->setAlignment(Qt::AlignLeft);
-    m_scrollArea->setWidget(contentsWidget);
-
-    contentsWidget->setObjectName("contentsWidget");
-    contentsWidget->setStyleSheet(QString("#contentsWidget{%1}").arg(MusicUIObject::MBackgroundStyle09));
-    QWidget *view = m_scrollArea->viewport();
-    view->setObjectName("viewport");
-    view->setStyleSheet(QString("#viewport{%1}").arg(MusicUIObject::MBackgroundStyle09));
+    m_scrollArea->setWidget(m_contentsWidget);
 
     mainLayout->addWidget(m_scrollArea);
     setLayout(mainLayout);
@@ -311,44 +374,6 @@ MusicSongsToolBoxWidget::~MusicSongsToolBoxWidget()
 QString MusicSongsToolBoxWidget::getClassName()
 {
     return staticMetaObject.className();
-}
-
-void MusicSongsToolBoxWidget::setCurrentIndex(int index)
-{
-    m_currentIndex = index;
-    for(int i=0; i<m_itemList.count(); ++i)
-    {
-        m_itemList[i].m_widgetItem->setItemExpand( i == index );
-    }
-}
-
-void MusicSongsToolBoxWidget::mousePressAt(int index)
-{
-    m_currentIndex = foundMappingIndex(index);
-    for(int i=0; i<m_itemList.count(); ++i)
-    {
-        bool hide = (i == m_currentIndex) ? !m_itemList[i].m_widgetItem->itemExpand() : false;
-        m_itemList[i].m_widgetItem->setItemExpand(hide);
-    }
-}
-
-void MusicSongsToolBoxWidget::resizeScrollIndex(int index) const
-{
-    QScrollBar *bar = m_scrollArea->verticalScrollBar();
-    if(bar)
-    {
-        bar->setSliderPosition(index);
-    }
-}
-
-int MusicSongsToolBoxWidget::currentIndex() const
-{
-    return m_currentIndex;
-}
-
-int MusicSongsToolBoxWidget::count() const
-{
-    return m_itemList.count();
 }
 
 void MusicSongsToolBoxWidget::addItem(QWidget *item, const QString &text)
@@ -429,6 +454,58 @@ QString MusicSongsToolBoxWidget::getTitle(QWidget *item) const
         }
     }
     return QString();
+}
+
+void MusicSongsToolBoxWidget::resizeScrollIndex(int index) const
+{
+    QScrollBar *bar = m_scrollArea->verticalScrollBar();
+    if(bar)
+    {
+        bar->setSliderPosition(index);
+    }
+}
+
+int MusicSongsToolBoxWidget::currentIndex() const
+{
+    return m_currentIndex;
+}
+
+int MusicSongsToolBoxWidget::count() const
+{
+    return m_itemList.count();
+}
+
+
+void MusicSongsToolBoxWidget::setCurrentIndex(int index)
+{
+    m_currentIndex = index;
+    for(int i=0; i<m_itemList.count(); ++i)
+    {
+        m_itemList[i].m_widgetItem->setItemExpand( i == index );
+    }
+}
+
+void MusicSongsToolBoxWidget::mousePressAt(int index)
+{
+    m_currentIndex = foundMappingIndex(index);
+    for(int i=0; i<m_itemList.count(); ++i)
+    {
+        bool hide = (i == m_currentIndex) ? !m_itemList[i].m_widgetItem->itemExpand() : false;
+        m_itemList[i].m_widgetItem->setItemExpand(hide);
+    }
+}
+
+void MusicSongsToolBoxWidget::setTransparent(int alpha)
+{
+    QString alphaStr = QString("background:rgba(255, 255, 255, %1)").arg(2.55*alpha);
+    QWidget *view = m_scrollArea->viewport();
+    view->setObjectName("viewport");
+    view->setStyleSheet(QString("#viewport{%1}").arg(alphaStr));
+
+    m_scrollArea->setStyleSheet(MusicUIObject::MScrollBarStyle01 +
+                                QString("QScrollBar{ background:rgba(255, 255, 255, %1);}").arg(alpha*2.55) + "\
+                                QScrollBar::handle:vertical{ background:#888888;} \
+                                QScrollBar::handle:vertical:hover{ background:#666666;}");
 }
 
 void MusicSongsToolBoxWidget::mousePressEvent(QMouseEvent *event)

@@ -47,6 +47,10 @@ public:
     /*!
      * Get current play music media path.
      */
+    QStringList mediaList() const;
+    /*!
+     * Get all music media path.
+     */
     int mediaCount() const;
     /*!
      * Get current medias count.
@@ -96,7 +100,7 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void setCurrentIndex(int index = -2);
+    void setCurrentIndex(int index = DEFAULT_INDEX_LEVEL1);
     /*!
      * Set current play index.
      */

@@ -141,6 +141,10 @@ Q_SIGNALS:
     /*!
      * Swap the current play index when user drag and drop.
      */
+    void musicListSongToLovestListAt(bool oper, int row);
+    /*!
+     * Add or remove music list song to lovest list by row.
+     */
 
 public Q_SLOTS:
     virtual void listCellEntered(int row, int column) override;
@@ -235,6 +239,14 @@ public Q_SLOTS:
     /*!
      * Open music song search query.
      */
+    void musicAddToPlayLater();
+    /*!
+     * Add music to played list and play later.
+     */
+    void musicAddToPlayedList();
+    /*!
+     * Add music to played list.
+     */
     void setItemRenameFinished(const QString &name);
     /*!
      * Rename item artist label is finised.
@@ -263,6 +275,11 @@ protected:
     /*!
      * Create context menu.
      */
+    void createMoreMenu(QMenu *menu);
+    /*!
+     * Create more menu information.
+     */
+
     QString getCurrentSongPath() const;
     /*!
      * Get current song path.
@@ -287,7 +304,7 @@ protected:
 
     QTimer m_timerShow, m_timerStay;
     MusicSongs *m_musicSongs;
-    MusicOpenFileWidget *m_uploadFileWidget;
+    MusicOpenFileWidget *m_openFileWidget;
     MusicSongsListItemInfoWidget *m_musicSongsInfoWidget;
     MusicSongsListPlayWidget *m_musicSongsPlayWidget;
     MusicSongsListFunctionWidget *m_floatWidget;

@@ -23,11 +23,14 @@ Item {
         for(var i=0; i<names.length; ++i) {
             var info = {
                 title: names[i],
-                artist: artists[i]
+                artist: artists[i],
+                playCount: TTK_APP.mediaPlayCount(i)
             }
             playlistModel.append(info);
+
         }
         itemListView.currentIndex = TTK_APP.getCurrentIndex();
+        updateItemListView();
     }
 
     property int functionClickedIndex: -1
@@ -35,15 +38,35 @@ Item {
     function removeItemFromList() {
         playlistModel.remove(functionClickedIndex);
         TTK_APP.removeMusicSongs(functionClickedIndex);
+        updateItemListView();
+    }
+
+    function updateItemListView() {
+        if(playlistModel.count === 0) {
+            noCreateItem.visible = true;
+            itemListView.visible = false;
+        }else {
+            noCreateItem.visible = false;
+            itemListView.visible = true;
+        }
     }
 
     Connections {
         target: TTK_APP
         onCurrentIndexChanged: {
-            itemListView.currentIndex = TTK_APP.getCurrentIndex();
+            var index = TTK_APP.getCurrentIndex();
+            itemListView.currentIndex = index;
+            if(index !== -1) {
+                playlistModel.set(index, {
+                    title: TTK_APP.mediaNames(ttkTheme.music_recent_list)[index],
+                    artist: TTK_APP.mediaArtists(ttkTheme.music_recent_list)[index],
+                    playCount: TTK_APP.mediaPlayCount(index)
+                });
+            }
         }
         onRemoveItemFromPlayerCenter: {
             playlistModel.remove(index);
+            updateItemListView();
         }
     }
 
@@ -102,10 +125,26 @@ Item {
             height: ttkMainStackView.height - mainMenubar.height
             color: ttkTheme.color_white
 
+            TTKMainFunctionItem {
+                id: noCreateItem
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                source: "qrc:/image/ic_start_recognize_bottom"
+                mainTitle: qsTr("空空如也")
+                subTitle: qsTr("搜索更多的歌曲吧")
+                mainTitleSize: ttkGlobal.dpHeight(150)/8
+            }
+
             ListView {
                 id: itemListView
                 anchors.fill: parent
                 clip: true
+
+                onFlickingVerticallyChanged: {
+                    locationButton.visible = true;
+                    timer.stop();
+                    timer.start();
+                }
 
                 delegate: Component {
                     Rectangle {
@@ -141,7 +180,8 @@ Item {
                         Text {
                             id: titleArea
                             text: title
-                            width: ttkMusicRecentListsPage.width - iconArea.width - ttkGlobal.dpHeight(60)
+                            width: ttkMusicRecentListsPage.width - iconArea.width - ttkGlobal.dpHeight(60) -
+                                   playCountArea.width - playCountTextArea.width
                             anchors {
                                 top: parent.top
                                 topMargin: ttkGlobal.dpHeight(10)
@@ -161,9 +201,43 @@ Item {
                                 top: titleArea.bottom
                                 topMargin: ttkGlobal.dpHeight(5)
                                 left: parent.left
-                                leftMargin: ttkGlobal.dpHeight(20)
+                                leftMargin: ttkGlobal.dpWidth(20)
                             }
                             source: "qrc:/image/ic_playlist_normal"
+                        }
+
+                        Rectangle {
+                            height: wrapper.height
+                            width: playCountArea.width
+                            anchors {
+                                top: parent.top
+                                topMargin: ttkGlobal.dpHeight(10)
+                                right: moreFuncArea.left
+                                rightMargin: ttkGlobal.dpWidth(playCountTextArea.width)
+                            }
+
+                            Image {
+                                id: playCountArea
+                                width: parent.height*2/3
+                                height: parent.height*2/3
+                                anchors {
+                                    top: parent.top
+                                    topMargin: ttkGlobal.dpHeight(5)
+                                }
+                                source: "qrc:/image/icon_headphone_small_light"
+                            }
+
+                            Text {
+                                id: playCountTextArea
+                                anchors {
+                                    left: playCountArea.right
+                                    top: parent.top
+                                    topMargin: ttkGlobal.dpHeight(20)
+                                }
+                                verticalAlignment: Qt.AlignVCenter
+                                color: ttkTheme.color_gray
+                                text: playCount
+                            }
                         }
 
                         TTKImageButton {
@@ -206,6 +280,49 @@ Item {
 
                 model: ListModel {
                     id: playlistModel
+                }
+            }
+        }
+
+        Timer {
+            id: timer
+            interval: 3000
+            repeat: false
+
+            onTriggered: {
+                disappearAnimation.start();
+            }
+        }
+
+        PropertyAnimation {
+            id: disappearAnimation
+            target: locationButton
+            property: "opacity"
+            duration: 1000
+            from: 1
+            to: 0
+            onStopped: {
+                locationButton.visible = false;
+                locationButton.opacity = 1;
+            }
+        }
+
+        TTKImageButton {
+            id: locationButton
+            visible: false
+            source: "qrc:/image/anchor_in_cell_point"
+            Layout.preferredWidth: ttkGlobal.dpWidth(50)
+            Layout.preferredHeight: ttkGlobal.dpHeight(50)
+            anchors {
+                right: parent.right
+                rightMargin: ttkGlobal.dpWidth(50)
+                bottom: parent.bottom
+                bottomMargin: ttkGlobal.dpHeight(10)
+            }
+            onPressed: {
+                var delta = ttkGlobal.dpHeight(70)*itemListView.currentIndex;
+                if(delta >= 0) {
+                    itemListView.contentY = delta;
                 }
             }
         }

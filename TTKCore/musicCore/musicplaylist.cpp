@@ -35,8 +35,12 @@ QString MusicPlaylist::currentMediaString() const
     {
         return QString();
     }
-    return m_mediaList.isEmpty() ? QString()
-                                 : m_mediaList[m_currentIndex];
+    return m_mediaList.isEmpty() ? QString() : m_mediaList[m_currentIndex];
+}
+
+QStringList MusicPlaylist::mediaList() const
+{
+    return m_mediaList;
 }
 
 int MusicPlaylist::mediaCount() const
@@ -129,7 +133,7 @@ bool MusicPlaylist::removeMedia(int start, int end)
 
 void MusicPlaylist::setCurrentIndex(int index)
 {
-    if(index == -2)
+    if(index == DEFAULT_INDEX_LEVEL1)
     {
         switch(m_playbackMode)
         {

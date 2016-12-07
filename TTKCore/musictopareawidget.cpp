@@ -21,6 +21,7 @@ MusicTopAreaWidget::MusicTopAreaWidget(QWidget *parent)
 {
     m_instance = this;
     m_musicUserWindow = new MusicUserWindow(this);
+    m_pictureCarouselTimer.setInterval(10*MT_S2MS);
     connect(&m_pictureCarouselTimer, SIGNAL(timeout()), SLOT(musicBackgroundChanged()));
     connect(M_BACKGROUND_PTR, SIGNAL(userSelectIndexChanged()), SLOT(musicBackgroundChanged()));
 
@@ -48,7 +49,9 @@ MusicTopAreaWidget *MusicTopAreaWidget::instance()
 void MusicTopAreaWidget::setupUi(Ui::MusicApplication* ui)
 {
     m_ui = ui;
+    ui->background->setNoAnimation(true);
     ui->userWindow->addWidget(m_musicUserWindow);
+
     ui->musicSongSearchLine->initWidget(MusicApplication::instance());
     ui->musicSongSearchLine->setStyleSheet(MusicUIObject::MLineEditStyle03);
     ui->musicSongSearchLine->setText(tr("please input search text"));
@@ -92,6 +95,11 @@ void MusicTopAreaWidget::setParameters(const QString &skin, int alpha, int alpha
     m_currentBgSkin = skin;
     m_listAlpha = alphaR;
     musicBgTransparentChanged(m_alpha = alpha);
+}
+
+QPixmap MusicTopAreaWidget::getBgSkinPixmap() const
+{
+    return m_ui->background->getRendererPixmap();
 }
 
 int MusicTopAreaWidget::getListBgSkinAlpha()
@@ -197,13 +205,18 @@ void MusicTopAreaWidget::musicBackgroundChanged()
     !art_path.isEmpty() ? drawWindowBackgroundRectString(art_path) : drawWindowBackgroundRect();
 }
 
+void MusicTopAreaWidget::musicBackgroundSliderStateChanged(bool state)
+{
+    m_ui->background->setNoAnimation(state);
+}
+
 void MusicTopAreaWidget::musicBgThemeDownloadFinished()
 {
     if(m_ui->surfaceStackedWidget->currentIndex() == 1  &&
        m_ui->musiclrccontainerforinline->artBackgroundIsShow() )
     {
         musicBackgroundChanged();
-        m_pictureCarouselTimer.start(5*MT_S2MS);
+        m_pictureCarouselTimer.start();
     }
     else
     {
@@ -219,7 +232,7 @@ void MusicTopAreaWidget::musicBgThemeChangedByResize()
         m_pictureCarouselTimer.stop();
         QString art_path = M_BACKGROUND_PTR->getArtPhotoPathByIndex();
         !art_path.isEmpty() ? drawWindowBackgroundRectString(art_path) : drawWindowBackgroundRect();
-        m_pictureCarouselTimer.start(5*MT_S2MS);
+        m_pictureCarouselTimer.start();
     }
     else
     {

@@ -1,6 +1,6 @@
 #include "musiclrccontainerforinline.h"
 #include "musiclrcmanagerforinline.h"
-#include "musiclrcartphotoupload.h"
+#include "musiclrcartphotouploadwidget.h"
 #include "musiclrcfloatwidget.h"
 #include "musiclrclocallinkwidget.h"
 #include "musicuiobject.h"
@@ -185,6 +185,18 @@ int MusicLrcContainerForInline::getLrcSize() const
     return M_SETTING_PTR->value(MusicSettingManager::LrcSizeChoiced).toInt();
 }
 
+void MusicLrcContainerForInline::resizeWindow()
+{
+    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
+    int height = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().height();
+
+    if(m_lrcDisplayAll)
+    {
+        width += 320;
+    }
+    resizeWidth(width - WINDOW_WIDTH_MIN, height - WINDOW_HEIGHT_MIN);
+}
+
 void MusicLrcContainerForInline::lrcSizeChanged(QAction *action) const
 {
     switch(action->data().toInt())
@@ -240,7 +252,7 @@ void MusicLrcContainerForInline::theArtBgChanged()
 
 void MusicLrcContainerForInline::theArtBgUploaded()
 {
-    MusicLrcArtPhotoUpload(this).exec();
+    MusicLrcArtPhotoUploadWidget(this).exec();
     m_showArtBackground = true;
     emit theArtBgHasChanged();
 }
@@ -404,14 +416,7 @@ void MusicLrcContainerForInline::paintEvent(QPaintEvent *)
 void MusicLrcContainerForInline::resizeEvent(QResizeEvent *event)
 {
     MusicLrcContainer::resizeEvent(event);
-    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
-    int height = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().height();
-
-    if(m_lrcDisplayAll)
-    {
-        width += 320;
-    }
-    resizeWidth(width - WINDOW_WIDTH_MIN, height - WINDOW_HEIGHT_MIN);
+    resizeWindow();
 }
 
 void MusicLrcContainerForInline::mouseMoveEvent(QMouseEvent *event)

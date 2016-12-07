@@ -6,12 +6,26 @@
  * works are strictly forbiden.
    =================================================*/
 
-import QtQuick 2.4
+import QtQuick 2.5
 
 Rectangle {
     id: ttkMusicLyricPage
 
     property alias currentIndex: lyricView.currentIndex
+    property color centerItemColor: ttkTheme.color_green
+    property int allItemSize: 26
+
+    Component.onCompleted: {
+        TTK_LRC.initParameter();
+    }
+
+    Connections {
+        target: TTK_LRC
+        onCurrentParameterChanged: {
+            centerItemColor = color;
+            allItemSize = size;
+        }
+    }
 
     ListView {
         id: lyricView
@@ -42,8 +56,9 @@ Rectangle {
                 width: lyricView.width
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
-                color: parent.ListView.isCurrentItem ? ttkTheme.color_green : ttkTheme.color_alpha_lv6
-                font.pixelSize: parent.ListView.isCurrentItem ? ttkGlobal.dpHeight(26) : ttkGlobal.dpHeight(22)
+                color: parent.ListView.isCurrentItem ? centerItemColor : ttkTheme.color_alpha_lv6
+                font.pixelSize: parent.ListView.isCurrentItem ? ttkGlobal.dpHeight(allItemSize)
+                                                              : ttkGlobal.dpHeight(allItemSize - 4)
                 font.bold: parent.ListView.isCurrentItem
                 font.family: qsTr("楷体")
                 text: textLine

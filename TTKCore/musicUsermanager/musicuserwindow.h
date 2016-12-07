@@ -13,7 +13,7 @@
 #include "musicglobaldefine.h"
 
 class MusicUserDialog;
-class MusicUserManager;
+class MusicUserManagerDialog;
 
 namespace Ui {
 class MusicUserWindow;
@@ -69,8 +69,8 @@ protected:
      * Disconnect to database.
      */
 
-    Ui::MusicUserWindow *ui;
-    MusicUserManager *m_userManager;
+    Ui::MusicUserWindow *m_ui;
+    MusicUserManagerDialog *m_userManager;
 
 };
 
