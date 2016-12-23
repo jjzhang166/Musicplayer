@@ -1,10 +1,6 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-08-08T23:19:41
-#
 # =================================================
 # * This file is part of the TTK Music Player project
-# * Copyright (c) 2014 - 2016 Greedysky Studio
+# * Copyright (c) 2015 - 2017 Greedysky Studio
 # * All rights reserved!
 # * Redistribution and use of the source code or any derivative
 # * works are strictly forbiden.
@@ -15,7 +11,12 @@ equals(QT_MAJOR_VERSION, 5){
 QT       += widgets
 }
 
-QMAKE_CXXFLAGS += -std=c++11
+win32:msvc{
+    CONFIG +=c++11
+}else{
+    QMAKE_CXXFLAGS += -std=c++11
+}
+
 INCLUDEPATH += $$PWD/../
 
 TARGET = TTKTest

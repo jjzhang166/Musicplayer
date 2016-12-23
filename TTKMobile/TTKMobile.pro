@@ -1,10 +1,6 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-08-08T23:19:41
-#
 # =================================================
 # * This file is part of the TTK Music Player project
-# * Copyright (c) 2014 - 2016 Greedysky Studio
+# * Copyright (c) 2015 - 2017 Greedysky Studio
 # * All rights reserved!
 # * Redistribution and use of the source code or any derivative
 # * works are strictly forbiden.
@@ -14,8 +10,8 @@ include(../TTKVersion.pri)
 
 QT       += core gui xml qml quick multimedia
 
-UI_DIR = ./.build/ui/
-MOC_DIR = ./.build/moc/
+UI_DIR = ./.build/ui
+MOC_DIR = ./.build/moc
 OBJECTS_DIR = ./.build/obj
 RCC_DIR = ./.build/rcc
 
@@ -26,6 +22,13 @@ greaterThan(QT_MAJOR_VERSION, 4){
 }
 
 TRANSLATIONS += TTKMobile.ts
+#lupdate_only
+#{
+#    SOURCES +=  \
+#        MobileWidgets/* \
+#        MobileWidgets/Core/*
+#}
+
 ##update translation
 win32:exists($$[QT_INSTALL_BINS]/lrelease.exe){
     LRELEASE_EXECUTABLE = $$[QT_INSTALL_BINS]/lrelease.exe

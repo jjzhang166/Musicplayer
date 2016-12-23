@@ -1,10 +1,6 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-08-08T23:19:41
-#
 # =================================================
 # * This file is part of the TTK Music Player project
-# * Copyright (c) 2014 - 2016 Greedysky Studio
+# * Copyright (c) 2015 - 2017 Greedysky Studio
 # * All rights reserved!
 # * Redistribution and use of the source code or any derivative
 # * works are strictly forbiden.
@@ -22,8 +18,8 @@ QT       += widgets multimediawidgets
 include(TTKExtra/Qt5/qmmp.pri)
 }
 
-UI_DIR = ./.build/ui/
-MOC_DIR = ./.build/moc/
+UI_DIR = ./.build/ui
+MOC_DIR = ./.build/moc
 OBJECTS_DIR = ./.build/obj
 RCC_DIR = ./.build/rcc
 
@@ -42,6 +38,7 @@ win32{
         greaterThan(QT_VER_MINOR, 1):QT  += winextras
         msvc{
             LIBS += -L../bin/$$TTKMusicPlayer -lqmmp1 -lMusicUi -lMusicExtras -lzlib
+            CONFIG +=c++11
             !contains(QMAKE_TARGET.arch, x86_64){
                  #support on windows XP
                  QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01

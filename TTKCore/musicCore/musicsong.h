@@ -3,7 +3,7 @@
 
 /* =================================================
  * This file is part of the TTK Music Player project
- * Copyright (c) 2014 - 2016 Greedysky Studio
+ * Copyright (c) 2015 - 2017 Greedysky Studio
  * All rights reserved!
  * Redistribution and use of the source code or any derivative
  * works are strictly forbiden.
@@ -158,6 +158,11 @@ typedef struct MUSIC_CORE_EXPORT MusicSongItem
     {
         m_itemIndex = -1;
         m_itemObject = nullptr;
+    }
+
+    inline bool operator<(const MusicSongItem &other) const
+    {
+        return m_itemIndex < other.m_itemIndex;
     }
 }MusicSongItem;
 TTK_DECLARE_LISTS(MusicSongItem)

@@ -302,7 +302,7 @@ void MusicLrcContainerForDesktop::resizeLrcSizeArea(bool resize)
 void MusicLrcContainerForDesktop::mousePressEvent(QMouseEvent *event)
 {
     MusicLrcContainer::mousePressEvent(event);
-    if(!m_windowLocked && event->button() == Qt::LeftButton )
+    if(!m_windowLocked && event->button() == Qt::LeftButton)
     {
         m_offset = event->globalPos() - frameGeometry().topLeft();
     }
@@ -311,7 +311,7 @@ void MusicLrcContainerForDesktop::mousePressEvent(QMouseEvent *event)
 void MusicLrcContainerForDesktop::mouseMoveEvent(QMouseEvent *event)
 {
     MusicLrcContainer::mouseMoveEvent(event);
-    if(!m_windowLocked && (event->buttons() & Qt::LeftButton) )
+    if(!m_windowLocked && (event->buttons() & Qt::LeftButton))
     {
         setCursor(Qt::CrossCursor);
         move(event->globalPos() - m_offset);

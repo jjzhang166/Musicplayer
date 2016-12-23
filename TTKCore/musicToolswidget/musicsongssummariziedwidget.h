@@ -3,7 +3,7 @@
 
 /* =================================================
  * This file is part of the TTK Music Player project
- * Copyright (c) 2014 - 2016 Greedysky Studio
+ * Copyright (c) 2015 - 2017 Greedysky Studio
  * All rights reserved!
  * Redistribution and use of the source code or any derivative
  * works are strictly forbiden.
@@ -16,6 +16,7 @@
 class QTableWidgetItem;
 class MusicSongsListWidget;
 class MusicSongCheckToolsWidget;
+class MusicSongsListFunctionWidget;
 
 /*! @brief The class of the songs summarizied widget.
  * @author Greedysky <greedysky@163.com>
@@ -34,7 +35,7 @@ public:
     /*!
      * Get class object name.
      */
-    void addMusicLists(const MusicSongItems &names);
+    bool addMusicLists(const MusicSongItems &names);
     /*!
      * Add music datas into container.
      */
@@ -148,6 +149,10 @@ public Q_SLOTS:
     /*!
      * Add new music dir to list.
      */
+    void swapDragItemIndex(int before, int after);
+    /*!
+     * Swap the item index by drag adn drop.
+     */
     void musicImportSongsOnlyFile();
     /*!
      * Import music songs by file.
@@ -214,11 +219,19 @@ public Q_SLOTS:
     /*!
      * Update current artist when it download finished.
      */
+    void showFloatWidget();
+    /*!
+     * Show the float function widget.
+     */
 
 private Q_SLOTS:
     void sliderValueChanaged(int value);
     /*!
      * Current vertical slider value chanaged.
+     */
+    void deleteFloatWidget();
+    /*!
+     * Delete the float function widget.
      */
 
 protected:
@@ -242,6 +255,7 @@ protected:
     /*!
      * Set item title.
      */
+    virtual void resizeEvent(QResizeEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
      * Override the widget event.
@@ -254,6 +268,7 @@ protected:
     MusicSongsToolBoxMaskWidget *m_listMaskWidget;
     MusicObject::MIntsListMap m_searchfileListCache;
     MusicSongCheckToolsWidget *m_songCheckToolsWidget;
+    MusicSongsListFunctionWidget *m_floatWidget;
 
 };
 

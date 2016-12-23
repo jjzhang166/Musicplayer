@@ -3,7 +3,7 @@
 
 /* =================================================
  * This file is part of the TTK Music Player project
- * Copyright (c) 2014 - 2016 Greedysky Studio
+ * Copyright (c) 2015 - 2017 Greedysky Studio
  * All rights reserved!
  * Redistribution and use of the source code or any derivative
  * works are strictly forbiden.
@@ -18,7 +18,6 @@ class QPropertyAnimation;
 class MusicOpenFileWidget;
 class MusicSongsListPlayWidget;
 class MusicSongsListItemInfoWidget;
-class MusicSongsListFunctionWidget;
 
 /*! @brief The class of the songs list widget.
  * @author Greedysky <greedysky@163.com>
@@ -145,6 +144,10 @@ Q_SIGNALS:
     /*!
      * Add or remove music list song to lovest list by row.
      */
+    void showFloatWidget();
+    /*!
+     * Show the float function widget.
+     */
 
 public Q_SLOTS:
     virtual void listCellEntered(int row, int column) override;
@@ -251,10 +254,6 @@ public Q_SLOTS:
     /*!
      * Rename item artist label is finised.
      */
-    void deleteFloatWidget();
-    /*!
-     * Delete the float function widget.
-     */
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
@@ -307,7 +306,6 @@ protected:
     MusicOpenFileWidget *m_openFileWidget;
     MusicSongsListItemInfoWidget *m_musicSongsInfoWidget;
     MusicSongsListPlayWidget *m_musicSongsPlayWidget;
-    MusicSongsListFunctionWidget *m_floatWidget;
 
     bool m_leftButtonPressed;
     bool m_renameActived, m_deleteItemWithFile;

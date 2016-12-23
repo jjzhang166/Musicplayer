@@ -1,4 +1,5 @@
 #include "musicsongssummariziedwidget.h"
+#include "musicsongslistfunctionwidget.h"
 #include "musicsongslistwidget.h"
 #include "musicsettingmanager.h"
 #include "musicuiobject.h"
@@ -16,8 +17,9 @@
 #include <QScrollBar>
 #include <QScrollArea>
 
-#define  ITEM_MIN_COUNT     4
-#define  ITEM_MAX_COUNT     10
+#define  ITEM_MIN_COUNT             4
+#define  ITEM_MAX_COUNT             10
+#define  RECENT_ITEM_MAX_COUNT      50
 
 MusicSongsSummariziedWidget::MusicSongsSummariziedWidget(QWidget *parent)
     : MusicSongsToolBoxWidget(parent)
@@ -36,9 +38,13 @@ MusicSongsSummariziedWidget::MusicSongsSummariziedWidget(QWidget *parent)
     connect(m_listMaskWidget, SIGNAL(renameFinished(int,QString)), SLOT(changRowItemName(int,QString)));
     connect(m_listMaskWidget, SIGNAL(addNewFiles(int)), SLOT(addNewFiles(int)));
     connect(m_listMaskWidget, SIGNAL(addNewDir(int)), SLOT(addNewDir(int)));
+    connect(m_listMaskWidget, SIGNAL(swapDragItemIndex(int,int)), SLOT(swapDragItemIndex(int,int)));
+
     connect(m_scrollArea->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(sliderValueChanaged(int)));
 
     m_songCheckToolsWidget = nullptr;
+    m_floatWidget = nullptr;
+
     M_CONNECTION_PTR->setValue(getClassName(), this);
     M_CONNECTION_PTR->poolConnect(MusicSongSearchOnlineTableWidget::getClassName(), getClassName());
 }
@@ -47,6 +53,7 @@ MusicSongsSummariziedWidget::~MusicSongsSummariziedWidget()
 {
     delete m_listMaskWidget;
     delete m_songCheckToolsWidget;
+    delete m_floatWidget;
     M_CONNECTION_PTR->removeValue(getClassName());
     clearAllLists();
 }
@@ -56,24 +63,64 @@ QString MusicSongsSummariziedWidget::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicSongsSummariziedWidget::addMusicLists(const MusicSongItems &names)
+bool MusicSongsSummariziedWidget::addMusicLists(const MusicSongItems &names)
 {
-    if(names.count() < 3)
+    MusicObject::MIntSet inDeed;
+    inDeed << MUSIC_NORMAL_LIST << MUSIC_LOVEST_LIST << MUSIC_NETWORK_LIST << MUSIC_RECENT_LIST;
+    foreach(const MusicSongItem &item, names)
     {
-        //if less than three count, add default items
-        addNewRowItem( tr("myDefaultPlayItem") );
-        addNewRowItem( tr("myLoveSongItem") );
-        addNewRowItem( tr("myNetSongItem") );
-        addNewRowItem( tr("myRecentSongItem") );
+        inDeed.remove(item.m_itemIndex);
+    }
+    //////////////////////////////////////////////////////////////////////
+    if(!inDeed.isEmpty())
+    {
+        //if less than four count(0, 1, 2, 3), find and add default items
+        m_songItems << names;
+        foreach(const int item, inDeed)
+        {
+            MusicSongItem songItem;
+            switch(item)
+            {
+                case MUSIC_NORMAL_LIST:
+                    {
+                        songItem.m_itemIndex = item;
+                        songItem.m_itemName = tr("myDefaultPlayItem");
+                        break;
+                    }
+                case MUSIC_LOVEST_LIST:
+                    {
+                        songItem.m_itemIndex = item;
+                        songItem.m_itemName = tr("myLoveSongItem");
+                        break;
+                    }
+                case MUSIC_NETWORK_LIST:
+                    {
+                        songItem.m_itemIndex = item;
+                        songItem.m_itemName = tr("myNetSongItem");
+                        break;
+                    }
+                case MUSIC_RECENT_LIST:
+                    {
+                        songItem.m_itemIndex = item;
+                        songItem.m_itemName = tr("myRecentSongItem");
+                        break;
+                    }
+            }
+            m_songItems << songItem;
+        }
+        qSort(m_songItems);
     }
     else
     {
         m_songItems = names;
-        for(int i=0; i<names.count(); ++i)
-        {
-            createWidgetItem(&m_songItems[i]);
-        }
     }
+
+    for(int i=0; i<m_songItems.count(); ++i)
+    {
+        createWidgetItem(&m_songItems[i]);
+    }
+
+    return inDeed.isEmpty();
 }
 
 void MusicSongsSummariziedWidget::appendMusicLists(const MusicSongItems &names)
@@ -374,6 +421,44 @@ void MusicSongsSummariziedWidget::addNewDir(int index)
     m_currentImportIndex = MUSIC_NORMAL_LIST;
 }
 
+void MusicSongsSummariziedWidget::swapDragItemIndex(int before, int after)
+{
+    before = foundMappingIndex(before);
+    after = foundMappingIndex(after);
+    if(before == after)
+    {
+        return;
+    }
+
+    //adjust the m_currentPlayToolIndex while the item has dragged and dropped
+    if(before < after)
+    {
+        if((before < m_currentPlayToolIndex && m_currentPlayToolIndex < after) || m_currentPlayToolIndex == after)
+        {
+            m_currentIndex = --m_currentPlayToolIndex;
+        }
+        else if(m_currentPlayToolIndex == before)
+        {
+            m_currentIndex = m_currentPlayToolIndex = after;
+        }
+    }
+    else
+    {
+        if((after < m_currentPlayToolIndex && m_currentPlayToolIndex < before) || m_currentPlayToolIndex == after)
+        {
+            m_currentIndex = ++m_currentPlayToolIndex;
+        }
+        else if(m_currentPlayToolIndex == before)
+        {
+            m_currentIndex = m_currentPlayToolIndex = after;
+        }
+    }
+
+    swapItem(before, after);
+    MusicSongItem item = m_songItems.takeAt(before);
+    m_songItems.insert(after, item);
+}
+
 void MusicSongsSummariziedWidget::musicImportSongsOnlyFile()
 {
     m_currentImportIndex = m_currentIndex;
@@ -624,17 +709,23 @@ void MusicSongsSummariziedWidget::setRecentMusicSongs(int index)
 
     MusicSongItem *item = &m_songItems[MUSIC_RECENT_LIST];
     MusicSong music( (*songs)[index] );
-    if(!item->m_songs.contains(music))
+    MusicSongs *musics = &item->m_songs;
+    if(!musics->contains(music))
     {
+        if(musics->count() >= RECENT_ITEM_MAX_COUNT)
+        {
+            musics->takeFirst();
+            item->m_itemObject->clearAllItems();
+        }
+
         music.setMusicPlayCount(music.getMusicPlayCount() + 1);
-        item->m_songs << music;
-        item->m_itemObject->updateSongsFileName(item->m_songs);
-        QString title(QString("%1[%2]").arg(item->m_itemName).arg(item->m_songs.count()));
+        musics->append(music);
+        item->m_itemObject->updateSongsFileName(*musics);
+        QString title(QString("%1[%2]").arg(item->m_itemName).arg(musics->count()));
         setTitle(item->m_itemObject, title);
     }
     else
     {
-        MusicSongs *musics = &item->m_songs;
         for(int i=0; i<musics->count(); ++i)
         {
             MusicSong *m = &(*musics)[i];
@@ -657,6 +748,22 @@ void MusicSongsSummariziedWidget::updateCurrentArtist()
     m_songItems[m_currentPlayToolIndex].m_itemObject->updateCurrentArtist();
 }
 
+void MusicSongsSummariziedWidget::showFloatWidget()
+{
+    if(m_floatWidget == nullptr)
+    {
+        m_floatWidget = new MusicSongsListFunctionWidget(this);
+        connect(m_floatWidget, SIGNAL(deleteObject()), SLOT(deleteFloatWidget()));
+        m_floatWidget->setGeometry();
+        m_floatWidget->show();
+    }
+    else
+    {
+        m_floatWidget->setGeometry();
+        m_floatWidget->active();
+    }
+}
+
 void MusicSongsSummariziedWidget::sliderValueChanaged(int value)
 {
     if(value >= 35*(m_currentIndex + 1) && m_currentIndex > -1 && m_currentIndex < m_songItems.count())
@@ -672,6 +779,12 @@ void MusicSongsSummariziedWidget::sliderValueChanaged(int value)
     {
         m_listMaskWidget->hide();
     }
+}
+
+void MusicSongsSummariziedWidget::deleteFloatWidget()
+{
+    delete m_floatWidget;
+    m_floatWidget = nullptr;
 }
 
 void MusicSongsSummariziedWidget::checkCurrentNameExist(QString &name)
@@ -730,6 +843,7 @@ void MusicSongsSummariziedWidget::createWidgetItem(MusicSongItem *item)
     connect(w, SIGNAL(deleteItemAt(MusicObject::MIntList,bool)), SLOT(setDeleteItemAt(MusicObject::MIntList,bool)));
     connect(w, SIGNAL(getMusicIndexSwaped(int,int,int,QStringList&)), SLOT(setMusicIndexSwaped(int,int,int,QStringList&)));
     connect(w, SIGNAL(musicListSongToLovestListAt(bool,int)), SLOT(musicListSongToLovestListAt(bool,int)));
+    connect(w, SIGNAL(showFloatWidget()), SLOT(showFloatWidget()));
 
     ///connect to items
     connect(m_itemList.last().m_widgetItem, SIGNAL(addNewRowItem()), SLOT(addNewRowItem()));
@@ -738,6 +852,7 @@ void MusicSongsSummariziedWidget::createWidgetItem(MusicSongItem *item)
     connect(m_itemList.last().m_widgetItem, SIGNAL(changRowItemName(int,QString)), SLOT(changRowItemName(int,QString)));
     connect(m_itemList.last().m_widgetItem, SIGNAL(addNewFiles(int)), SLOT(addNewFiles(int)));
     connect(m_itemList.last().m_widgetItem, SIGNAL(addNewDir(int)), SLOT(addNewDir(int)));
+    connect(m_itemList.last().m_widgetItem, SIGNAL(swapDragItemIndex(int,int)), SLOT(swapDragItemIndex(int,int)));
 
     w->setSongsFileName(&item->m_songs);
     setTitle(w, QString("%1[%2]").arg(item->m_itemName).arg(item->m_songs.count()));
@@ -760,6 +875,15 @@ void MusicSongsSummariziedWidget::setItemTitle(MusicSongItem *item)
     if(m_listMaskWidget->isVisible() && m_listMaskWidget->getItemIndex() == item->m_itemIndex)
     {
         m_listMaskWidget->setTitle(title);
+    }
+}
+
+void MusicSongsSummariziedWidget::resizeEvent(QResizeEvent *event)
+{
+    MusicSongsToolBoxWidget::resizeEvent(event);
+    if(m_floatWidget)
+    {
+        m_floatWidget->setGeometry();
     }
 }
 

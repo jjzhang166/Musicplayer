@@ -3,7 +3,7 @@
 
 /* =================================================
  * This file is part of the TTK Music Player project
- * Copyright (c) 2014 - 2016 Greedysky Studio
+ * Copyright (c) 2015 - 2017 Greedysky Studio
  * All rights reserved!
  * Redistribution and use of the source code or any derivative
  * works are strictly forbiden.
@@ -45,6 +45,10 @@ public:
     /*!
      * Set Item expand.
      */
+    bool isItemExpand() const;
+    /*!
+     * Get Item expand.
+     */
 
     void setTitle(const QString &text);
     /*!
@@ -83,6 +87,10 @@ Q_SIGNALS:
     void addNewDir(int index);
     /*!
      * Add new music dir to list.
+     */
+    void swapDragItemIndex(int before, int after);
+    /*!
+     * Swap the item index by drag adn drop.
      */
 
 public Q_SLOTS:
@@ -124,7 +132,16 @@ public Q_SLOTS:
      */
 
 protected:
+    bool isItemEnable() const;
+    /*!
+     * Check the item is enable or not.
+     */
+    virtual void dragLeaveEvent(QDragLeaveEvent *event) override;
+    virtual void dragMoveEvent(QDragMoveEvent *event) override;
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual void dropEvent(QDropEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
     /*!
@@ -136,6 +153,9 @@ protected:
     QLabel *m_labelIcon, *m_labelText;
     MusicSongsToolItemRenamedWidget *m_renameLine;
 
+    bool m_isDrawTopState, m_isDrawMoveState;
+    bool m_isBlockMoveExpand;
+    QPoint m_pressPosAt;
 };
 
 
@@ -244,6 +264,10 @@ Q_SIGNALS:
     /*!
      * Add new music dir to list.
      */
+    void swapDragItemIndex(int before, int after);
+    /*!
+     * Swap the item index by drag adn drop.
+     */
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
@@ -298,6 +322,10 @@ public:
     void removeItem(QWidget *item);
     /*!
      * Remove widget item.
+     */
+    void swapItem(int before, int after);
+    /*!
+     * Swap widget item.
      */
 
     void setTitle(QWidget *item, const QString &text);
