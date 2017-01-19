@@ -223,7 +223,7 @@ QString MusicApplication::musicDownloadContains(bool &contains) const
             MusicSongs currentSongs = items[m_musicSongTree->getCurrentPlayToolIndex()].m_songs;
             MusicSong currentSong = currentSongs[index];
             path = QString("%1%2.%3").arg(M_SETTING_PTR->value(MusicSettingManager::DownloadMusicPathDirChoiced).toString())
-                                      .arg(currentSong.getMusicName()).arg(currentSong.getMusicType());
+                                     .arg(currentSong.getMusicName()).arg(currentSong.getMusicType());
             contains = QFile::exists(path);
         }
     }
@@ -573,6 +573,7 @@ void MusicApplication::musicPlayIndex(int row)
 {
     m_musicPlayer->stop();
     setMusicPlayIndex();
+    m_currentMusicSongTreeIndex = row;
     m_musicList->setCurrentIndex(row);
 }
 
@@ -580,7 +581,7 @@ void MusicApplication::musicPlayIndex(int row, int)
 {
     m_musicPlayer->stop();
 
-    if(m_currentMusicSongTreeIndex != m_musicSongTree->currentIndex())
+    if(m_currentMusicSongTreeIndex != m_musicSongTree->currentIndex() || m_musicList->mediaCount() == 0)
     {
         setMusicPlayIndex();
         m_ui->musicPlayedList->clear();
@@ -591,6 +592,7 @@ void MusicApplication::musicPlayIndex(int row, int)
             m_ui->musicPlayedList->append(index, items[index].m_songs);
         }
     }
+
     if(!m_musicSongTree->searchFileListEmpty())
     {
         row = m_musicSongTree->getSearchFileListIndexAndClear(row);

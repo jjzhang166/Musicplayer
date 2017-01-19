@@ -1,19 +1,19 @@
-#include "musicmydownloadrecordconfigmanager.h"
+#include "musicdownloadrecordconfigmanager.h"
 
-MusicMyDownloadRecordConfigManager::MusicMyDownloadRecordConfigManager(QObject *parent)
+MusicDownloadRecordConfigManager::MusicDownloadRecordConfigManager(Type type, QObject *parent)
     : MusicAbstractXml(parent)
 {
-
+    m_type = type;
 }
 
-QString MusicMyDownloadRecordConfigManager::getClassName()
+QString MusicDownloadRecordConfigManager::getClassName()
 {
     return staticMetaObject.className();
 }
 
-void MusicMyDownloadRecordConfigManager::writeDownloadConfig(const MusicDownloadRecords &records)
+void MusicDownloadRecordConfigManager::writeDownloadConfig(const MusicDownloadRecords &records)
 {
-    if( !writeConfig( DOWNLOADINFO_FULL ) )
+    if( !writeConfig( mappingFilePathFromEnum() ) )
     {
         return;
     }
@@ -33,7 +33,7 @@ void MusicMyDownloadRecordConfigManager::writeDownloadConfig(const MusicDownload
     m_ddom->save(out, 4);
 }
 
-void MusicMyDownloadRecordConfigManager::readDownloadConfig(MusicDownloadRecords &records)
+void MusicDownloadRecordConfigManager::readDownloadConfig(MusicDownloadRecords &records)
 {
     QDomNodeList nodelist = m_ddom->elementsByTagName("value");
     for(int i=0; i<nodelist.count(); ++i)
@@ -43,5 +43,15 @@ void MusicMyDownloadRecordConfigManager::readDownloadConfig(MusicDownloadRecords
         record.m_path = nodelist.at(i).toElement().text();
         record.m_size = nodelist.at(i).toElement().attribute("size");
         records << record;
+    }
+}
+
+QString MusicDownloadRecordConfigManager::mappingFilePathFromEnum() const
+{
+    switch(m_type)
+    {
+        case Normal: return NORMALDOWNPATH_FULL;
+        case Cloud : return CLOUDDOWNPATH_FULL;
+        default: return QString();
     }
 }

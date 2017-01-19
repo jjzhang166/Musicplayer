@@ -9,12 +9,12 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include "musicabstracttablewidget.h"
+#include "musicsongslistabstracttablewidget.h"
 
 /*! @brief The class of the lcal songs table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicLocalSongsTableWidget : public MusicAbstractTableWidget
+class MUSIC_WIDGET_EXPORT MusicLocalSongsTableWidget : public MusicSongsListAbstractTableWidget
 {
     Q_OBJECT
 public:
@@ -22,11 +22,13 @@ public:
     /*!
      * Object contsructor.
      */
+    virtual ~MusicLocalSongsTableWidget();
 
     static QString getClassName();
     /*!
      * Get class object name.
      */
+
     void clearShowlist();
     /*!
      * Clear show list.
@@ -43,11 +45,23 @@ public:
     /*!
      * Create show path.
      */
+    void addShowlistItems(const QFileInfoList &path);
+    /*!
+     * Add show list items.
+     */
+    void addShowPathItems(const QFileInfoList &path);
+    /*!
+     * Add show path items.
+     */
 
 public Q_SLOTS:
     virtual void listCellClicked(int row, int column) override;
     /*!
      * Table widget list cell click.
+     */
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    /*!
+     * Override the widget event.
      */
 
 };

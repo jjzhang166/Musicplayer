@@ -1,6 +1,6 @@
 #include "musicsongssummariziedwidget.h"
 #include "musicsongslistfunctionwidget.h"
-#include "musicsongslistwidget.h"
+#include "musicsongslisttablewidget.h"
 #include "musicsettingmanager.h"
 #include "musicuiobject.h"
 #include "musicmessagebox.h"
@@ -368,7 +368,7 @@ void MusicSongsSummariziedWidget::deleteRowItemAll(int index)
 
     m_currentDeleteIndex = id;
     m_toolDeleteChanged = true;
-    MusicSongsListWidget *w = m_songItems[id].m_itemObject;
+    MusicSongsListTableWidget *w = m_songItems[id].m_itemObject;
     if(w->rowCount() > 0)
     {
         w->setCurrentCell(0, 1);
@@ -563,7 +563,7 @@ void MusicSongsSummariziedWidget::musicSongToLovestListAt(bool oper, int row)
 }
 
 void MusicSongsSummariziedWidget::addNetMusicSongToList(const QString &name, const QString &time,
-                                                  const QString &format, bool play)
+                                                        const QString &format, bool play)
 {
     QString musicSong = MusicCryptographicHash::decryptData(name, DOWNLOAD_KEY);
     const QString path = QString("%1%2.%3").arg(CACHE_DIR_FULL).arg(name).arg(format);
@@ -600,9 +600,20 @@ void MusicSongsSummariziedWidget::addSongToPlayList(const QStringList &items)
             emit updatePlayLists(var);
         }
     }
+
+    MusicSongItem *songItem = &m_songItems[MUSIC_NORMAL_LIST];
+    MusicSongs *musicSongs = &songItem->m_songs;
+    MusicSong song = MusicSong(items.last());
+
+    int index = musicSongs->count() - 1;
+    if(musicSongs->contains(song))
+    {
+        index = musicSongs->indexOf(song);
+    }
+
     /// just play it at once
     MusicSongsToolBoxWidget::setCurrentIndex(0);
-    MusicApplication::instance()->musicPlayIndex(m_songItems[MUSIC_NORMAL_LIST].m_songs.count() - 1, 0);
+    MusicApplication::instance()->musicPlayIndex(index, 0);
 }
 
 void MusicSongsSummariziedWidget::setDeleteItemAt(const MusicObject::MIntList &index, bool fileRemove)
@@ -644,7 +655,7 @@ void MusicSongsSummariziedWidget::setDeleteItemAt(const MusicObject::MIntList &i
     item->m_itemObject->createUploadFileWidget();
 }
 
-void MusicSongsSummariziedWidget::setMusicIndexSwaped(int before, int after, int play, QStringList &list)
+void MusicSongsSummariziedWidget::setMusicIndexSwaped(int before, int after, int play, MusicSongs &songs)
 {
     MusicSongs *names = &m_songItems[m_currentIndex].m_songs;
     if(before > after)
@@ -661,8 +672,8 @@ void MusicSongsSummariziedWidget::setMusicIndexSwaped(int before, int after, int
             names->swap(i, i + 1);
         }
     }
+    songs = *names;
 
-    list = getMusicSongsFileName(m_currentIndex);
     if(m_currentIndex == m_currentPlayToolIndex)
     {
         emit updateMediaLists(getMusicSongsFilePath(m_currentPlayToolIndex), play);
@@ -823,7 +834,7 @@ void MusicSongsSummariziedWidget::addNewRowItem(const QString &name)
 
 void MusicSongsSummariziedWidget::createWidgetItem(MusicSongItem *item)
 {
-    MusicSongsListWidget *w = new MusicSongsListWidget(-1, this);
+    MusicSongsListTableWidget *w = new MusicSongsListTableWidget(-1, this);
     w->setMovedScrollBar(m_scrollArea->verticalScrollBar());
     item->m_itemObject = w;
     item->m_itemIndex = m_itemIndexRaise;
@@ -841,7 +852,7 @@ void MusicSongsSummariziedWidget::createWidgetItem(MusicSongItem *item)
     connect(w, SIGNAL(isCurrentIndexs(bool&)), SLOT(isCurrentIndexs(bool&)));
     connect(w, SIGNAL(isSearchFileListEmpty(bool&)), SLOT(isSearchFileListEmpty(bool&)));
     connect(w, SIGNAL(deleteItemAt(MusicObject::MIntList,bool)), SLOT(setDeleteItemAt(MusicObject::MIntList,bool)));
-    connect(w, SIGNAL(getMusicIndexSwaped(int,int,int,QStringList&)), SLOT(setMusicIndexSwaped(int,int,int,QStringList&)));
+    connect(w, SIGNAL(getMusicIndexSwaped(int,int,int,MusicSongs&)), SLOT(setMusicIndexSwaped(int,int,int,MusicSongs&)));
     connect(w, SIGNAL(musicListSongToLovestListAt(bool,int)), SLOT(musicListSongToLovestListAt(bool,int)));
     connect(w, SIGNAL(showFloatWidget()), SLOT(showFloatWidget()));
 
@@ -862,7 +873,7 @@ void MusicSongsSummariziedWidget::clearAllLists()
 {
     while(!m_songItems.isEmpty())
     {
-        MusicSongsListWidget *w = m_songItems.takeLast().m_itemObject;
+        MusicSongsListTableWidget *w = m_songItems.takeLast().m_itemObject;
         delete w;
         w = nullptr;
     }

@@ -390,7 +390,7 @@ MusicLrcContainerHorizontalDesktop::MusicLrcContainerHorizontalDesktop(QWidget *
     desktopWidget->setObjectName("desktopWidget");
     m_musicLrcContainer << new MusicLRCManagerHorizontalDesktop(desktopWidget)
                         << new MusicLRCManagerHorizontalDesktop(desktopWidget);
-    setGeometry(200,  windowSize.height() - height() - 150, m_geometry.x(), 2*m_geometry.y() + TOOLBAR_HEIGHT + TOOLBAR_MAIN_HEIGHT);
+    setGeometry(200,  windowSize.height() - height() - 200, m_geometry.x(), 2*m_geometry.y() + TOOLBAR_HEIGHT + TOOLBAR_MAIN_HEIGHT);
     desktopWidget->setGeometry(0, TOOLBAR_MAIN_HEIGHT, m_geometry.x(), 2*m_geometry.y() + TOOLBAR_MAIN_HEIGHT);
 
     setSelfGeometry();

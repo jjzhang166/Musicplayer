@@ -1,5 +1,5 @@
-#ifndef MUSICSONGSPLAYEDLISTWIDGET_H
-#define MUSICSONGSPLAYEDLISTWIDGET_H
+#ifndef MUSICSONGSLISTABSTRACTTABLEWIDGET_H
+#define MUSICSONGSLISTABSTRACTTABLEWIDGET_H
 
 /* =================================================
  * This file is part of the TTK Music Player project
@@ -9,43 +9,44 @@
  * works are strictly forbiden.
    =================================================*/
 
+#include <QMenu>
 #include "musicsong.h"
 #include "musicslowmovingtablewidget.h"
 
-/*! @brief The class of the songs list widget.
+/*! @brief The class of the songs list abstract table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicSongsPlayedListWidget : public MusicSlowMovingTableWidget
+class MUSIC_WIDGET_EXPORT MusicSongsListAbstractTableWidget : public MusicSlowMovingTableWidget
 {
     Q_OBJECT
 public:
-    explicit MusicSongsPlayedListWidget(QWidget *parent = 0);
+    explicit MusicSongsListAbstractTableWidget(QWidget *parent = 0);
     /*!
      * Object contsructor.
      */
-    virtual ~MusicSongsPlayedListWidget();
+    virtual ~MusicSongsListAbstractTableWidget();
 
     static QString getClassName();
     /*!
      * Get class object name.
      */
 
-    void setSongsFileName(MusicPlayedSongs *songs);
+    virtual void setSongsFileName(MusicSongs *songs);
     /*!
      * Set songs file names.
      */
-    void updateSongsFileName(const MusicPlayedSongs &songs);
+    virtual void updateSongsFileName(const MusicSongs &songs);
     /*!
      * Update songs file names in table.
      */
-
-    void selectRow(int index);
+    virtual void selectRow(int index);
     /*!
      * Select the current play row by given index.
      */
-    void selectPlayedRow();
+
+    void setParentToolIndex(int index);
     /*!
-     * Select the current played row.
+     * Set parent tool index.
      */
     inline void setPlayRowIndex(int index) { m_playRowIndex = index; }
     /*!
@@ -57,27 +58,23 @@ public:
      */
 
 Q_SIGNALS:
-    void updateCountLabel();
+    void isCurrentIndexs(bool &state);
     /*!
-     * Update count label.
+     * Check is current play stack widget.
      */
 
 public Q_SLOTS:
-    virtual void listCellEntered(int row, int column) override;
-    /*!
-     * Table widget list cell enter.
-     */
-    virtual void listCellClicked(int row, int column) override;
-    /*!
-     * Table widget list cell click.
-     */
     void musicPlayClicked();
     /*!
      * Music item has double been clicked.
      */
-    void setDeleteItemAt();
+    virtual void setDeleteItemAt();
     /*!
      * Delete item from list at current row.
+     */
+    void setDeleteItemAll();
+    /*!
+     * Delete all items from list.
      */
     void musicOpenFileDir();
     /*!
@@ -113,11 +110,7 @@ public Q_SLOTS:
      */
 
 protected:
-    virtual void contextMenuEvent(QContextMenuEvent *event) override;
-    /*!
-     * Override the widget event.
-     */
-    void createMoreMenu();
+    void createMoreMenu(QMenu *menu);
     /*!
      * Create more menu information.
      */
@@ -138,9 +131,10 @@ protected:
      * Get song name.
      */
 
-    int m_playRowIndex;
-    MusicPlayedSongs *m_musicSongs;
+    int m_playRowIndex, m_parentToolIndex;
+    MusicSongs *m_musicSongs;
+    bool m_hasParentToolIndex;
 
 };
 
-#endif // MUSICSONGSPLAYEDLISTWIDGET_H
+#endif // MUSICSONGSLISTABSTRACTTABLEWIDGET_H

@@ -1,5 +1,5 @@
-#ifndef MUSICSONGSLISTWIDGET_H
-#define MUSICSONGSLISTWIDGET_H
+#ifndef MUSICSONGSLISTTABLEWIDGET_H
+#define MUSICSONGSLISTTABLEWIDGET_H
 
 /* =================================================
  * This file is part of the TTK Music Player project
@@ -9,38 +9,33 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include <QMenu>
 #include <QTimer>
-#include "musicsong.h"
-#include "musicslowmovingtablewidget.h"
+#include "musicsongslistabstracttablewidget.h"
 
 class QPropertyAnimation;
 class MusicOpenFileWidget;
 class MusicSongsListPlayWidget;
 class MusicSongsListItemInfoWidget;
 
-/*! @brief The class of the songs list widget.
+/*! @brief The class of the songs list table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicSongsListWidget : public MusicSlowMovingTableWidget
+class MUSIC_WIDGET_EXPORT MusicSongsListTableWidget : public MusicSongsListAbstractTableWidget
 {
     Q_OBJECT
 public:
-    explicit MusicSongsListWidget(int index, QWidget *parent = 0);
+    explicit MusicSongsListTableWidget(int index, QWidget *parent = 0);
     /*!
      * Object contsructor.
      */
-    virtual ~MusicSongsListWidget();
+    virtual ~MusicSongsListTableWidget();
 
     static QString getClassName();
     /*!
      * Get class object name.
      */
-    void setSongsFileName(MusicSongs *songs);
-    /*!
-     * Set songs file names.
-     */
-    void updateSongsFileName(const MusicSongs &songs);
+
+    virtual void updateSongsFileName(const MusicSongs &songs) override;
     /*!
      * Update songs file names in table.
      */
@@ -49,15 +44,11 @@ public:
      * Clear All Items.
      */
 
-    void setParentToolIndex(int index);
-    /*!
-     * Set parent tool index.
-     */
     int allRowsHeight() const;
     /*!
      * Get all rows height.
      */
-    void selectRow(int index);
+    virtual void selectRow(int index) override;
     /*!
      * Select the current play row.
      */
@@ -128,15 +119,11 @@ Q_SIGNALS:
     /*!
      * Check current list is searched or not.
      */
-    void isCurrentIndexs(bool &state);
-    /*!
-     * Check is current play stack widget.
-     */
     void deleteItemAt(const MusicObject::MIntList &index, bool fileRemove);
     /*!
      * Delete items from indexs and check remove file or not.
      */
-    void getMusicIndexSwaped(int before, int after, int play, QStringList &list);
+    void getMusicIndexSwaped(int before, int after, int play, MusicSongs &songs);
     /*!
      * Swap the current play index when user drag and drop.
      */
@@ -158,17 +145,9 @@ public Q_SLOTS:
     /*!
      * Table widget list cell click.
      */
-    void musicPlayClicked();
-    /*!
-     * Music item has double been clicked.
-     */
-    void setDeleteItemAt();
+    virtual void setDeleteItemAt() override;
     /*!
      * Delete item from list at current row.
-     */
-    void setDeleteItemAll();
-    /*!
-     * Delete all items from list.
      */
     void setDeleteItemWithFile();
     /*!
@@ -186,10 +165,6 @@ public Q_SLOTS:
     /*!
      * Reset item name by current row.
      */
-    void musicOpenFileDir();
-    /*!
-     * Open the music at local path.
-     */
     void musicMakeRingWidget();
     /*!
      * Open music make ring widget.
@@ -198,45 +173,17 @@ public Q_SLOTS:
     /*!
      * Open music transform widget.
      */
-    void musicFileInformation();
-    /*!
-     * Open music file information widget.
-     */
-    void musicSongMovieFound();
-    /*!
-     * To search song mv by song name.
-     */
     void musicSongMovieFoundPy();
     /*!
      * To search song mv by song name in play widget.
-     */
-    void musicAlbumFoundWidget();
-    /*!
-     * Open music album found widget.
-     */
-    void musicSimilarFoundWidget();
-    /*!
-     * Open music similar found widget.
      */
     void musicSimilarFoundWidgetPy();
     /*!
      * Open music similar found widget in play widget.
      */
-    void musicSongSharedWidget();
-    /*!
-     * Open music song shared widget.
-     */
     void musicSongSharedWidgetPy();
     /*!
      * Open music song shared widget in play widget.
-     */
-    void musicSongTransferWidget();
-    /*!
-     * Open music song transfer widget.
-     */
-    void musicSongDownload();
-    /*!
-     * Open music song download widget.
      */
     void musicSearchQuery(QAction *action);
     /*!
@@ -266,6 +213,10 @@ protected:
     /*!
      * Override the widget event.
      */
+    void closeRenameItem();
+    /*!
+     * Close rename item.
+     */
     void startToDrag();
     /*!
      * Start to drag to play list.
@@ -274,35 +225,12 @@ protected:
     /*!
      * Create context menu.
      */
-    void createMoreMenu(QMenu *menu);
-    /*!
-     * Create more menu information.
-     */
 
-    QString getCurrentSongPath() const;
-    /*!
-     * Get current song path.
-     */
-    QString getSongPath(int index) const;
-    /*!
-     * Get song path.
-     */
-    QString getCurrentSongName() const;
-    /*!
-     * Get current song name.
-     */
-    QString getSongName(int index) const;
-    /*!
-     * Get song name.
-     */
-
-    int m_transparent, m_parentToolIndex;
-    int m_playRowIndex, m_dragStartIndex;
+    int m_transparent, m_dragStartIndex;
     QPoint m_dragStartPoint;
     bool m_mouseMoved;
 
     QTimer m_timerShow, m_timerStay;
-    MusicSongs *m_musicSongs;
     MusicOpenFileWidget *m_openFileWidget;
     MusicSongsListItemInfoWidget *m_musicSongsInfoWidget;
     MusicSongsListPlayWidget *m_musicSongsPlayWidget;
@@ -314,4 +242,4 @@ protected:
 
 };
 
-#endif // MUSICSONGSLISTWIDGET_H
+#endif // MUSICSONGSLISTTABLEWIDGET_H

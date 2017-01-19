@@ -1,5 +1,5 @@
-#ifndef MUSICMYDOWNLOADRECORDCONFIGMANAGER_H
-#define MUSICMYDOWNLOADRECORDCONFIGMANAGER_H
+#ifndef MUSICDOWNLOADRECORDCONFIGMANAGER_H
+#define MUSICDOWNLOADRECORDCONFIGMANAGER_H
 
 /* =================================================
  * This file is part of the TTK Music Player project
@@ -22,11 +22,17 @@ TTK_DECLARE_LISTS(MusicDownloadRecord)
 /*! @brief The class of the download record manager.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_TOOL_EXPORT MusicMyDownloadRecordConfigManager : public MusicAbstractXml
+class MUSIC_TOOL_EXPORT MusicDownloadRecordConfigManager : public MusicAbstractXml
 {
     Q_OBJECT
 public:
-    explicit MusicMyDownloadRecordConfigManager(QObject *parent = 0);
+    enum Type
+    {
+        Normal,
+        Cloud
+    };
+
+    explicit MusicDownloadRecordConfigManager(Type type, QObject *parent = 0);
     /*!
      * Object contsructor.
      */
@@ -35,7 +41,15 @@ public:
     /*!
      * Get class object name.
      */
-    inline bool readDownloadXMLConfig(){ return readConfig(DOWNLOADINFO_FULL); }
+    inline void setType(Type type) { m_type = type; }
+    /*!
+     * Set config type.
+     */
+    inline Type getType() const { return m_type; }
+    /*!
+     * Get config type.
+     */
+    inline bool readDownloadXMLConfig() { return readConfig( mappingFilePathFromEnum() ); }
     /*!
      * Read history download datas from xml file by given name.
      */
@@ -48,6 +62,14 @@ public:
      * Read history download datas into xml file.
      */
 
+protected:
+    QString mappingFilePathFromEnum() const;
+    /*!
+     * Mapping file path from enum type.
+     */
+
+    Type m_type;
+
 };
 
-#endif // MUSICMYDOWNLOADRECORDCONFIGMANAGER_H
+#endif // MUSICDOWNLOADRECORDCONFIGMANAGER_H

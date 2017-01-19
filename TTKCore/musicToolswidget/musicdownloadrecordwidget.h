@@ -1,5 +1,5 @@
-#ifndef MUSICMYDOWNLOADRECORDWIDGET_H
-#define MUSICMYDOWNLOADRECORDWIDGET_H
+#ifndef MUSICDOWNLOADRECORDWIDGET_H
+#define MUSICDOWNLOADRECORDWIDGET_H
 
 /* =================================================
  * This file is part of the TTK Music Player project
@@ -9,25 +9,23 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include "musicabstracttablewidget.h"
-#include "musicmydownloadrecordconfigmanager.h"
-
-#define MUSIC_TIMES_ROLE Qt::UserRole + 1
+#include "musicsongslistabstracttablewidget.h"
+#include "musicdownloadrecordconfigmanager.h"
 
 class MusicProgressBarDelegate;
 
 /*! @brief The class of the download record widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_TOOL_EXPORT MusicMyDownloadRecordWidget : public MusicAbstractTableWidget
+class MUSIC_TOOL_EXPORT MusicDownloadRecordWidget : public MusicSongsListAbstractTableWidget
 {
     Q_OBJECT
 public:
-    explicit MusicMyDownloadRecordWidget(QWidget *parent = 0);
+    explicit MusicDownloadRecordWidget(QWidget *parent = 0);
     /*!
      * Object contsructor.
      */
-    virtual ~MusicMyDownloadRecordWidget();
+    virtual ~MusicDownloadRecordWidget();
 
     static QString getClassName();
     /*!
@@ -53,13 +51,9 @@ public Q_SLOTS:
     /*!
      * Add selected music song path to list.
      */
-    void setDeleteItemAt();
+    virtual void setDeleteItemAt() override;
     /*!
      * Delete item from list at current row.
-     */
-    void setDeleteItemAll();
-    /*!
-     * Delete all items from list.
      */
     void listCellClicked(int row, int column);
     /*!
@@ -68,10 +62,6 @@ public Q_SLOTS:
     void listCellDoubleClicked(int row, int column);
     /*!
      * Table widget list cell double click.
-     */
-    void musicOpenFileDir();
-    /*!
-     * Open the music at local path.
      */
     void downloadProgressChanged(float percent, const QString &total, qint64 time);
     /*!
@@ -87,7 +77,7 @@ protected:
     /*!
      * Override the widget event.
      */
-    void createItem(int index, const QString &name, const QString &size, qint64 time);
+    void createItem(int index, const MusicDownloadRecord &record, qint64 time);
     /*!
      * Create item by index and name and size and time.
      */
@@ -98,4 +88,4 @@ protected:
 
 };
 
-#endif // MUSICMYDOWNLOADRECORDWIDGET_H
+#endif // MUSICDOWNLOADRECORDWIDGET_H

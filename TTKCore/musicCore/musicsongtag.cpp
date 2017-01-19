@@ -81,6 +81,7 @@ bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
             QString t = QString::number(infos.first()->length()*MT_S2MS);
             m_parameters.insert(TagReadAndWrite::TAG_LENGTH, t);
         }
+        loader.unload();
     }
 
     return !m_parameters.isEmpty();
