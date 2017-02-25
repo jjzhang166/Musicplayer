@@ -2,6 +2,7 @@
 #include "musicsettingmanager.h"
 #include "musicdownloadstatuslabel.h"
 #include "musiccoreutils.h"
+#include "musicstringutils.h"
 #include "musicnetworkthread.h"
 #include "musicbackgroundmanager.h"
 
@@ -262,7 +263,7 @@ int MusicApplication::mediaPlayCount(int index) const
 
 QString MusicApplication::artistImagePath() const
 {
-    QString name = MusicUtils::Core::artistName( getCurrentFileName() );
+    QString name = MusicUtils::String::artistName( getCurrentFileName() );
     name = ART_DIR_FULL + name + SKN_FILE;
     return QFile::exists(name) ? "file:///" + name : QString();
 }
@@ -428,7 +429,6 @@ void MusicApplication::readXMLConfigFromText()
     M_SETTING_PTR->setValue(MusicSettingManager::LrcSizeChoiced, xml.readShowLrcSize());
 
     M_SETTING_PTR->setValue(MusicSettingManager::DownloadServerChoiced, 0);
-    M_SETTING_PTR->setValue(MusicSettingManager::DownloadServerMultipleChoiced, 1);
     M_SETTING_PTR->setValue(MusicSettingManager::ShowInlineLrcChoiced, 1);
     M_SETTING_PTR->setValue(MusicSettingManager::ShowDesktopLrcChoiced, 1);
 

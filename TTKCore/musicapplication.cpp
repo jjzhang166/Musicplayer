@@ -65,7 +65,6 @@ MusicApplication::MusicApplication(QWidget *parent)
     setAcceptDrops(true);
 
     m_musicList->setPlaybackMode(MusicObject::MC_PlayOrder);
-    m_ui->musicPlayMode->initWidget(this);
     //The default is the order of play
 
     m_musicPlayer->setPlaylist(m_musicList);
@@ -438,35 +437,30 @@ void MusicApplication::musicPlayOrder()
 {
     m_musicList->setPlaybackMode(MusicObject::MC_PlayOrder);
     m_ui->musicPlayMode->setPlaybackMode(MusicObject::MC_PlayOrder);
-    m_musicSongTree->setPlaybackMode(MusicObject::MC_PlayOrder);
 }
 
 void MusicApplication::musicPlayRandom()
 {
     m_musicList->setPlaybackMode(MusicObject::MC_PlayRandom);
     m_ui->musicPlayMode->setPlaybackMode(MusicObject::MC_PlayRandom);
-    m_musicSongTree->setPlaybackMode(MusicObject::MC_PlayRandom);
 }
 
 void MusicApplication::musicPlayListLoop()
 {
     m_musicList->setPlaybackMode(MusicObject::MC_PlayListLoop);
     m_ui->musicPlayMode->setPlaybackMode(MusicObject::MC_PlayListLoop);
-    m_musicSongTree->setPlaybackMode(MusicObject::MC_PlayListLoop);
 }
 
 void MusicApplication::musicPlayOneLoop()
 {
     m_musicList->setPlaybackMode(MusicObject::MC_PlayOneLoop);
     m_ui->musicPlayMode->setPlaybackMode(MusicObject::MC_PlayOneLoop);
-    m_musicSongTree->setPlaybackMode(MusicObject::MC_PlayOneLoop);
 }
 
 void MusicApplication::musicPlayItemOnce()
 {
     m_musicList->setPlaybackMode(MusicObject::MC_PlayOnce);
     m_ui->musicPlayMode->setPlaybackMode(MusicObject::MC_PlayOnce);
-    m_musicSongTree->setPlaybackMode(MusicObject::MC_PlayOnce);
 }
 
 void MusicApplication::musicVolumeMute()
@@ -567,6 +561,13 @@ void MusicApplication::musicExportSongsItemList(int index)
         }
         manager.writeMusicSongsConfig(MusicSongItems() << items[index], fileName);
     }
+}
+
+void MusicApplication::musicPlaySort(int row)
+{
+    m_musicList->clear();
+    m_musicList->addMedia(m_musicSongTree->getMusicSongsFilePath(m_currentMusicSongTreeIndex));
+    m_musicList->setCurrentIndex(row);
 }
 
 void MusicApplication::musicPlayIndex(int row)
@@ -745,7 +746,7 @@ void MusicApplication::musicCreateRightMenu()
     QMenu musicPlaybackMode(tr("playbackMode"), &rightClickMenu);
     rightClickMenu.addMenu(&musicPlaybackMode);
 
-    MusicObject::SongPlayType songplaymode = m_musicList->playbackMode();
+    MusicObject::SongPlayMode songplaymode = m_musicList->playbackMode();
     QAction *order = musicPlaybackMode.addAction(tr("OrderPlay"), this, SLOT(musicPlayOrder()));
     QAction *random = musicPlaybackMode.addAction(tr("RandomPlay"), this, SLOT(musicPlayRandom()));
     QAction *lCycle = musicPlaybackMode.addAction(tr("ListCycle"), this, SLOT(musicPlayListLoop()));

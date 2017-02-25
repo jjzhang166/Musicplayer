@@ -321,19 +321,25 @@ void MusicRightAreaWidget::musicFunctionClicked(int index)
         case SearchWidget: //insert search display widget
             {
                 QString searchedQString = m_ui->musicSongSearchLine->text().trimmed();
-                m_ui->surfaceStackedWidget->setCurrentIndex(0);
-                emit updateBackgroundTheme();
+                searchedQString = searchedQString.isEmpty() ? m_ui->musicSongSearchLine->placeholderText() : searchedQString;
                 //The string searched wouldn't allow to be none
-                if( !searchedQString.isEmpty() && searchedQString != tr("please input search text") )
+                if(!searchedQString.isEmpty() && searchedQString != tr("please input search text"))
                 {
+                    m_ui->musicSongSearchLine->setText(searchedQString);
                     m_ui->songSearchWidget->startSearchQuery(searchedQString);
                 }
                 else
                 {
+                    musicFunctionClicked(MusicRightAreaWidget::KugGouSongWidget);
+
                     MusicMessageBox message;
                     message.setText(tr("enter input search text first"));
                     message.exec();
+                    break;
                 }
+
+                m_ui->surfaceStackedWidget->setCurrentIndex(0);
+                emit updateBackgroundTheme();
                 break;
             }
         case SimilarWidget: //insert similar found widget
@@ -391,7 +397,7 @@ void MusicRightAreaWidget::musicSongCommentsWidget()
 {
     if(m_ui->surfaceStackedWidget->currentIndex() != 1)
     {
-        musicFunctionClicked(LrcWidget);
+        musicFunctionClicked(MusicRightAreaWidget::LrcWidget);
     }
     m_ui->musiclrccontainerforinline->showSongCommentsWidget();
 }
@@ -485,7 +491,13 @@ void MusicRightAreaWidget::songResearchButtonSearched(const QString &name)
 
 void MusicRightAreaWidget::researchQueryByQuality(const QString &quality)
 {
-    m_ui->songSearchWidget->researchQueryByQuality(m_ui->showCurrentSong->text().trimmed(), quality);
+    QString text = m_ui->showCurrentSong->text().trimmed();
+    if(text.isEmpty())
+    {
+        return;
+    }
+
+    m_ui->songSearchWidget->researchQueryByQuality(text, quality);
     m_ui->surfaceStackedWidget->setCurrentIndex(0);
     emit updateBackgroundTheme();
 }
