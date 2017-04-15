@@ -37,6 +37,13 @@ Item {
         }
     }
 
+    Connections {
+        target: TTK_NETWORK
+        onNetworkConnectionStateChanged: {
+            networkWidget.visible = !state;
+        }
+    }
+
     ColumnLayout {
         spacing: 0
         anchors.fill: parent
@@ -58,7 +65,7 @@ Item {
                     Layout.preferredWidth: ttkGlobal.dpWidth(50)
                     Layout.preferredHeight: ttkGlobal.dpHeight(50)
                     anchors.left: parent.left
-                    onPressed: {
+                    onClicked: {
                         ttkMainStackView.push("qrc:/MobileWidgets/TTKMainSettingPage.qml");
                     }
                 }
@@ -68,8 +75,8 @@ Item {
                     Layout.preferredWidth: ttkGlobal.dpWidth(50)
                     Layout.preferredHeight: ttkGlobal.dpHeight(50)
                     anchors.right: parent.right
-                    onPressed: {
-                        ttkMainStackView.push("qrc:/MobileWidgets/TTKOnlineSearchPage.qml");
+                    onClicked: {
+                        ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicOnlineSearchPage.qml");
                     }
                 }
 
@@ -98,6 +105,24 @@ Item {
                 ColumnLayout {
                     spacing: 5
                     anchors.fill: parent
+
+                    ///networkWidget
+                    Rectangle {
+                        id: networkWidget
+                        Layout.preferredWidth: ttkMainWindow.width
+                        Layout.preferredHeight: ttkGlobal.dpHeight(30)
+                        anchors.left: parent.left
+                        color: ttkTheme.color_white
+                        visible: false
+
+                        Text {
+                            anchors.fill: parent
+                            verticalAlignment: Qt.AlignVCenter
+                            horizontalAlignment: Qt.AlignHCenter
+                            text: qsTr("你已经进入了一个无网络的异次元空间")
+                            color: ttkTheme.color_red
+                        }
+                    }
 
                     ///userWidget
                     Rectangle {
@@ -167,7 +192,7 @@ Item {
                             source: "qrc:/image/mymusic_icon_allsongs_highlight"
                             mainTitle: qsTr("本地歌曲")
                             subTitle: TTK_APP.mediaCount(ttkTheme.music_normal_list)
-                            onPressed: {
+                            onClicked: {
                                 TTK_APP.setToolBoxIndex(ttkTheme.music_normal_list);
                                 ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicListsPage.qml");
                             }
@@ -181,7 +206,7 @@ Item {
                             }
                             source: "qrc:/image/mymusic_icon_download_normal"
                             mainTitle: qsTr("下载歌曲")
-                            onPressed: {
+                            onClicked: {
                                 TTK_APP.setToolBoxIndex(ttkTheme.music_download_list);
                                 ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicDownloadListsPage.qml");
                             }
@@ -196,7 +221,7 @@ Item {
                             source: "qrc:/image/mymusic_icon_history_highlight"
                             mainTitle: qsTr("最近播放")
                             subTitle: TTK_APP.mediaCount(ttkTheme.music_recent_list)
-                            onPressed: {
+                            onClicked: {
                                 TTK_APP.setToolBoxIndex(ttkTheme.music_recent_list);
                                 ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicRecentListsPage.qml");
                             }
@@ -210,7 +235,7 @@ Item {
                             }
                             source: "qrc:/image/mymusic_icon_favorite_normal"
                             mainTitle: qsTr("我喜欢")
-                            onPressed: {
+                            onClicked: {
                                 TTK_APP.setToolBoxIndex(ttkTheme.music_lovest_list);
                                 ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicLovestListsPage.qml");
                             }
@@ -224,9 +249,9 @@ Item {
                             }
                             source: "qrc:/image/mymusic_icon_mv_highlight"
                             mainTitle: qsTr("下载MV")
-                            onPressed: {
+                            onClicked: {
                                 TTK_APP.setToolBoxIndex(ttkTheme.music_downmv_list);
-                                ttkMainStackView.push("qrc:/MobileWidgets/TTKMVDownloadListsPage.qml");
+                                ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicMVDownloadListsPage.qml");
                             }
                         }
 
@@ -239,7 +264,7 @@ Item {
                             source: "qrc:/image/mymusic_icon_recognizer_normal"
                             mainTitle: qsTr("听歌识曲")
                             subTitle: qsTr("[绿旋风]")
-                            onPressed: {
+                            onClicked: {
                                 TTK_APP.setToolBoxIndex(ttkTheme.music_musicrg_list);
                                 ttkMainStackView.push("qrc:/MobileWidgets/TTKMusicIdentifyListsPage.qml");
                             }
@@ -281,7 +306,7 @@ Item {
                             TTKImageButton {
                                 anchors.fill: parent
                                 source: "qrc:/image/radio_play_play"
-                                onPressed: {
+                                onClicked: {
                                     ttkRaioHelper.init();
                                     if(ttkRaioHelper.isPlaying()) {
                                         source = "qrc:/image/radio_play_play";

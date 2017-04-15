@@ -13,8 +13,8 @@ import "Core"
 Rectangle {
     id: ttkMusicSongSharedPage
     visible: false
-    width: parent.width
-    height: parent.height
+    width: ttkGlobal.window_width
+    height: ttkGlobal.window_height
     color: ttkTheme.color_alpha_lv12
 
     MouseArea {
@@ -111,7 +111,7 @@ Rectangle {
                 textColor: ttkTheme.color_black
                 text: qsTr("取消")
                 textSize: ttkMusicSongSharedPage.height/25
-                onPressed: {
+                onClicked: {
                     ttkMusicSongSharedPage.visible = false;
                 }
             }

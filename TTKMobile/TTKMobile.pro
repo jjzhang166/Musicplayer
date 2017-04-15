@@ -91,7 +91,7 @@ HEADERS += \
     ../TTKCore/musicCoreKits/musicsongtag.h \
     ../TTKCore/musicCoreKits/musicsemaphoreloop.h \
     ../TTKCore/musicLrcKits/musiclrcanalysis.h \
-    ../TTKCore/musicWidgetKits/musicdownloadstatuslabel.h \
+    ../TTKCore/musicWidgetKits/musicdownloadstatusobject.h \
     MobileCore/ttkfilesearchcore.h \
     MobileCore/ttkmusicplaylist.h \
     MobileCore/ttkmusicplayer.h \
@@ -120,7 +120,7 @@ SOURCES += \
     ../TTKCore/musicCoreKits/musicsongtag.cpp \
     ../TTKCore/musicCoreKits/musicsemaphoreloop.cpp \
     ../TTKCore/musicLrcKits/musiclrcanalysis.cpp \
-    ../TTKCore/musicWidgetKits/musicdownloadstatuslabel.cpp \
+    ../TTKCore/musicWidgetKits/musicdownloadstatusobject.cpp \
     MobileCore/ttkfilesearchcore.cpp \
     MobileCore/ttkmusicplaylist.cpp \
     MobileCore/ttkmusicplayer.cpp \
@@ -156,18 +156,10 @@ OTHER_FILES += \
     android/src/org/greedysky/ttkmobile/TTKMobile.java \
     android/src/org/greedysky/ttkmobile/SplashScreen.java
 
-DISTFILES += \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradlew \
-    android/res/values/libs.xml \
-    android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew.bat
-
 ANDROID_EXTRA_LIBS = \
     bin/$$TTKMusicPlayer/libplugin_input_aac.so \
     bin/$$TTKMusicPlayer/libplugin_input_cue.so \
-#        bin/$$TTKMusicPlayer/libplugin_input_ffmpeg.so \
+#    bin/$$TTKMusicPlayer/libplugin_input_ffmpeg.so \
     bin/$$TTKMusicPlayer/libplugin_input_flac.so \
     bin/$$TTKMusicPlayer/libplugin_input_gme.so \
     bin/$$TTKMusicPlayer/libplugin_input_mad.so \
@@ -179,10 +171,10 @@ ANDROID_EXTRA_LIBS = \
     bin/$$TTKMusicPlayer/libplugin_input_wavpack.so \
     bin/$$TTKMusicPlayer/libplugin_output_qtmultimedia.so \
     bin/$$TTKMusicPlayer/libqmmp.so \
-    bin/$$TTKMusicPlayer/libtag.so \
-#        bin/$$TTKMusicPlayer/libavcodec.so \
-#        bin/$$TTKMusicPlayer/libavformat.so \
-#        bin/$$TTKMusicPlayer/libavutil.so
+    bin/$$TTKMusicPlayer/libtag.so
+#    bin/$$TTKMusicPlayer/libavcodec.so \
+#    bin/$$TTKMusicPlayer/libavformat.so \
+#    bin/$$TTKMusicPlayer/libavutil.so
 }
 
 RESOURCES += \

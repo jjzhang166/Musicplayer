@@ -36,6 +36,8 @@ typedef struct MUSIC_WIDGET_EXPORT DownloadData
 }DownloadData;
 TTK_DECLARE_LISTS(DownloadData)
 
+class QLabel;
+class QPushButton;
 class MusicCoreMPlayer;
 
 /*! @brief The class of the song search online table widget.
@@ -55,6 +57,10 @@ public:
     /*!
      * Get class object name.
      */
+    inline void setQueryAllRecords(bool state) { m_queryAllRecords = state;}
+    /*!
+     * Set wheather query all quality of records.
+     */
     virtual void startSearchQuery(const QString &text) override;
     /*!
      * Start search query by text.
@@ -64,6 +70,10 @@ public:
      * Data download to local file.
      */
 
+    void auditionStop();
+    /*!
+     * Stop current audtion.
+     */
     void auditionToMusic(int row);
     /*!
      * Start play audition to music by row.
@@ -117,6 +127,10 @@ public Q_SLOTS:
     /*!
      * Search data dwonload finished.
      */
+    void musicSongDownload(int row);
+    /*!
+     * Open music song download widget.
+     */
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -129,6 +143,7 @@ protected:
      * Add search music to play list by index.
      */
 
+    bool m_queryAllRecords;
     int m_previousAuditionRow;
     MusicCoreMPlayer *m_audition;
     DownloadData m_downloadData;
@@ -136,8 +151,6 @@ protected:
 };
 
 
-class QLabel;
-class QPushButton;
 
 /*! @brief The class of the song search online widget.
  * @author Greedysky <greedysky@163.com>
@@ -160,6 +173,10 @@ public:
     /*!
      * Start search query by text.
      */
+    void startSearchQuery(const QString &name, bool all);
+    /*!
+     * Start search query by text.
+     */
     void researchQueryByQuality(const QString &name, const QString &quality);
     /*!
      * Research query by quality it changed.
@@ -167,6 +184,10 @@ public:
     void resizeWindow();
     /*!
      * Resize window bound by widgte resize called.
+     */
+    void auditionStop();
+    /*!
+     * Stop current audtion.
      */
 
 public Q_SLOTS:

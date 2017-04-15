@@ -56,7 +56,7 @@ Rectangle {
                     Layout.preferredWidth: ttkGlobal.dpWidth(50)
                     Layout.preferredHeight: ttkGlobal.dpHeight(50)
                     anchors.left: parent.left
-                    onPressed: {
+                    onClicked: {
                         ttkOutStackView.pop();
                     }
                 }
@@ -124,7 +124,7 @@ Rectangle {
                                         bottom: cachedSizeArea.top
                                     }
                                     color: ttkTheme.color_white
-                                    text: qsTr("QQ音乐缓存")
+                                    text: qsTr("天天酷音缓存")
                                 }
 
                                 Text {
@@ -169,8 +169,8 @@ Rectangle {
                                 color: ttkTheme.topbar_background
                                 width: 1
                             }
-                            onPressed: {
-                                if( TTK_UTILS.removeDir(TTK_UTILS.getCachedPath()) ) {
+                            onClicked: {
+                                if( TTK_UTILS.removeCacheDir(TTK_UTILS.getCachedPath()) ) {
                                     ttkFlyInOutBox.color = ttkTheme.topbar_background
                                     ttkFlyInOutBox.text = qsTr("清理成功！");
                                 }else {

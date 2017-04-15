@@ -46,6 +46,7 @@
         <file alias="local_music_upgrade_song_quality_icon">MobileImages/local_music_upgrade_song_quality_icon.png</file>
         <file alias="ic_lyric_poster_lyric_select">MobileImages/ic_lyric_poster_lyric_select.png</file>
         <file alias="ic_lyric_poster_lyric_unselect">MobileImages/ic_lyric_poster_lyric_unselect.png</file>
+        <file alias="ic_lyric_poster_gray_unselect">MobileImages/ic_lyric_poster_gray_unselect.png</file>
         <file alias="scanning_animation">MobileImages/scanning_animation.png</file>
         <file alias="scanning_forlder_icon">MobileImages/scanning_forlder_icon.png</file>
         <file alias="custom_file_type_dir">MobileImages/custom_file_type_dir.png</file>
@@ -119,6 +120,14 @@
         <file alias="action_icon_submit">MobileImages/action_icon_submit.png</file>
         <file alias="data_searching">MobileImages/data_searching.png</file>
     </qresource>
+    <qresource prefix="/server">
+        <file alias="lb_baidu">../TTKResource/server/lb_server_baidu.png</file>
+        <file alias="lb_kugou">../TTKResource/server/lb_server_kugou.png</file>
+        <file alias="lb_kuwo">../TTKResource/server/lb_server_kuwo.png</file>
+        <file alias="lb_qq">../TTKResource/server/lb_server_qq.png</file>
+        <file alias="lb_wangyiyun">../TTKResource/server/lb_server_wangyiyun.png</file>
+        <file alias="lb_xiami">../TTKResource/server/lb_server_xiami.png</file>
+    </qresource>
     <qresource prefix="/">
         <file>MobileWidgets/main.qml</file>
         <file>MobileWidgets/Core/TTKGlobal.qml</file>
@@ -137,10 +146,13 @@
         <file>MobileWidgets/Core/TTKTextMarquee.qml</file>
         <file>MobileWidgets/Core/TTKTextPair.qml</file>
         <file>MobileWidgets/Core/TTKMarquee.qml</file>
-        <file>MobileWidgets/TTKTimeSettingPage.qml</file>
+        <file>MobileWidgets/Core/TTKImageTextButton.qml</file>
+        <file>MobileWidgets/Core/TTKImageRadiusTextButton.qml</file>
+        <file>MobileWidgets/TTKMusicTimeSettingPage.qml</file>
         <file>MobileWidgets/TTKMainPage.qml</file>
         <file>MobileWidgets/TTKMainSettingPage.qml</file>
-        <file>MobileWidgets/TTKOnlineSearchPage.qml</file>
+        <file>MobileWidgets/TTKMainMoreSettingPage.qml</file>
+        <file>MobileWidgets/TTKMusicOnlineSearchPage.qml</file>
         <file>MobileWidgets/TTKMusicBar.qml</file>
         <file>MobileWidgets/TTKMusicPlayerCenterPage.qml</file>
         <file>MobileWidgets/TTKMusicPlayerCenterLrcPage.qml</file>
@@ -153,8 +165,8 @@
         <file>MobileWidgets/TTKMusicRecentListsPage.qml</file>
         <file>MobileWidgets/TTKMusicLovestListsPage.qml</file>
         <file>MobileWidgets/TTKMusicIdentifyListsPage.qml</file>
-        <file>MobileWidgets/TTKMVDownloadListsPage.qml</file>
-        <file>MobileWidgets/TTKScanFolderPage.qml</file>
+        <file>MobileWidgets/TTKMusicMVDownloadListsPage.qml</file>
+        <file>MobileWidgets/TTKMusicScanFolderPage.qml</file>
         <file>MobileWidgets/TTKMusicLyricPage.qml</file>
         <file>MobileWidgets/TTKMusicLyricStylePage.qml</file>
         <file>MobileWidgets/TTKMusicDTSEffectPage.qml</file>
@@ -166,5 +178,7 @@
         <file>MobileWidgets/TTKMusicVideoPage.qml</file>
         <file>MobileWidgets/TTKMusicAboutPage.qml</file>
         <file>MobileWidgets/TTKMusicCleanCachedPage.qml</file>
+        <file>MobileWidgets/TTKMusicDeletePage.qml</file>
+        <file>MobileWidgets/TTKMusicListsManagerPage.qml</file>
     </qresource>
 </RCC>

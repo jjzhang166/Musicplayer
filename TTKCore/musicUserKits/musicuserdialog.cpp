@@ -187,26 +187,26 @@ void MusicUserDialog::changeVerificationCode()
 
 void MusicUserDialog::userLogin()
 {
-    windowRectChanged(0, QRect(20, 45, 331, 181));
+    windowRectChanged(0, 181);
 }
 
 void MusicUserDialog::registerUser()
 {
-    windowRectChanged(1, QRect(20, 45, 331, 300));
+    windowRectChanged(1, 300);
 }
 
 void MusicUserDialog::userForgotPasswd()
 {
-    windowRectChanged(2, QRect(20, 45, 331, 251));
+    windowRectChanged(2, 251);
 }
 
-void MusicUserDialog::windowRectChanged(int index, const QRect &rect)
+void MusicUserDialog::windowRectChanged(int index, int height)
 {
     clearOriginData();
     m_ui->stackedWidget->setCurrentIndex(index);
-    m_ui->stackedWidget->setGeometry(rect);
+    m_ui->stackedWidget->setGeometry(QRect(4, 29, 331, height));
     QRect other = geometry();
-    other.setHeight(rect.height() + 61);
+    other.setHeight(height + 33);
     setGeometry(other);
 }
 
@@ -329,7 +329,7 @@ int MusicUserDialog::findUserNameIndex(const QString &name)
     int index = -1;
     for(int i=0; i<m_records.count(); ++i)
     {
-        if(m_records[i].m_name == name)
+        if(m_records[i].m_userName == name)
         {
             return i;
         }
@@ -342,9 +342,9 @@ void MusicUserDialog::readFromUserSettings()
     int index = findUserNameIndex(m_userName);
     if(index != -1)
     {
-        m_ui->automaticLogon->setChecked( !(m_records[index].m_al == "0") );
-        m_ui->rememberPwd->setChecked( !(m_records[index].m_rp == "0") );
-        m_ui->passwLineEdit->setText( m_records[index].m_pwd );
+        m_ui->automaticLogon->setChecked( !(m_records[index].m_autoLogin == "0") );
+        m_ui->rememberPwd->setChecked( !(m_records[index].m_rememberPWD == "0") );
+        m_ui->passwLineEdit->setText( m_records[index].m_password );
     }
 }
 
@@ -353,18 +353,18 @@ void MusicUserDialog::writeToUserSettings()
     int index = findUserNameIndex(m_userName);
     if(index != -1)
     {
-        m_records[index].m_al = m_ui->automaticLogon->isChecked() ? "1" : "0";
-        m_records[index].m_rp = m_ui->rememberPwd->isChecked() ? "1" : "0";
-        m_records[index].m_pwd = m_ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName)
+        m_records[index].m_autoLogin = m_ui->automaticLogon->isChecked() ? "1" : "0";
+        m_records[index].m_rememberPWD = m_ui->rememberPwd->isChecked() ? "1" : "0";
+        m_records[index].m_password = m_ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName)
                                                               : QString();
     }
     else
     {
         MusicUserRecord record;
-        record.m_name = m_userName;
-        record.m_al = (m_ui->automaticLogon->isChecked() ? "1" : "0");
-        record.m_rp = (m_ui->rememberPwd->isChecked() ? "1" : "0");
-        record.m_pwd = (m_ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName) : QString() );
+        record.m_userName = m_userName;
+        record.m_autoLogin = (m_ui->automaticLogon->isChecked() ? "1" : "0");
+        record.m_rememberPWD = (m_ui->rememberPwd->isChecked() ? "1" : "0");
+        record.m_password = (m_ui->rememberPwd->isChecked() ? m_userModel->getUserPWDMD5(m_userName) : QString() );
         m_records << record;
     }
 }

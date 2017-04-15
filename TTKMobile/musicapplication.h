@@ -20,7 +20,7 @@ class TTKMusicPlayer;
 class TTKNetworkHelper;
 class TTKMusicLyricModel;
 class TTKMusicSongsSummarizied;
-class MusicDownloadStatusLabel;
+class MusicDownloadStatusObject;
 
 /*! @brief The class of the music application.
  * @author Greedysky <greedysky@163.com>
@@ -58,6 +58,10 @@ public:
     Q_INVOKABLE void removeMusicSongs(int index);
     /*!
      * Remove music data from container by index.
+     */
+    Q_INVOKABLE void removeMusicSongsFromManager(int type, int index);
+    /*!
+     * Remove music data from container manager by index.
      */
 
     Q_INVOKABLE bool checkLovestMusicSong() const;
@@ -164,7 +168,7 @@ public:
     /*!
      * Set time to quit app.
      */
-
+    ///////////////////////////////////////////////////////////////////////////////////
 
 Q_SIGNALS:
     void updateCurrentArtist();
@@ -224,7 +228,7 @@ protected:
     TTKNetworkHelper *m_networkHelper;
     TTKMusicLyricModel *m_ttkLrcModel;
     TTKMusicSongsSummarizied *m_songsSummarizied;
-    MusicDownloadStatusLabel *m_downloadStatus;
+    MusicDownloadStatusObject *m_downloadStatus;
 
 };
 

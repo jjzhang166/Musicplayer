@@ -1,5 +1,9 @@
 <RCC>
+    <qresource prefix="/data">
+        <file alias="playlist">../TTKResource/A_extras/playlist</file>
+    </qresource>
     <qresource prefix="/image">
+        <file alias="lb_logo">../TTKResource/logo_pic.png</file>
         <file alias="lb_warning">../TTKResource/lb_warning.png</file>
         <file alias="lb_defaultArt">../TTKResource/lb_default_art.jpg</file>
         <file alias="lb_noAlbum">../TTKResource/lb_no_album_found.png</file>
@@ -319,7 +323,6 @@
         <file alias="lb_kugou">../TTKResource/server/lb_server_kugou.png</file>
         <file alias="lb_kuwo">../TTKResource/server/lb_server_kuwo.png</file>
         <file alias="lb_qq">../TTKResource/server/lb_server_qq.png</file>
-        <file alias="lb_ttdongting">../TTKResource/server/lb_server_ttdongting.png</file>
         <file alias="lb_wangyiyun">../TTKResource/server/lb_server_wangyiyun.png</file>
         <file alias="lb_xiami">../TTKResource/server/lb_server_xiami.png</file>
     </qresource>
@@ -463,6 +466,9 @@
         <file alias="lb_sort_asc">../TTKResource/tiny/lb_sort_asc.png</file>
         <file alias="lb_sort_desc">../TTKResource/tiny/lb_sort_desc.png</file>
         <file alias="lb_server_type">../TTKResource/tiny/lb_server_type.png</file>
+        <file alias="btn_listen_hover">../TTKResource/tiny/btn_listen_hover.png</file>
+        <file alias="btn_playlist_normal">../TTKResource/tiny/btn_playlist_normal.png</file>
+        <file alias="btn_playlist_hover">../TTKResource/tiny/btn_playlist_hover.png</file>
     </qresource>
     <qresource prefix="/functions">
         <file alias="lb_drag_cursor">../TTKResource/functions/lb_drag_cursor.png</file>
@@ -534,6 +540,8 @@
         <file alias="btn_reset_window_hover">../TTKResource/functions/btn_reset_window_hover.png</file>
         <file alias="btn_artist_hover">../TTKResource/functions/btn_artist_hover.png</file>
         <file alias="btn_artist_normal">../TTKResource/functions/btn_artist_normal.png</file>
+        <file alias="btn_playlist_hover">../TTKResource/functions/btn_playlist_hover.png</file>
+        <file alias="btn_playlist_normal">../TTKResource/functions/btn_playlist_normal.png</file>
     </qresource>
     <qresource prefix="/video">
         <file alias="btn_play_normal">../TTKResource/video/btn_play_normal.png</file>

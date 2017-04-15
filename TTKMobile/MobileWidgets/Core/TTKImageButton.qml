@@ -13,19 +13,21 @@ Rectangle {
 
     property alias source: image.source
 
-    signal pressed
+    signal clicked
     
     Image {
         id: image
         smooth: true
         anchors.fill: parent
     }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         onClicked: {
-            ttkImageButton.pressed();
+            ttkImageButton.clicked();
         }
     }
+
     color: ttkTheme.color_alpha_lv0
 }

@@ -1,9 +1,6 @@
 #include "musicartistfoundwidget.h"
 #include "musicdownloadqueryfactory.h"
 #include "musicsourcedownloadthread.h"
-#include "musicsongssummariziedwidget.h"
-#include "musicconnectionpool.h"
-#include "musicsettingmanager.h"
 #include "musicstringutils.h"
 #include "musicuiobject.h"
 #include "musictime.h"
@@ -18,22 +15,11 @@
 MusicArtistFoundTableWidget::MusicArtistFoundTableWidget(QWidget *parent)
     : MusicQueryFoundTableWidget(parent)
 {
-    QHeaderView *headerview = horizontalHeader();
-    headerview->resizeSection(0, 30);
-    headerview->resizeSection(1, 436);
-    headerview->resizeSection(2, 47);
-    headerview->resizeSection(3, 26);
-    headerview->resizeSection(4, 26);
-    headerview->resizeSection(5, 26);
-    headerview->resizeSection(6, 26);
 
-    M_CONNECTION_PTR->setValue(getClassName(), this);
-    M_CONNECTION_PTR->poolConnect(getClassName(), MusicSongsSummariziedWidget::getClassName());
 }
 
 MusicArtistFoundTableWidget::~MusicArtistFoundTableWidget()
 {
-    M_CONNECTION_PTR->removeValue(getClassName());
     clearAllItems();
 }
 
@@ -51,61 +37,23 @@ void MusicArtistFoundTableWidget::setQueryInput(MusicDownLoadQueryThreadAbstract
     }
 }
 
-void MusicArtistFoundTableWidget::resizeWindow()
-{
-    int width = M_SETTING_PTR->value(MusicSettingManager::WidgetSize).toSize().width();
-    QHeaderView *headerview = horizontalHeader();
-    headerview->resizeSection(1, (width - WINDOW_WIDTH_MIN)*0.9 + 436);
-    headerview->resizeSection(2, (width - WINDOW_WIDTH_MIN)*0.1 + 47);
-
-    for(int i=0; i<rowCount(); ++i)
-    {
-        QTableWidgetItem *it = item(i, 1);
-        it->setText(MusicUtils::Widget::elidedText(font(), it->toolTip(), Qt::ElideRight, headerview->sectionSize(1) - 31));
-    }
-}
-
-void MusicArtistFoundTableWidget::resizeEvent(QResizeEvent *event)
-{
-    MusicQueryFoundTableWidget::resizeEvent(event);
-    resizeWindow();
-}
-
 
 
 MusicArtistFoundWidget::MusicArtistFoundWidget(QWidget *parent)
-    : QWidget(parent)
+    : MusicFoundAbstractWidget(parent)
 {
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-    m_mainWindow = new QWidget(this);
-    m_mainWindow->setObjectName("MainWindow");
-    m_mainWindow->setStyleSheet(QString("#MainWindow{%1}").arg(MusicUIObject::MBackgroundStyle17));
-    layout->addWidget(m_mainWindow);
-    setLayout(layout);
-
-    m_statusLabel = new QLabel(tr("Loading Now ... "), m_mainWindow);
-    m_statusLabel->setStyleSheet(MusicUIObject::MFontStyle05 + MusicUIObject::MFontStyle01);
     m_iconLabel = nullptr;
-
-    QHBoxLayout *mLayout = new QHBoxLayout(m_mainWindow);
-    mLayout->addWidget(m_statusLabel, 0, Qt::AlignCenter);
-    m_mainWindow->setLayout(mLayout);
 
     m_artistTableWidget = new MusicArtistFoundTableWidget(this);
     m_downloadThread = M_DOWNLOAD_QUERY_PTR->getQueryThread(this);
     connect(m_downloadThread, SIGNAL(downLoadDataChanged(QString)), SLOT(queryAllFinished()));
-
 }
 
 MusicArtistFoundWidget::~MusicArtistFoundWidget()
 {
     delete m_artistTableWidget;
     delete m_downloadThread;
-    delete m_statusLabel;
     delete m_iconLabel;
-    delete m_mainWindow;
 }
 
 QString MusicArtistFoundWidget::getClassName()
@@ -115,7 +63,7 @@ QString MusicArtistFoundWidget::getClassName()
 
 void MusicArtistFoundWidget::setSongName(const QString &name)
 {
-    m_songNameFull = name;
+    MusicFoundAbstractWidget::setSongName(name);
     m_downloadThread->setQueryAllRecords(false);
     m_downloadThread->setQuerySimplify(true);
     m_downloadThread->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery,
@@ -318,9 +266,4 @@ void MusicArtistFoundWidget::downloadButtonClicked()
 void MusicArtistFoundWidget::addButtonClicked()
 {
     m_artistTableWidget->downloadDataFrom(false);
-}
-
-void MusicArtistFoundWidget::contextMenuEvent(QContextMenuEvent *event)
-{
-    Q_UNUSED(event);
 }

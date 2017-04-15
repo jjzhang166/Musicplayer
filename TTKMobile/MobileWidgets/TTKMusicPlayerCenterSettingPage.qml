@@ -22,6 +22,10 @@ Rectangle{
     property alias text: musicSongTitle.text
     property int muteVolume: TTK_PLAYER.volume()
 
+    function removeItemFromList() {
+        TTK_APP.removeMusicSongs();
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -76,57 +80,27 @@ Rectangle{
                 orientation: ListView.Horizontal
                 spacing: ttkGlobal.dpHeight(30)
 
-                delegate: Rectangle {
-                    id: wrapper1
-                    width: ttkGlobal.dpWidth(60)
-                    height: ttkGlobal.dpHeight(60)
-                    radius: 10
-
-                    Rectangle {
-                        id: imageArea1
-                        width: parent.width
-                        height: parent.height
-                        color: ttkTheme.color_white
-                        radius: parent.radius
-
-                        Image {
-                            anchors.fill: parent
-                            source: imgSource
-                        }
-                    }
-
-                    Text {
-                        anchors {
-                            top: imageArea1.bottom
-                            topMargin: ttkGlobal.dpHeight(20)
-                        }
-                        verticalAlignment: Qt.AlignVCenter
-                        horizontalAlignment: Qt.AlignHCenter
-                        width: parent.width
-                        text: title
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onPressed: {
-                            switch(index) {
-                                case 0: break;
-                                case 1:
-                                    ttkMusicPlayerCenterSettingPage.visible = false;
-                                    ttkMusicSongDownloadPage.visible = true;
-                                    break;
-                                case 2:
-                                    ttkMusicPlayerCenterSettingPage.visible = false;
-                                    ttkMusicSongSharedPage.visible = true;
-                                    break;
-                                case 3:
-                                    ttkMusicPlayerCenterSettingPage.visible = false;
-                                    TTK_APP.removeMusicSongs();
-                                    break;
-                                case 4: break;
-                                case 5: break;
-                                case 6: break;
-                            }
+                delegate: TTKImageRadiusTextButton {
+                    source: imgSource
+                    text: title
+                    onClicked: {
+                        switch(index) {
+                            case 0: break;
+                            case 1:
+                                ttkMusicPlayerCenterSettingPage.visible = false;
+                                ttkMusicSongDownloadPage.visible = true;
+                                break;
+                            case 2:
+                                ttkMusicPlayerCenterSettingPage.visible = false;
+                                ttkMusicSongSharedPage.visible = true;
+                                break;
+                            case 3:
+                                ttkMusicDeletePage.visible = true;
+                                ttkMusicPlayerCenterSettingPage.visible = false;
+                                break;
+                            case 4: break;
+                            case 5: break;
+                            case 6: break;
                         }
                     }
                 }
@@ -177,49 +151,19 @@ Rectangle{
                 orientation: ListView.Horizontal
                 spacing: ttkGlobal.dpHeight(30)
 
-                delegate: Rectangle {
-                    id: wrapper2
-                    width: ttkGlobal.dpWidth(60)
-                    height: ttkGlobal.dpHeight(60)
-                    radius: 10
-
-                    Rectangle {
-                        id: imageArea2
-                        width: parent.width
-                        height: parent.height
-                        color: ttkTheme.color_white
-                        radius: parent.radius
-
-                        Image {
-                            anchors.fill: parent
-                            source: imgSource
-                        }
-                    }
-
-                    Text {
-                        anchors {
-                            top: imageArea2.bottom
-                            topMargin: ttkGlobal.dpHeight(20)
-                        }
-                        verticalAlignment: Qt.AlignVCenter
-                        horizontalAlignment: Qt.AlignHCenter
-                        width: parent.width
-                        text: title
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onPressed: {
-                            switch(index) {
-                                case 0: break;
-                                case 1: break;
-                                case 2: break;
-                                case 3: break;
-                                case 4: break;
-                                case 5: break;
-                                case 6: break;
-                                case 7: break;
-                            }
+                delegate: TTKImageRadiusTextButton {
+                    source: imgSource
+                    text: title
+                    onClicked: {
+                        switch(index) {
+                            case 0: break;
+                            case 1: break;
+                            case 2: break;
+                            case 3: break;
+                            case 4: break;
+                            case 5: break;
+                            case 6: break;
+                            case 7: break;
                         }
                     }
                 }
@@ -282,7 +226,7 @@ Rectangle{
                         Layout.preferredHeight: ttkGlobal.dpHeight(30)
                         source: "qrc:/image/playing_volumn_slide_icon"
 
-                        onPressed: {
+                        onClicked: {
                             if(TTK_PLAYER.volume() !== 0) {
                                 source = "qrc:/image/playing_volumn_slide_nosound_icon";
                                 muteVolume = TTK_PLAYER.volume();
@@ -410,5 +354,9 @@ Rectangle{
             docRoot = docRoot.parent;
         }
         ttkMusicPlayerCenterSettingPage.parent = docRoot;
+    }
+
+    TTKMusicDeletePage {
+        id: ttkMusicDeletePage
     }
 }

@@ -97,10 +97,18 @@ public:
      * Read Show Lrc Fg Color Config.
      */
 
+    bool readNeedUpdateConfig();
+    /*!
+     * Read need update config.
+     */
     void readSystemLastPlayIndexConfig(QStringList &key) const;
    /*!
     * Read System Last Play Index Config.
     */
+    void readOtherLoadConfig() const;
+    /*!
+     * Read Other Load Config.
+     */
 
 protected:
     MusicSongs readMusicFilePath(const QDomNode &node) const;

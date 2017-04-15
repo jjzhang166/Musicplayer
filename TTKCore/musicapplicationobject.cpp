@@ -14,6 +14,7 @@
 #include "musicmobiledevicesthread.h"
 #include "musicsourceupdatewidget.h"
 #include "musicsoundeffectswidget.h"
+#include "musicmessageaboutdialog.h"
 #include "musicnumberdefine.h"
 #include "musicapplication.h"
 #include "musictopareawidget.h"
@@ -129,7 +130,7 @@ void MusicApplicationObject::winEvent(MSG *msg, long *)
                         }
                         QString dev((char)(i + 'A'));
                         M_LOGGER_INFO(QString("USB_Arrived and The USBDisk is: %1").arg(dev));
-                        M_SETTING_PTR->setValue(MusicSettingManager::MobileDevicePathChoiced, dev + ":/");
+                        M_SETTING_PTR->setValue(MusicSettingManager::ExtraDevicePathChoiced, dev + ":/");
                         delete m_mobileDevices;
                         m_mobileDevices = new MusicMobileDevicesWidget;
                         m_mobileDevices->show();
@@ -143,7 +144,7 @@ void MusicApplicationObject::winEvent(MSG *msg, long *)
                     if (lpdbv -> dbcv_flags == 0)
                     {
                         M_LOGGER_INFO("USB_remove");
-                        M_SETTING_PTR->setValue(MusicSettingManager::MobileDevicePathChoiced, QString());
+                        M_SETTING_PTR->setValue(MusicSettingManager::ExtraDevicePathChoiced, QString());
                         delete m_mobileDevices;
                         m_mobileDevices = nullptr;
                     }
@@ -157,12 +158,7 @@ void MusicApplicationObject::winEvent(MSG *msg, long *)
 
 void MusicApplicationObject::musicAboutUs()
 {
-    MusicMessageBox message;
-    message.setText(tr("TTK Music Player") + QString("\n\n") +
-                    tr("Directed By Greedysky") +
-                    QString("\nCopyright© 2015-2017") +
-                    QString("\nMail:Greedysky@163.com"));
-    message.exec();
+    MusicMessageAboutDialog().exec();
 }
 
 void MusicApplicationObject::musicVersionUpdate()

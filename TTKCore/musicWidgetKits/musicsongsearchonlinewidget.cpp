@@ -14,7 +14,7 @@
 #include "musicgiflabelwidget.h"
 
 #include <QDateTime>
-#include <QVBoxLayout>
+#include <QBoxLayout>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QButtonGroup>
@@ -33,11 +33,14 @@ MusicSongSearchOnlineTableWidget::MusicSongSearchOnlineTableWidget(QWidget *pare
     headerview->resizeSection(6, 26);
 
     m_previousAuditionRow = -1;
+    m_queryAllRecords = true;
+
     M_CONNECTION_PTR->setValue(getClassName(), this);
 }
 
 MusicSongSearchOnlineTableWidget::~MusicSongSearchOnlineTableWidget()
 {
+    auditionStop();
     delete m_audition;
     clearAllItems();
 }
@@ -82,6 +85,7 @@ void MusicSongSearchOnlineTableWidget::startSearchQuery(const QString &text)
     ////////////////////////////////////////////////
     m_loadingLabel->show();
     m_loadingLabel->start();
+    m_downLoadManager->setQueryAllRecords(m_queryAllRecords);
     m_downLoadManager->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, text);
 }
 
@@ -96,6 +100,14 @@ void MusicSongSearchOnlineTableWidget::musicDownloadLocal(int row)
     MusicDownloadWidget *download = new MusicDownloadWidget(this);
     download->setSongName(musicSongInfos[row], MusicDownLoadQueryThreadAbstract::MusicQuery);
     download->show();
+}
+
+void MusicSongSearchOnlineTableWidget::auditionStop()
+{
+    if(m_audition)
+    {
+        m_audition->stop();
+    }
 }
 
 void MusicSongSearchOnlineTableWidget::auditionToMusic(int row)
@@ -129,6 +141,7 @@ void MusicSongSearchOnlineTableWidget::auditionToMusicStop(int row)
     {
         m_audition->stop();
     }
+
     if(row < 0 || (row >= rowCount() - 1))
     {
         MusicMessageBox message;
@@ -261,6 +274,7 @@ void MusicSongSearchOnlineTableWidget::actionGroupClick(QAction *action)
     {
         case 4: auditionToMusic(row); break;
         case 5: addSearchMusicToPlayList(row); break;
+        case 6: musicSongDownload(row); break;
     }
 }
 
@@ -274,6 +288,19 @@ void MusicSongSearchOnlineTableWidget::searchDataDwonloadFinished()
     m_downloadData.clear();
 }
 
+void MusicSongSearchOnlineTableWidget::musicSongDownload(int row)
+{
+    if(row < 0)
+    {
+        return;
+    }
+
+    MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
+    MusicDownloadWidget *download = new MusicDownloadWidget(this);
+    download->setSongName(musicSongInfos[row], MusicDownLoadQueryThreadAbstract::MusicQuery);
+    download->show();
+}
+
 void MusicSongSearchOnlineTableWidget::resizeEvent(QResizeEvent *event)
 {
     MusicQueryItemTableWidget::resizeEvent(event);
@@ -283,15 +310,13 @@ void MusicSongSearchOnlineTableWidget::resizeEvent(QResizeEvent *event)
 void MusicSongSearchOnlineTableWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     MusicQueryItemTableWidget::contextMenuEvent(event);
+
     QMenu rightClickMenu(this);
+    m_actionGroup->addAction( rightClickMenu.addAction(QIcon(":/contextMenu/btn_play"), tr("musicPlay")) )->setData(4);
+    m_actionGroup->addAction( rightClickMenu.addAction(tr("musicAdd")) )->setData(5);
+    m_actionGroup->addAction( rightClickMenu.addAction(tr("downloadMore...")) )->setData(6);
     createContextMenu(rightClickMenu);
 
-    QAction *playAction = rightClickMenu.addAction(QIcon(":/contextMenu/btn_play"), tr("musicPlay"));
-    QAction *addAction = rightClickMenu.addAction(tr("musicAdd"));
-    rightClickMenu.insertAction(rightClickMenu.actions().first(), addAction);
-    rightClickMenu.insertAction(addAction, playAction);
-    m_actionGroup->addAction( playAction )->setData(4);
-    m_actionGroup->addAction( addAction )->setData(5);
     rightClickMenu.exec(QCursor::pos());
 }
 
@@ -374,20 +399,31 @@ QString MusicSongSearchOnlineWidget::getClassName()
 
 void MusicSongSearchOnlineWidget::startSearchQuery(const QString &name)
 {
+    startSearchQuery(name, true);
+}
+
+void MusicSongSearchOnlineWidget::startSearchQuery(const QString &name, bool all)
+{
     setResizeLabelText(name);
+    m_searchTableWidget->setQueryAllRecords(all);
     m_searchTableWidget->startSearchQuery(name);
 }
 
 void MusicSongSearchOnlineWidget::researchQueryByQuality(const QString &name, const QString &quality)
 {
     m_searchTableWidget->setSearchQuality(quality);
-    startSearchQuery(name);
+    startSearchQuery(name, false);
 }
 
 void MusicSongSearchOnlineWidget::resizeWindow()
 {
     setResizeLabelText( m_textLabel->toolTip() );
     m_searchTableWidget->resizeWindow();
+}
+
+void MusicSongSearchOnlineWidget::auditionStop()
+{
+    m_searchTableWidget->auditionStop();
 }
 
 void MusicSongSearchOnlineWidget::buttonClicked(int index)

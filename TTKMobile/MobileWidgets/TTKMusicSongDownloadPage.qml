@@ -23,6 +23,29 @@ Rectangle {
     property string text
     property string jsonAtrrString
 
+    function startSearch() {
+        clearData();
+        itemListModel.append({title: qsTr("正在获取数据当中..."), bit: -1});
+        if(visible === true) {
+            verticalYAnimation.start();
+            if(autoDownloadFlag) {
+                TTK_NETWORK.downloadSong(text);
+            }else {
+                TTK_NETWORK.setQueryType(queryType);
+                var json = JSON.parse(jsonAtrrString);
+                if(json.length !== 0) {
+                    clearData();
+                }else{
+                    createData(-1);
+                }
+
+                for(var i=0; i<json.length; ++i) {
+                    createData( json[i].bitrate );
+                }
+            }
+        }
+    }
+
     function clearData() {
         itemListModel.clear();
         itemListView.currentIndex = -1;
@@ -140,7 +163,7 @@ Rectangle {
 
                 MouseArea {
                     anchors.fill: parent
-                    onPressed: {
+                    onClicked: {
                         itemListView.currentIndex = index;
                         songBitrate = bit;
                     }
@@ -174,11 +197,10 @@ Rectangle {
             text: qsTr("下载")
             textSize: ttkMusicSongDownloadPage.height/25
             enabled: false
-            onPressed: {
+            onClicked: {
                 if(songBitrate > 0) {
                     ttkMusicSongDownloadPage.visible = false;
                     TTK_NETWORK.setCurrentIndex(songIndex, songBitrate);
-
                     ttkFlyInOutBox.text = qsTr("已加入下载列表");
                     ttkFlyInOutBox.start();
                 }
@@ -196,26 +218,7 @@ Rectangle {
     }
 
     onVisibleChanged: {
-        clearData();
-        itemListModel.append({title: qsTr("正在获取数据当中..."), bit: -1});
-        if(visible === true) {
-            verticalYAnimation.start();
-            if(autoDownloadFlag) {
-                TTK_NETWORK.downloadSong(text);
-            }else {
-                TTK_NETWORK.setQueryType(queryType);
-                var json = JSON.parse(jsonAtrrString);
-                if(json.length !== 0) {
-                    clearData();
-                }else{
-                    createData(-1);
-                }
-
-                for(var i=0; i<json.length; ++i) {
-                    createData( json[i].bitrate );
-                }
-            }
-        }
+        startSearch();
     }
 
     Component.onCompleted:

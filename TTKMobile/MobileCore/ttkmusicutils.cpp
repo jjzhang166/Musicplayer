@@ -1,8 +1,13 @@
 #include "ttkmusicutils.h"
 #include "musicobject.h"
 #include "musictime.h"
+#include "musicversion.h"
 #include "musicsongtag.h"
 #include "musicnumberutils.h"
+#include "musicsettingmanager.h"
+#include "musicsourceupdatethread.h"
+#include "musicsemaphoreloop.h"
+#include "musicnetworkthread.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -17,6 +22,16 @@ TTKMusicUtils::TTKMusicUtils(QObject *parent)
 TTKMusicUtils::~TTKMusicUtils()
 {
     delete m_songTag;
+}
+
+QVariant TTKMusicUtils::getValue(const QString &key) const
+{
+    return M_SETTING_PTR->value(key);
+}
+
+void TTKMusicUtils::setValue(const QString &key, const QVariant &value) const
+{
+    M_SETTING_PTR->setValue(key, value);
 }
 
 QString TTKMusicUtils::getRoot() const
@@ -36,6 +51,34 @@ QString TTKMusicUtils::getRootPath() const
 QString TTKMusicUtils::getCachedPath() const
 {
     return CACHE_DIR_FULL;
+}
+
+void TTKMusicUtils::showWindowNotify(int value)
+{
+#if defined (Q_OS_ANDROID)
+    QAndroidJniObject::callStaticMethod<void>(APP_PKG_NAME,
+              "notify", "(Ljava/lang/String;Ljava/lang/String;I)V",
+              QAndroidJniObject::fromString( QString() ).object<jstring>(),
+              QAndroidJniObject::fromString( QString() ).object<jstring>(),
+              static_cast<jint>(value));
+#else
+    Q_UNUSED(value);
+#endif
+}
+
+void TTKMusicUtils::showWindowNotify(const QString &title, const QString &text, int value)
+{
+#if defined (Q_OS_ANDROID)
+    QAndroidJniObject::callStaticMethod<void>(APP_PKG_NAME,
+              "notify", "(Ljava/lang/String;Ljava/lang/String;I)V",
+              QAndroidJniObject::fromString( title ).object<jstring>(),
+              QAndroidJniObject::fromString( text ).object<jstring>(),
+              static_cast<jint>(value));
+#else
+    Q_UNUSED(title);
+    Q_UNUSED(text);
+    Q_UNUSED(value);
+#endif
 }
 
 void TTKMusicUtils::showMessageBox(const QString &text, const QString &title, QWidget *parent)
@@ -58,6 +101,35 @@ bool TTKMusicUtils::currentNetIsWifi()
     return (wifi == 0);
 #endif
     return false;
+}
+
+void TTKMusicUtils::setNetworkBlockNotWifi()
+{
+#if defined (Q_OS_ANDROID)
+    bool block = M_SETTING_PTR->value(MusicSettingManager::MobileWifiConnectChoiced).toBool() && currentNetIsWifi();
+    M_NETWORK_PTR->setBlockNetWork(block);
+#endif
+}
+
+void TTKMusicUtils::updateApplicationDialog()
+{
+#if defined (Q_OS_ANDROID)
+    MusicSemaphoreLoop loop;
+    MusicSourceUpdateThread *download = new MusicSourceUpdateThread(this);
+    connect(download, SIGNAL(downLoadDataChanged(QVariant)), &loop, SLOT(quit()));
+    download->startToDownload();
+    loop.exec();
+
+    if(!download->isLastedVersion())
+    {
+        QAndroidJniObject::callStaticMethod<void>(APP_PKG_NAME, "updateApplicationDialog", "(Ljava/lang/String;)V",
+        QAndroidJniObject::fromString( download->getLastedVersion() ).object<jstring>());
+    }
+    else
+    {
+        showMessageBox(tr("Current version is updated!"));
+    }
+#endif
 }
 
 QString TTKMusicUtils::normalizeTime(qint64 time, const QString &format)
@@ -110,7 +182,7 @@ void TTKMusicUtils::closeTagFromFile()
     m_songTag = nullptr;
 }
 
-bool TTKMusicUtils::removeDir(const QString &dir)
+bool TTKMusicUtils::removeCacheDir(const QString &dir)
 {
     QDir d(dir);
     if(d.exists() && d.removeRecursively())
@@ -119,6 +191,12 @@ bool TTKMusicUtils::removeDir(const QString &dir)
         return true;
     }
     return false;
+}
+
+bool TTKMusicUtils::removeDir(const QString &dir)
+{
+    QDir d(dir);
+    return (d.exists() && d.removeRecursively());
 }
 
 void TTKMusicUtils::checkTheFileNeededExist()

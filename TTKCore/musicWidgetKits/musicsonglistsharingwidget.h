@@ -18,7 +18,6 @@ class MusicSongListSharingWidget;
 /*! @brief The class of the song list share widget.
  * @author Greedysky <greedysky@163.com>
  */
-
 class MUSIC_WIDGET_EXPORT MusicSongListSharingWidget : public MusicAbstractMoveDialog
 {
     Q_OBJECT
@@ -39,8 +38,25 @@ public Q_SLOTS:
     /*!
      * Override exec function.
      */
+    void switchToDiffWidget(int index);
+    /*!
+     * Switch to diff widget.
+     */
+    void writeMainCopyButtonClicked();
+    /*!
+     * Write copy button clicked.
+     */
+    void readMainButtonClicked();
+    /*!
+     * Read button clicked.
+     */
 
 protected:
+    void createWriteKey();
+    /*!
+     * Create write key.
+     */
+
     Ui::MusicSongListSharingWidget *m_ui;
 
 };

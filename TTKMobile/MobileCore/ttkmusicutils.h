@@ -29,6 +29,15 @@ public:
      */
     ~TTKMusicUtils();
 
+    Q_INVOKABLE QVariant getValue(const QString &key) const;
+    /*!
+     * Get global setting vale.
+     */
+    Q_INVOKABLE void setValue(const QString &key, const QVariant &value) const;
+    /*!
+     * Set global setting vale.
+     */
+
     Q_INVOKABLE QString getRoot() const;
     /*!
      * Get root.
@@ -42,13 +51,29 @@ public:
      * Get cached path.
      */
 
+    Q_INVOKABLE void showWindowNotify(int value);
+    /*!
+     * Show window notify dialog.
+     */
+    Q_INVOKABLE void showWindowNotify(const QString &title, const QString &text, int value);
+    /*!
+     * Show window notify dialog.
+     */
     Q_INVOKABLE void showMessageBox(const QString &text, const QString &title = 0, QWidget *parent = 0);
     /*!
      * Show message box.
      */
     Q_INVOKABLE bool currentNetIsWifi();
     /*!
-     * Show message box.
+     * Check current network is wifi.
+     */
+    Q_INVOKABLE void setNetworkBlockNotWifi();
+    /*!
+     * Set network block if it is not Wifi.
+     */
+    Q_INVOKABLE void updateApplicationDialog();
+    /*!
+     * Update application dialog.
      */
 
     Q_INVOKABLE QString normalizeTime(qint64 time, const QString &format);
@@ -82,6 +107,10 @@ public:
      * Close tag reader object.
      */
 
+    Q_INVOKABLE bool removeCacheDir(const QString &dir);
+    /*!
+     * Remove cache dir in ecursive.
+     */
     Q_INVOKABLE bool removeDir(const QString &dir);
     /*!
      * Remove dir in ecursive.

@@ -100,7 +100,7 @@ Item {
                     textColor: ttkTheme.color_white
                     text: qsTr("关闭")
 
-                    onPressed: {
+                    onClicked: {
                         ttkOutStackView.pop();
                     }
                 }
@@ -179,7 +179,7 @@ Item {
                     radius: 10
                     text: qsTr("开始扫描")
 
-                    onPressed: {
+                    onClicked: {
                         searchCore.search(TTK_UTILS.getRoot());
                         rotationAnimation.start();
                         bottomBody.visible = false;
@@ -277,7 +277,7 @@ Item {
                 color: ttkTheme.topbar_background
                 radius: 10
 
-                onPressed: {
+                onClicked: {
                     TTK_APP.importOtherMusicSongs(scanedPaths);
                     ttkOutStackView.pop();
                 }
@@ -300,7 +300,7 @@ Item {
                 radius: 10
                 text: qsTr("取消扫描")
 
-                onPressed: {
+                onClicked: {
                     rotationAnimation.stop();
                     bottomBody.visible = true;
                     scanMainPage.visible = true;
@@ -327,8 +327,8 @@ Item {
                     width: 2
                 }
 
-                onPressed: {
-                    scanFolderObj = ttkOutStackView.push("qrc:/MobileWidgets/TTKScanFolderPage.qml");
+                onClicked: {
+                    scanFolderObj = ttkOutStackView.push("qrc:/MobileWidgets/TTKMusicScanFolderPage.qml");
                 }
             }
 
@@ -343,7 +343,7 @@ Item {
                     width: 2
                 }
 
-                onPressed: {
+                onClicked: {
                     ttkOutStackView.pop();
                 }
             }

@@ -13,7 +13,7 @@
 #include "musicglobaldefine.h"
 
 class MusicSettingWidget;
-class MusicDownloadStatusLabel;
+class MusicDownloadStatusObject;
 class MusicLrcContainerForDesktop;
 
 namespace Ui {
@@ -38,6 +38,7 @@ public:
         SimilarWidget,          ///*insert similar found widget*/
         AlbumWidget,            ///*insert album found widget*/
         ArtistWidget,           ///*insert artist found widget*/
+        PlaylistWidget,         ///*insert playlist found widget*/
         IndentifyWidget,        ///*insert indentify songs widget*/
         KuiSheWidget            ///*insert kugou kuishe widget*/
     };
@@ -162,6 +163,10 @@ public Q_SLOTS:
     /*!
      * Music artist function that by string.
      */
+    void musicPlaylistFound();
+    /*!
+     * Music playlist function that by string.
+     */
     void musicLoadSongIndexWidget();
     /*!
      * Music load song index widget.
@@ -217,7 +222,7 @@ protected:
     Ui::MusicApplication *m_ui;
     MusicSettingWidget *m_setting;
     MusicLrcContainerForDesktop *m_musicLrcForDesktop;
-    MusicDownloadStatusLabel *m_downloadStatusLabel;
+    MusicDownloadStatusObject *m_downloadStatusLabel;
 
     static MusicRightAreaWidget *m_instance;
 };

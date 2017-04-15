@@ -109,7 +109,7 @@ Item {
                     Layout.preferredWidth: ttkGlobal.dpWidth(50)
                     Layout.preferredHeight: ttkGlobal.dpHeight(50)
                     anchors.left: parent.left
-                    onPressed: {
+                    onClicked: {
                         ttkMainStackView.pop();
                     }
                 }
@@ -130,7 +130,7 @@ Item {
                     Layout.preferredWidth: ttkGlobal.dpWidth(50)
                     Layout.preferredHeight: ttkGlobal.dpHeight(50)
                     anchors.right: parent.right
-                    onPressed: {
+                    onClicked: {
                         ttkMusicListsMorePage.visible = true;
                     }
                 }
@@ -173,6 +173,10 @@ Item {
 
                         MouseArea {
                             anchors.fill: parent
+                            onPressAndHold: {
+                                ttkGlobal.list_module_index = ttkTheme.music_normal_list;
+                                ttkOutStackView.push("qrc:/MobileWidgets/TTKMusicListsManagerPage.qml");
+                            }
                             onClicked: {
                                 itemListView.currentIndex = index;
                                 TTK_APP.setCurrentIndex(ttkTheme.music_normal_list, index);
@@ -198,7 +202,7 @@ Item {
                         Text {
                             id: titleArea
                             text: title
-                            width: ttkMusicListsPage.width - iconArea.width - ttkGlobal.dpHeight(60)
+                            width: ttkMusicListsPage.width - iconArea.width - ttkGlobal.dpWidth(60)
                             anchors {
                                 top: parent.top
                                 topMargin: ttkGlobal.dpHeight(10)
@@ -234,7 +238,7 @@ Item {
                                 rightMargin: ttkGlobal.dpHeight(20)
                             }
                             source: "qrc:/image/ic_playlist_more_normal"
-                            onPressed: {
+                            onClicked: {
                                 functionClickedIndex = index;
                                 ttkMusicSongSettingPage.songName = title;
                                 ttkMusicSongSettingPage.singerName = artist;
@@ -302,7 +306,7 @@ Item {
                 bottom: parent.bottom
                 bottomMargin: ttkGlobal.dpHeight(10)
             }
-            onPressed: {
+            onClicked: {
                 var delta = ttkGlobal.dpHeight(70)*itemListView.currentIndex;
                 if(delta >= 0) {
                     itemListView.contentY = delta;

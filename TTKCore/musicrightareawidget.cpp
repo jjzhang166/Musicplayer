@@ -4,12 +4,13 @@
 #include "musicuiobject.h"
 #include "musiclrccontainerfordesktop.h"
 #include "musicvideoplaywidget.h"
-#include "musicdownloadstatuslabel.h"
+#include "musicdownloadstatusobject.h"
 #include "musicsettingwidget.h"
 #include "musicmessagebox.h"
 #include "musicalbumfoundwidget.h"
 #include "musicartistfoundwidget.h"
 #include "musicsimilarfoundwidget.h"
+#include "musicplaylistfoundwidget.h"
 #include "musicsongsearchonlinewidget.h"
 #include "musicidentifysongswidget.h"
 #include "musicfunctionuiobject.h"
@@ -29,7 +30,7 @@ MusicRightAreaWidget::MusicRightAreaWidget(QWidget *parent)
     m_stackedFuncWidget = nullptr;
     m_musicLrcForDesktop = nullptr;
 
-    m_downloadStatusLabel = new MusicDownloadStatusLabel(parent);
+    m_downloadStatusLabel = new MusicDownloadStatusObject(parent);
     m_setting = new MusicSettingWidget(this);
     connect(m_setting, SIGNAL(parameterSettingChanged()), parent,
                        SLOT(getParameterSetting()));
@@ -209,6 +210,10 @@ void MusicRightAreaWidget::resizeWindow()
     {
         MObject_cast(MusicArtistFoundWidget*, m_stackedFuncWidget)->resizeWindow();
     }
+    else if(MObject_cast(MusicPlaylistFoundWidget*, m_stackedFuncWidget))
+    {
+        MObject_cast(MusicPlaylistFoundWidget*, m_stackedFuncWidget)->resizeWindow();
+    }
     else if(MObject_cast(MusicVideoPlayWidget*, m_stackedFuncWidget))
     {
         MObject_cast(MusicVideoPlayWidget*, m_stackedFuncWidget)->resizeWindow();
@@ -246,6 +251,7 @@ void MusicRightAreaWidget::musicFunctionClicked(int index)
     }
 
     deleteStackedFuncWidget();
+    m_ui->songSearchWidget->auditionStop();
     m_ui->lrcDisplayAllButton->setVisible(false);
     if(m_ui->musiclrccontainerforinline->lrcDisplayExpand())
     {
@@ -369,6 +375,15 @@ void MusicRightAreaWidget::musicFunctionClicked(int index)
                 emit updateBackgroundTheme();
                 break;
             }
+        case PlaylistWidget: //insert playlist found widget
+            {
+                MusicPlaylistFoundWidget *playlistFoundWidget = new MusicPlaylistFoundWidget(this);
+                m_ui->surfaceStackedWidget->addWidget(playlistFoundWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(playlistFoundWidget);
+                m_stackedFuncWidget = playlistFoundWidget;
+                emit updateBackgroundTheme();
+                break;
+            }
         case IndentifyWidget: //insert indentify songs widget
             {
                 MusicIdentifySongsWidget *songsIdentifyWidget = new MusicIdentifySongsWidget(this);
@@ -418,6 +433,12 @@ void MusicRightAreaWidget::musicArtistFound(const QString &text)
 {
     musicFunctionClicked(MusicRightAreaWidget::ArtistWidget);
     MStatic_cast(MusicArtistFoundWidget*, m_stackedFuncWidget)->setSongName(text);
+}
+
+void MusicRightAreaWidget::musicPlaylistFound()
+{
+    musicFunctionClicked(MusicRightAreaWidget::PlaylistWidget);
+    MStatic_cast(MusicPlaylistFoundWidget*, m_stackedFuncWidget)->setSongName(QString());
 }
 
 void MusicRightAreaWidget::musicLoadSongIndexWidget()
