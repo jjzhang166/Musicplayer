@@ -29,6 +29,13 @@
 #include "musicdownloadquerykgplaylistthread.h"
 #include "musicdownloadquerykwplaylistthread.h"
 
+#include "musicdownloadquerywycommentsthread.h"
+#include "musicdownloadqueryxmcommentsthread.h"
+#include "musicdownloadquerybdcommentsthread.h"
+#include "musicdownloadquerykgcommentsthread.h"
+#include "musicdownloadquerykwcommentsthread.h"
+#include "musicdownloadqueryqqcommentsthread.h"
+
 #include "musicdatadownloadthread.h"
 
 #include "musictextdownloadthread.h"
@@ -114,9 +121,27 @@ MusicDownLoadQueryThreadAbstract *MusicDownLoadQueryFactory::getPlaylistThread(Q
     return thread;
 }
 
-MusicDownLoadThreadAbstract *MusicDownLoadQueryFactory::getDownloadSmallPic(const QString &url, const QString &save,
-                                                                            MusicDownLoadThreadAbstract::Download_Type type,
-                                                                            QObject *parent)
+MusicDownLoadQueryThreadAbstract *MusicDownLoadQueryFactory::getCommentThread(QObject *parent)
+{
+    MusicDownLoadQueryThreadAbstract *thread = nullptr;
+    int index = M_SETTING_PTR->value(MusicSettingManager::DownloadServerChoiced).toInt();
+    switch( index )
+    {
+        case 0:  thread = new MusicDownLoadQueryWYCommentsThread(parent); break;
+        case 1:  thread = new MusicDownLoadQueryQQCommentsThread(parent); break;
+        case 2:  thread = new MusicDownLoadQueryXMCommentsThread(parent); break;
+        case 3:  thread = new MusicDownLoadQueryBDCommentsThread(parent); break;
+        case 4:  thread = new MusicDownLoadQueryKWCommentsThread(parent); break;
+        case 5:  thread = new MusicDownLoadQueryKGCommentsThread(parent); break;
+        default: thread = new MusicDownLoadQueryWYCommentsThread(parent);
+    }
+    M_LOGGER_INFO(QString("getCommentThread server: %1").arg(thread->getQueryServer()));
+    return thread;
+}
+
+MusicDownLoadThreadAbstract *MusicDownLoadQueryFactory::getDownloadSmallPicThread(const QString &url, const QString &save,
+                                                                                  MusicDownLoadThreadAbstract::Download_Type type,
+                                                                                  QObject *parent)
 {
     int index = M_SETTING_PTR->value(MusicSettingManager::DownloadServerChoiced).toInt();
     switch( index )
@@ -131,9 +156,9 @@ MusicDownLoadThreadAbstract *MusicDownLoadQueryFactory::getDownloadSmallPic(cons
     return (new MusicDataDownloadThread(url, save, type, parent));
 }
 
-MusicDownLoadThreadAbstract *MusicDownLoadQueryFactory::getDownloadLrc(const QString &url, const QString &save,
-                                                                       MusicDownLoadThreadAbstract::Download_Type type,
-                                                                       QObject *parent)
+MusicDownLoadThreadAbstract *MusicDownLoadQueryFactory::getDownloadLrcThread(const QString &url, const QString &save,
+                                                                             MusicDownLoadThreadAbstract::Download_Type type,
+                                                                             QObject *parent)
 {
     int index = M_SETTING_PTR->value(MusicSettingManager::DownloadServerChoiced).toInt();
     switch( index )

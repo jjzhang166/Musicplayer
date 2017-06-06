@@ -4,8 +4,10 @@
 #include "musicplaylistfoundinfowidget.h"
 #include "musicdownloadqueryfactory.h"
 #include "musictinyuiobject.h"
-#include "musicplaylistfoundcategorywidget.h"
+#include "musicplaylistfoundcategorypopwidget.h"
+#include "musicpagingwidgetobject.h"
 
+#include <qmath.h>
 #include <QPushButton>
 #include <QGridLayout>
 #include <QScrollArea>
@@ -114,6 +116,7 @@ MusicPlaylistFoundWidget::MusicPlaylistFoundWidget(QWidget *parent)
     m_container->addWidget(m_mainWindow);
 
     m_firstInit = false;
+    m_categoryChanged = false;
     m_infoWidget = nullptr;
     m_gridLayout = nullptr;
     m_categoryButton = nullptr;
@@ -129,6 +132,7 @@ MusicPlaylistFoundWidget::~MusicPlaylistFoundWidget()
 //    delete m_container;
     delete m_categoryButton;
     delete m_downloadThread;
+    delete m_pagingWidgetObject;
 }
 
 QString MusicPlaylistFoundWidget::getClassName()
@@ -139,11 +143,16 @@ QString MusicPlaylistFoundWidget::getClassName()
 void MusicPlaylistFoundWidget::setSongName(const QString &name)
 {
     MusicFoundAbstractWidget::setSongName(name);
-    m_downloadThread->startSearchSong(MusicDownLoadQueryThreadAbstract::MovieQuery, QString());
+    m_downloadThread->startSearchSong(MusicDownLoadQueryThreadAbstract::OtherQuery, QString());
 }
 
 void MusicPlaylistFoundWidget::resizeWindow()
 {
+    if(m_infoWidget)
+    {
+        m_infoWidget->resizeWindow();
+    }
+
     if(!m_resizeWidget.isEmpty())
     {
         if(m_gridLayout)
@@ -183,7 +192,7 @@ void MusicPlaylistFoundWidget::queryAllFinished(const MusicPlaylistItem &item)
         QWidget *containTopWidget = new QWidget(m_mainWindow);
         QHBoxLayout *containTopLayout  = new QHBoxLayout(containTopWidget);
         containTopLayout->setContentsMargins(30, 0, 30, 0);
-        m_categoryButton = new MusicPlaylistFoundCategoryWidget(m_mainWindow);
+        m_categoryButton = new MusicPlaylistFoundCategoryPopWidget(m_mainWindow);
         m_categoryButton->setCategory(m_downloadThread->getQueryServer(), this);
         containTopLayout->addWidget(m_categoryButton);
         containTopLayout->addStretch(1);
@@ -197,6 +206,7 @@ void MusicPlaylistFoundWidget::queryAllFinished(const MusicPlaylistItem &item)
             containTopLayout->addWidget(l);
             containTopLayout->addWidget(hline);
         }
+        containTopWidget->setLayout(containTopLayout);
 
         QFrame *line = new QFrame(m_mainWindow);
         line->setFrameShape(QFrame::HLine);
@@ -210,7 +220,19 @@ void MusicPlaylistFoundWidget::queryAllFinished(const MusicPlaylistItem &item)
         mainlayout->addWidget(containTopWidget);
         mainlayout->addWidget(line);
         mainlayout->addWidget(containWidget);
+
+        m_pagingWidgetObject = new MusicPagingWidgetObject(m_mainWindow);
+        connect(m_pagingWidgetObject, SIGNAL(mapped(int)), SLOT(buttonClicked(int)));
+        int total = ceil(m_downloadThread->getPageTotal()*1.0/m_downloadThread->getPageSize());
+        mainlayout->addWidget(m_pagingWidgetObject->createPagingWidget(m_mainWindow, total));
         mainlayout->addStretch(1);
+    }
+
+    if(m_categoryChanged && m_pagingWidgetObject)
+    {
+        m_categoryChanged = false;
+        int total = ceil(m_downloadThread->getPageTotal()*1.0/m_downloadThread->getPageSize());
+        m_pagingWidgetObject->reset(total);
     }
 
     MusicPlaylistFoundItemWidget *label = new MusicPlaylistFoundItemWidget(this);
@@ -242,6 +264,7 @@ void MusicPlaylistFoundWidget::categoryChanged(const PlaylistCategoryItem &categ
 {
     if(m_categoryButton)
     {
+        m_categoryChanged = true;
         m_categoryButton->setText(category.m_name);
         m_categoryButton->closeMenu();
 
@@ -251,8 +274,21 @@ void MusicPlaylistFoundWidget::categoryChanged(const PlaylistCategoryItem &categ
             m_gridLayout->removeWidget(w);
             delete w;
         }
-        m_downloadThread->startSearchSong(MusicDownLoadQueryThreadAbstract::MovieQuery, category.m_id);
+        m_downloadThread->startSearchSong(MusicDownLoadQueryThreadAbstract::OtherQuery, category.m_id);
     }
+}
+
+void MusicPlaylistFoundWidget::buttonClicked(int index)
+{
+    while(!m_resizeWidget.isEmpty())
+    {
+        QWidget *w = m_resizeWidget.takeLast();
+        m_gridLayout->removeWidget(w);
+        delete w;
+    }
+    int total = ceil(m_downloadThread->getPageTotal()*1.0/m_downloadThread->getPageSize());
+    m_pagingWidgetObject->paging(index, total);
+    m_downloadThread->startSearchSong(m_pagingWidgetObject->currentIndex() - 1);
 }
 
 void MusicPlaylistFoundWidget::resizeEvent(QResizeEvent *event)

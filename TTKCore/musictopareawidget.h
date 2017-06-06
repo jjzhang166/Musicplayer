@@ -17,6 +17,7 @@ class MusicUserWindow;
 class MusicRemoteWidget;
 class MusicBackgroundSkinDialog;
 class MusicWYDiscoverListThread;
+class MusicCounterPVDownloadThread;
 
 namespace Ui {
     class MusicApplication;
@@ -177,6 +178,14 @@ public Q_SLOTS:
     /*!
      * Changed current remote to complex style mode.
      */
+    void musicStripRemote();
+    /*!
+     * Changed current remote to strip mode.
+     */
+    void musicRipplesRemote();
+    /*!
+     * Changed current remote to ripples mode.
+     */
     void musicDeleteRemote();
     /*!
      * Delete current remote.
@@ -199,20 +208,13 @@ protected:
     /*!
      * Draw window background rect by picture.
      */
-    void reRenderImage(int delta, const QImage *input, QImage *output);
-    /*!
-     * Rerender the image by color burn transform.
-     */
-    uint colorBurnTransform(int c, int delta);
-    /*!
-     * Image color burn transform.
-     */
 
     Ui::MusicApplication *m_ui;
     MusicUserWindow *m_musicUserWindow;
     MusicBackgroundSkinDialog *m_musicbgskin;
     MusicRemoteWidget *m_musicRemoteWidget;
     MusicWYDiscoverListThread *m_getDiscoverThread;
+    MusicCounterPVDownloadThread *m_counterPVThread;
 
     QString m_currentBgSkin;
     int m_alpha, m_listAlpha;

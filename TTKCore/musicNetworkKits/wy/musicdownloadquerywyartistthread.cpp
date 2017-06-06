@@ -22,6 +22,11 @@ void MusicDownLoadQueryWYArtistThread::startSearchSong(QueryType type, const QSt
 
 void MusicDownLoadQueryWYArtistThread::startSearchSong(const QString &artist)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     QUrl musicUrl = MusicCryptographicHash::decryptData(WY_ARTIST_URL, URL_KEY).arg(artist);
     deleteAll();
 
@@ -43,7 +48,7 @@ void MusicDownLoadQueryWYArtistThread::startSearchSong(const QString &artist)
 
 void MusicDownLoadQueryWYArtistThread::downLoadFinished()
 {
-    if(m_reply == nullptr)
+    if(!m_reply || !m_manager)
     {
         deleteAll();
         return;
@@ -84,7 +89,7 @@ void MusicDownLoadQueryWYArtistThread::downLoadFinished()
                     musicInfo.m_timeLength = MusicTime::msecTime2LabelJustified(value["duration"].toInt());
                     musicInfo.m_lrcUrl = MusicCryptographicHash::decryptData(WY_SONG_LRC_URL, URL_KEY).arg(value["id"].toInt());
 
-                    readFromMusicSongAttribute(&musicInfo, value, m_searchQuality, m_queryAllRecords);
+                    readFromMusicSongAttribute(&musicInfo, m_manager, value, m_searchQuality, m_queryAllRecords);
 
                     if(musicInfo.m_songAttrs.isEmpty())
                     {

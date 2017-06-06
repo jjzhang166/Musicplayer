@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 add_definitions(-DMUSIC_LIBRARY)
 
-set(TTK_VERSION "2.4.8.0")
+set(TTK_VERSION "2.5.0.0")
 
 # Find includes in the build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -31,10 +31,10 @@ set(MUSIC_UI_DIR "${MUSIC_LIB_DIR}/musicUiKits")
 set(MUSIC_LOCALSEARCH_DIR "${MUSIC_LIB_DIR}/musicSearchKits")
 set(MUSIC_LRCMANAGER_DIR "${MUSIC_LIB_DIR}/musicLrcKits")
 set(MUSIC_REMOTEWIDGET_DIR "${MUSIC_LIB_DIR}/musicRemoteKits")
-set(MUSIC_TOOLSETSWIDGET_DIR "${MUSIC_LIB_DIR}/musicToolsetsKits")
+set(MUSIC_TOOLSETSWIDGET_DIR "${MUSIC_LIB_DIR}/musicToolsSetsKits")
 set(MUSIC_TOOLSWIDGET_DIR "${MUSIC_LIB_DIR}/musicToolsKits")
 set(MUSIC_USERMANAGER_DIR "${MUSIC_LIB_DIR}/musicUserKits")
-set(MUSIC_VIDEOKITS_DIR "${MUSIC_LIB_DIR}/musicVideokits")
+set(MUSIC_VIDEOKITS_DIR "${MUSIC_LIB_DIR}/musicVideoKits")
 
 set(MUSIC_SCRIPT_DIR "${MUSIC_DIR}/TTKScript")
 set(MUSIC_QRC_DIR "${MUSIC_DIR}/TTKQrc")

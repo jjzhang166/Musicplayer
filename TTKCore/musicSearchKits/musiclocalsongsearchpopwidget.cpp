@@ -4,7 +4,6 @@
 
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QDateTime>
 
 #define ROW_HEIGHT 30
 
@@ -41,12 +40,12 @@ void MusicLocalSongSearchPopTableWidget::createItems(int index, const QString &n
 
     QTableWidgetItem *item0 = new QTableWidgetItem(MusicUtils::Widget::elidedText(font(), "  " + name, Qt::ElideRight, 200));
     item0->setToolTip(name);
-    item0->setTextColor(QColor(50, 50, 50));
+    item0->setTextColor(QColor(100, 100, 100));
     item0->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     setItem(index, 0, item0);
 
     QTableWidgetItem *item1 = new QTableWidgetItem(time);
-    item1->setTextColor(QColor(50, 50, 50));
+    item1->setTextColor(QColor(100, 100, 100));
     item1->setTextAlignment(Qt::AlignCenter);
     setItem(index, 1, item1);
 }
@@ -125,7 +124,7 @@ void MusicLocalSongSearchPopWidget::createItems()
 
 QString MusicLocalSongSearchPopWidget::utcTimeToLocal(const QString &time) const
 {
-    qint64 t = (QDateTime::currentMSecsSinceEpoch() - time.toLongLong()) / MT_S2MS;
+    qint64 t = (MusicTime::timeStamp() - time.toLongLong()) / MT_S2MS;
     return MusicTime::normalTime2Label(t);
 }
 

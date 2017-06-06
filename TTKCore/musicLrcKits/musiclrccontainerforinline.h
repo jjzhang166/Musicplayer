@@ -86,7 +86,7 @@ public:
     /*!
      * Get state of background is artist shown.
      */
-    void setLrcSize(MusicLRCManager::LrcSizeTable = MusicLRCManager::Middle) const;
+    void setLrcSize(int size);
     /*!
      * Set current lrc size.
      */
@@ -110,7 +110,7 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void lrcSizeChanged(QAction *action) const;
+    void lrcSizeChanged(QAction *action);
     /*!
      * Set current lrc size by action.
      */
@@ -150,6 +150,10 @@ public Q_SLOTS:
     /*!
      * Show song comments widget.
      */
+    void showSoundKMicroWidget();
+    /*!
+     * Show song KMicro widget.
+     */
 
 private Q_SLOTS:
     void getTranslatedLrcFinished(const QString &data);
@@ -170,7 +174,6 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void wheelEvent(QWheelEvent *event) override;
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     /*!
@@ -207,6 +210,10 @@ protected:
     void setItemStyleSheet(int index, int size, int transparent);
     /*!
      * Set per lrc line style sheet by index and size and transparent.
+     */
+    void setLrcSizeProperty(int property);
+    /*!
+     * Set current lrc size property.
      */
     void resizeWidth(int w, int h);
     /*!

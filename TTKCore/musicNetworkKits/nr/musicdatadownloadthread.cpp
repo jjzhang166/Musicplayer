@@ -1,5 +1,6 @@
 #include "musicdatadownloadthread.h"
 #include "musicconnectionpool.h"
+#include "musictime.h"
 
 MusicDataDownloadThread::MusicDataDownloadThread(const QString &url, const QString &save,
                                                  Download_Type type, QObject *parent)
@@ -17,7 +18,7 @@ QString MusicDataDownloadThread::getClassName()
 
 void MusicDataDownloadThread::startToDownload()
 {
-    if( !m_file->exists() || m_file->size() < 4 )
+    if( m_file && (!m_file->exists() || m_file->size() < 4) )
     {
         if( m_file->open(QIODevice::WriteOnly) )
         {
@@ -40,6 +41,11 @@ void MusicDataDownloadThread::startToDownload()
 
 void MusicDataDownloadThread::startRequest(const QUrl &url)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     m_timer.start(MT_S2MS);
     QNetworkRequest request;
     request.setUrl(url);
@@ -58,14 +64,14 @@ void MusicDataDownloadThread::startRequest(const QUrl &url)
     if(m_downloadType == Download_Music && !m_redirection)
     {
         M_CONNECTION_PTR->connectMusicDownload(this);
-        m_createItemTime = QDateTime::currentMSecsSinceEpoch();
+        m_createItemTime = MusicTime::timeStamp();
         emit createDownloadItem(m_savePathName, m_createItemTime);
     }
 }
 
 void MusicDataDownloadThread::downLoadFinished()
 {
-    if(!m_file)
+    if(!m_file || !m_reply)
     {
         deleteAll();
         return;

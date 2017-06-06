@@ -14,10 +14,10 @@
 #include <QPushButton>
 #include "musiclrccontainer.h"
 
-#define TOOLBAR_MAIN_HEIGHT 35
-#define TOOLBAR_HEIGHT      23
-#define TOOLBAR_WIDTH       31
-#define TOOLBAR_TEXT_LENGTH 58
+#define TOOLBAR_MAIN_HEIGHT     35
+#define TOOLBAR_HEIGHT          23
+#define TOOLBAR_WIDTH           31
+#define TOOLBAR_TEXT_LENGTH     58
 
 
 class MusicLRCManagerForDesktop;
@@ -108,6 +108,10 @@ public Q_SLOTS:
     /*!
      * Set current color style changed.
      */
+    virtual void setSingleLineTypeChanged();
+    /*!
+     * Set single line type changed.
+     */
 
 protected:
     void setSelfGeometry() const;
@@ -137,9 +141,9 @@ protected:
      * Override the widget event.
      */
 
-    bool m_verticalWindow;
+    bool m_verticalWindow, m_singleLineType;
     bool m_windowLocked, m_reverse;
-    int m_currentLrcFontSize;
+    int m_currentLrcFontSize, m_widgetWidth;
     QPoint m_offset, m_geometry;
 
     QBoxLayout *m_toolBarLayout;
@@ -170,11 +174,18 @@ public:
      * Init current lrc when the first show.
      */
 
+public Q_SLOTS:
+    virtual void setSingleLineTypeChanged() override;
+    /*!
+     * Set single line type changed.
+     */
+
 protected:
     virtual void resizeLrcSizeArea() override;
     /*!
      * Resize lrc size area by change size.
      */
+
 };
 
 
@@ -199,11 +210,18 @@ public:
      * Init current lrc when the first show.
      */
 
+public Q_SLOTS:
+    virtual void setSingleLineTypeChanged() override;
+    /*!
+     * Set single line type changed.
+     */
+
 protected:
     virtual void resizeLrcSizeArea() override;
     /*!
      * Resize lrc size area by change size.
      */
+
 };
 
 #endif // MUSICLRCCONTAINERFORDESKTOP_H

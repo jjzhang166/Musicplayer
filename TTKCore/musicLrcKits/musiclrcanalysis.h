@@ -12,6 +12,8 @@
 #include "musicobject.h"
 #include "musicglobaldefine.h"
 
+#define MUSIC_LRC_INLINE_MAX_LINE   11
+
 class MusicTranslationThread;
 
 /*! @brief The class of the core lrc analysis.
@@ -70,7 +72,11 @@ public:
      * Get current line middle number.
      */
 
-    void setLrcData(const MusicObject::MIntStringMap &data);
+    State setLrcData(const QByteArray &data);
+    /*!
+     * Set lrc container data from other raw data.
+     */
+    State setLrcData(const MusicObject::MIntStringMap &data);
     /*!
      * Set lrc container data from other raw data.
      */

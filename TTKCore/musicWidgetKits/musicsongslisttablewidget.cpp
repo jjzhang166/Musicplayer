@@ -11,8 +11,9 @@
 #include "musicsongsharingwidget.h"
 #include "musicrightareawidget.h"
 #include "musicopenfilewidget.h"
-#include "musicplayedlistwidget.h"
+#include "musicplayedlistpopwidget.h"
 #include "musicapplication.h"
+#include "musicleftareawidget.h"
 
 #include <QUrl>
 #include <QAction>
@@ -475,7 +476,7 @@ void MusicSongsListTableWidget::setDeleteItemAt()
     {
         int index = deleteList[i];
         removeRow(index);           //Delete the current row
-        MusicPlayedListWidget::instance()->remove(m_parentToolIndex, (*m_musicSongs)[index]);
+        MusicPlayedListPopWidget::instance()->remove(m_parentToolIndex, (*m_musicSongs)[index]);
         progress.setValue(deleteList.count()*2 - i);
     }
 
@@ -587,6 +588,16 @@ void MusicSongsListTableWidget::musicSongSharedWidgetPy()
     shareWidget.exec();
 }
 
+void MusicSongsListTableWidget::musicSongKMicroWidgetPy()
+{
+    if(rowCount() == 0 || currentRow() < 0)
+    {
+        return;
+    }
+
+    MusicLeftAreaWidget::instance()->createSoundKMicroWidget( getSongName(m_playRowIndex) );
+}
+
 void MusicSongsListTableWidget::musicSearchQuery(QAction *action)
 {
     if(action->data().isNull())
@@ -628,7 +639,7 @@ void MusicSongsListTableWidget::musicAddToPlayLater()
         return;
     }
 
-    MusicPlayedListWidget::instance()->insert(m_parentToolIndex, (*m_musicSongs)[row]);
+    MusicPlayedListPopWidget::instance()->insert(m_parentToolIndex, (*m_musicSongs)[row]);
 }
 
 void MusicSongsListTableWidget::musicAddToPlayedList()
@@ -639,7 +650,7 @@ void MusicSongsListTableWidget::musicAddToPlayedList()
         return;
     }
 
-    MusicPlayedListWidget::instance()->append(m_parentToolIndex, (*m_musicSongs)[row]);
+    MusicPlayedListPopWidget::instance()->append(m_parentToolIndex, (*m_musicSongs)[row]);
 }
 
 void MusicSongsListTableWidget::setItemRenameFinished(const QString &name)

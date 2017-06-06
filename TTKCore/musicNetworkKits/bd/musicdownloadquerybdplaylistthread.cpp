@@ -6,6 +6,7 @@
 MusicDownLoadQueryBDPlaylistThread::MusicDownLoadQueryBDPlaylistThread(QObject *parent)
     : MusicDownLoadQueryThreadAbstract(parent)
 {
+    m_pageSize = 20;
     m_queryServer = "Baidu";
 }
 
@@ -22,14 +23,22 @@ void MusicDownLoadQueryBDPlaylistThread::startSearchSong(QueryType type, const Q
     }
     else
     {
-        startSearchSongAll(playlist);
+        m_searchText = playlist;
+        startSearchSong(0);
     }
 }
 
-void MusicDownLoadQueryBDPlaylistThread::startSearchSongAll(const QString &type)
+void MusicDownLoadQueryBDPlaylistThread::startSearchSong(int offset)
 {
-    QUrl musicUrl = MusicCryptographicHash::decryptData(BD_PLAYLIST_URL, URL_KEY).arg(type);
+    if(!m_manager)
+    {
+        return;
+    }
+
     deleteAll();
+    m_pageTotal = 0;
+    QUrl musicUrl = MusicCryptographicHash::decryptData(BD_PLAYLIST_URL, URL_KEY)
+                    .arg(m_searchText).arg(m_pageSize*offset);
 
     QNetworkRequest request;
     request.setUrl(musicUrl);
@@ -49,6 +58,11 @@ void MusicDownLoadQueryBDPlaylistThread::startSearchSongAll(const QSet<QString> 
 {
     foreach(const QString &id, ids)
     {
+        if(!m_manager)
+        {
+            return;
+        }
+
         QUrl musicUrl = MusicCryptographicHash::decryptData(BD_PLAYLIST_ATTR_URL, URL_KEY).arg(id);
 
         QNetworkRequest request;
@@ -67,6 +81,11 @@ void MusicDownLoadQueryBDPlaylistThread::startSearchSongAll(const QSet<QString> 
 
 void MusicDownLoadQueryBDPlaylistThread::startSearchSong(const QString &playlist)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     QUrl musicUrl =  MusicCryptographicHash::decryptData(BD_PLAYLIST_ATTR_URL, URL_KEY).arg(playlist);
 
     QNetworkRequest request;
@@ -106,6 +125,14 @@ void MusicDownLoadQueryBDPlaylistThread::downLoadFinished()
                 songIds << regx.cap(1);
                 pos += regx.matchedLength();
                 pos = regx.indexIn(text, pos);
+            }
+
+            ///Get the total playlist number
+            if(text.contains("pageNavigator:{"))
+            {
+                text = text.split(",").front();
+                text = text.split(":").back();
+                m_pageTotal = text.toInt();
             }
         }
         startSearchSongAll(songIds);
@@ -159,7 +186,7 @@ void MusicDownLoadQueryBDPlaylistThread::getDetailsFinished()
     emit clearAllItems();      ///Clear origin items
     m_musicSongInfos.clear();  ///Empty the last search to songsInfo
 
-    if(reply && reply->error() == QNetworkReply::NoError)
+    if(reply && m_manager && reply->error() == QNetworkReply::NoError)
     {
         QByteArray bytes = reply->readAll();
 

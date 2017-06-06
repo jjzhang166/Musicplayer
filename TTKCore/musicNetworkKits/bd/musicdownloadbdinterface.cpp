@@ -15,9 +15,14 @@
 void MusicDownLoadBDInterface::readFromMusicSongAttribute(MusicObject::MusicSongInfomation *info, QNetworkAccessManager *manager,
                                                           const QString &bit)
 {
+    if(!manager)
+    {
+        return;
+    }
+
     QString key = MusicCryptographicHash::decryptData(BD_SONG_ATTR_PA_URL, URL_KEY).arg(info->m_songId)
-                  .arg(QDateTime::currentMSecsSinceEpoch());
-    QString eKey = QString(QAesWrap::encrypt(key, "4CC20A0C44FEB6FD", "2012061402992850"));
+                  .arg(MusicTime::timeStamp());
+    QString eKey = QString(QAesWrap::encrypt(key.toUtf8(), "4CC20A0C44FEB6FD", "2012061402992850"));
     eKey.replace('+', "%2B");
     eKey.replace('/', "%2F");
     eKey.replace('=', "%3D");
@@ -60,14 +65,17 @@ void MusicDownLoadBDInterface::readFromMusicSongAttribute(MusicObject::MusicSong
                 {
                     MusicObject::MusicSongAttribute attr;
                     attr.m_url = value["file_link"].toString();
+                    if(attr.m_url.isEmpty())
+                    {
+                        continue;
+                    }
+
                     if(attr.m_url.contains("pan."))
                     {
                         readFromMusicPayAttribute(info, manager);
                     }
                     else
                     {
-//                        attr.m_url.replace(MusicCryptographicHash::decryptData(BD_SONG_YYDOWN_URL, URL_KEY),
-//                                           MusicCryptographicHash::decryptData(BD_SONG_SSDOWN_URL, URL_KEY));
                         attr.m_duration = MusicTime::msecTime2LabelJustified(value["file_duration"].toInt()*1000);
                         attr.m_size = MusicUtils::Number::size2Label(value["file_size"].toInt());
                         attr.m_format = value["file_extension"].toString();
@@ -83,6 +91,11 @@ void MusicDownLoadBDInterface::readFromMusicSongAttribute(MusicObject::MusicSong
 void MusicDownLoadBDInterface::readFromMusicSongAttribute(MusicObject::MusicSongInfomation *info, QNetworkAccessManager *manager,
                                                           const QString &format, const QString &quality, bool all)
 {
+    if(!manager)
+    {
+        return;
+    }
+
     QString formatString = format;
     foreach(const QString &f, formatString.split(","))
     {
@@ -129,6 +142,11 @@ void MusicDownLoadBDInterface::readFromMusicSongAttribute(MusicObject::MusicSong
 
 void MusicDownLoadBDInterface::readFromMusicLLAttribute(MusicObject::MusicSongInfomation *info, QNetworkAccessManager *manager)
 {
+    if(!manager)
+    {
+        return;
+    }
+
     QUrl musicUrl = MusicCryptographicHash::decryptData(BD_SONG_INFO_URL, URL_KEY).arg(info->m_songId);
 
     QNetworkRequest request;
@@ -181,6 +199,11 @@ void MusicDownLoadBDInterface::readFromMusicLLAttribute(MusicObject::MusicSongIn
 
 void MusicDownLoadBDInterface::readFromMusicPayAttribute(MusicObject::MusicSongInfomation *info, QNetworkAccessManager *manager)
 {
+    if(!manager)
+    {
+        return;
+    }
+
     QUrl musicUrl = MusicCryptographicHash::decryptData(BD_SONG_FMINFO_URL, URL_KEY).arg(info->m_songId);
 
     QNetworkRequest request;
@@ -203,7 +226,7 @@ void MusicDownLoadBDInterface::readFromMusicPayAttribute(MusicObject::MusicSongI
     if(ok)
     {
         QVariantMap value = data.toMap();
-        if(value["error_code"].toInt() == 22000 && value.contains("data"))
+        if(value["errorCode"].toInt() == 22000 && value.contains("data"))
         {
             value = value["data"].toMap();
             QVariantList datas = value["songList"].toList();

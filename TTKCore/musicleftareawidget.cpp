@@ -7,10 +7,11 @@
 #include "musicdownloadmgmtwidget.h"
 #include "musictoolsetswidget.h"
 #include "musicdownloadrecordwidget.h"
-#include "musicwebradiotoolwidget.h"
+#include "musicwebmusicradiolistview.h"
 #include "musicconnectmobilewidget.h"
 #include "musiccloudsharedsongwidget.h"
-#include "musicqualitychoicewidget.h"
+#include "musicqualitychoicepopwidget.h"
+#include "musicsoundkmicrowidget.h"
 ///qmmp incldue
 #include "visual.h"
 #include "visualfactory.h"
@@ -18,16 +19,19 @@
 MusicLeftAreaWidget *MusicLeftAreaWidget::m_instance = nullptr;
 
 MusicLeftAreaWidget::MusicLeftAreaWidget(QWidget *parent)
-    : QWidget(parent), m_qualityChoiceWidget(nullptr)
+    : QWidget(parent)
 {
     m_instance = this;
     m_stackedWidget = nullptr;
+    m_soundKMicroWidget = nullptr;
+    m_qualityChoiceWidget = nullptr;
     m_cloudSharedSongWidget = nullptr;
     m_currentIndex = 0;
 }
 
 MusicLeftAreaWidget::~MusicLeftAreaWidget()
 {
+    delete m_soundKMicroWidget;
     delete m_qualityChoiceWidget;
     delete m_cloudSharedSongWidget;
     delete m_stackedWidget;
@@ -46,7 +50,7 @@ MusicLeftAreaWidget *MusicLeftAreaWidget::instance()
 void MusicLeftAreaWidget::setupUi(Ui::MusicApplication* ui)
 {
     m_ui = ui;
-    m_qualityChoiceWidget = new MusicQualityChoiceWidget(this);
+    m_qualityChoiceWidget = new MusicQualityChoicePopWidget(this);
     m_ui->musicQualityWindow->addWidget(m_qualityChoiceWidget);
     m_ui->songsContainer->setLength(320, MusicAnimationStackedWidget::LeftToRight);
 
@@ -111,6 +115,16 @@ void MusicLeftAreaWidget::musictLoveStateClicked(bool state)
     emit currentLoveStateChanged();
 }
 
+void MusicLeftAreaWidget::createSoundKMicroWidget(const QString &name)
+{
+    if(m_soundKMicroWidget == nullptr)
+    {
+        m_soundKMicroWidget = new MusicSoundKMicroWidget(this);
+    }
+    m_soundKMicroWidget->startSeachKMicro(name);
+    m_soundKMicroWidget->show();
+}
+
 void MusicLeftAreaWidget::musicDownloadSongToLocal()
 {
     MusicDownloadMgmtWidget mgmt(this);
@@ -165,7 +179,10 @@ void MusicLeftAreaWidget::musicStackedRadioWidgetChanged()
     m_currentIndex = 2;
 
     delete m_stackedWidget;
-    m_stackedWidget = new MusicWebRadioToolWidget(this);
+    MusicWebMusicRadioListView *w = new MusicWebMusicRadioListView(this);
+    w->initListItems();
+    m_stackedWidget = w;
+
     m_ui->songsContainer->insertWidget(1, m_stackedWidget);
     m_ui->songsContainer->setIndex(0, 0);
     m_ui->songsContainer->start(1);

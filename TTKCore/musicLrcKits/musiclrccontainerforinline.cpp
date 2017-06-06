@@ -15,6 +15,7 @@
 #include "musiclrccommentswidget.h"
 #include "musiclrctranslatedwidget.h"
 #include "musiclayoutanimation.h"
+#include "musicleftareawidget.h"
 
 #include <QPainter>
 #include <QClipboard>
@@ -31,7 +32,7 @@ MusicLrcContainerForInline::MusicLrcContainerForInline(QWidget *parent)
     setLayout(vBoxLayout);
 
     m_lrcAnalysis = new MusicLrcAnalysis(this);
-    m_lrcAnalysis->setLineMax(11);
+    m_lrcAnalysis->setLineMax(MUSIC_LRC_INLINE_MAX_LINE);
 
     m_containerType = "INLINE";
     m_layoutWidget = new MusicLayoutAnimation(this);
@@ -98,7 +99,8 @@ void MusicLrcContainerForInline::setMaskLinearGradientColor(const QList<QColor> 
 void MusicLrcContainerForInline::setSettingParameter()
 {
     MusicLrcContainer::setSettingParameter();
-    setItemStyleSheet();
+    int size = M_SETTING_PTR->value(MusicSettingManager::LrcSizeChoiced).toInt();
+    setLrcSize(size);
 }
 
 void MusicLrcContainerForInline::updateCurrentLrc(qint64 time)
@@ -166,18 +168,39 @@ bool MusicLrcContainerForInline::findText(qint64 total, QString &pre, QString &l
     return m_lrcAnalysis->findText(m_currentTime, total, pre, last, interval);
 }
 
-void MusicLrcContainerForInline::setLrcSize(MusicLRCManager::LrcSizeTable size) const
+void MusicLrcContainerForInline::setLrcSize(int size)
 {
-    if(size < 13 || size > 17)
+    if(size <= 14)
     {
-        M_LOGGER_ERROR("set lrc size error!");
-        return;
+        setLrcSizeProperty(0);
     }
+    else if(14 < size && size <= 18)
+    {
+        setLrcSizeProperty(2);
+    }
+    else if(18 < size&& size <= 26)
+    {
+        setLrcSizeProperty(4);
+    }
+    else if(26 < size&& size <= 36)
+    {
+        setLrcSizeProperty(6);
+    }
+    else if(36 < size&& size <= 72)
+    {
+        setLrcSizeProperty(8);
+    }
+
     for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
     {
         m_musicLrcContainer[i]->setLrcFontSize(size);
+        m_musicLrcContainer[i]->setY(35 + size);
     }
     M_SETTING_PTR->setValue(MusicSettingManager::LrcSizeChoiced, size);
+
+    setSongSpeedAndSlow(m_currentTime);
+    resizeWindow();
+    setItemStyleSheet();
 }
 
 int MusicLrcContainerForInline::getLrcSize() const
@@ -197,15 +220,15 @@ void MusicLrcContainerForInline::resizeWindow()
     resizeWidth(width - WINDOW_WIDTH_MIN, height - WINDOW_HEIGHT_MIN);
 }
 
-void MusicLrcContainerForInline::lrcSizeChanged(QAction *action) const
+void MusicLrcContainerForInline::lrcSizeChanged(QAction *action)
 {
     switch(action->data().toInt())
     {
-        case 0: setLrcSize(MusicLRCManager::Smaller); break;
-        case 1: setLrcSize(MusicLRCManager::Small); break;
-        case 2: setLrcSize(MusicLRCManager::Middle); break;
-        case 3: setLrcSize(MusicLRCManager::Big); break;
-        case 4: setLrcSize(MusicLRCManager::Bigger); break;
+        case 0: setLrcSize(14); break;
+        case 1: setLrcSize(18); break;
+        case 2: setLrcSize(26); break;
+        case 3: setLrcSize(36); break;
+        case 4: setLrcSize(72); break;
         default: break;
     }
 }
@@ -289,6 +312,16 @@ void MusicLrcContainerForInline::showSongCommentsWidget()
     m_commentsWidget->setCurrentSongName(m_currentSongName);
 }
 
+void MusicLrcContainerForInline::showSoundKMicroWidget()
+{
+    if(m_currentSongName.isEmpty())
+    {
+        return;
+    }
+
+    MusicLeftAreaWidget::instance()->createSoundKMicroWidget(m_currentSongName);
+}
+
 void MusicLrcContainerForInline::getTranslatedLrcFinished(const QString &data)
 {
     QString text;
@@ -306,6 +339,11 @@ void MusicLrcContainerForInline::getTranslatedLrcFinished(const QString &data)
 
 void MusicLrcContainerForInline::musicSongMovieClicked()
 {
+    if(m_currentSongName.isEmpty())
+    {
+        return;
+    }
+
     MusicRightAreaWidget::instance()->musicVideoButtonSearched(m_currentSongName);
 }
 
@@ -353,11 +391,22 @@ void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *)
 
     //////////////////////////////////////////////////
     QActionGroup *group = new QActionGroup(this);
-    group->addAction(changeLrcSize.addAction(tr("smaller")))->setData(0);
-    group->addAction(changeLrcSize.addAction(tr("small")))->setData(1);
-    group->addAction(changeLrcSize.addAction(tr("middle")))->setData(2);
-    group->addAction(changeLrcSize.addAction(tr("big")))->setData(3);
-    group->addAction(changeLrcSize.addAction(tr("bigger")))->setData(4);
+    QAction *ac1 = group->addAction(changeLrcSize.addAction(tr("smaller")));
+    QAction *ac2 = group->addAction(changeLrcSize.addAction(tr("small")));
+    QAction *ac3 = group->addAction(changeLrcSize.addAction(tr("middle")));
+    QAction *ac4 = group->addAction(changeLrcSize.addAction(tr("big")));
+    QAction *ac5 = group->addAction(changeLrcSize.addAction(tr("bigger")));
+    int size = M_SETTING_PTR->value(MusicSettingManager::LrcSizeChoiced).toInt();
+    (size == 14) ? ac1->setIcon(QIcon(":/contextMenu/btn_selected")) : ac1->setIcon(QIcon());
+    (size == 18) ? ac2->setIcon(QIcon(":/contextMenu/btn_selected")) : ac2->setIcon(QIcon());
+    (size == 26) ? ac3->setIcon(QIcon(":/contextMenu/btn_selected")) : ac3->setIcon(QIcon());
+    (size == 36) ? ac4->setIcon(QIcon(":/contextMenu/btn_selected")) : ac4->setIcon(QIcon());
+    (size == 72) ? ac5->setIcon(QIcon(":/contextMenu/btn_selected")) : ac5->setIcon(QIcon());
+    ac1->setData(0);
+    ac2->setData(1);
+    ac3->setData(2);
+    ac4->setData(3);
+    ac5->setData(4);
     connect(group, SIGNAL(triggered(QAction*)), SLOT(lrcSizeChanged(QAction*)));
 
     changeLrcSize.addSeparator();
@@ -451,12 +500,6 @@ void MusicLrcContainerForInline::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void MusicLrcContainerForInline::wheelEvent(QWheelEvent *event)
-{
-    MusicLrcContainer::wheelEvent(event);
-    changeLrcPostion(QString::number(event->delta()));
-}
-
 void MusicLrcContainerForInline::changeLrcPostion(const QString &type)
 {
     int index = m_lrcAnalysis->getCurrentIndex();
@@ -529,7 +572,7 @@ void MusicLrcContainerForInline::showNoLrcCurrentInfo()
     QFontMetrics me = m_noLrcCurrentInfo->fontMetrics();
     int w = me.width(m_noLrcCurrentInfo->text());
     int h = me.height();
-    int offset = (height() - 40)*(m_lrcAnalysis->getMiddle() + 1)/m_musicLrcContainer.count();
+    int offset = height()/m_lrcAnalysis->getLineMax()*(m_lrcAnalysis->getMiddle() + 1) - 40;
 
     m_noLrcCurrentInfo->setGeometry((width() - w)/2, offset, w, h);
     m_noLrcCurrentInfo->show();
@@ -578,6 +621,7 @@ void MusicLrcContainerForInline::initFunctionLabel()
 
     connect(translation, SIGNAL(clicked()), m_lrcAnalysis, SLOT(getTranslatedLrc()));
     connect(movie, SIGNAL(clicked()), SLOT(musicSongMovieClicked()));
+    connect(microphone, SIGNAL(clicked()), SLOT(showSoundKMicroWidget()));
     connect(message, SIGNAL(clicked()), SLOT(showSongCommentsWidget()));
 
     functionLayout->addStretch(1);
@@ -593,14 +637,56 @@ void MusicLrcContainerForInline::initFunctionLabel()
 
 void MusicLrcContainerForInline::setItemStyleSheet()
 {
-    for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
+    int length = m_lrcAnalysis->getLineMax();
+    if(length == 11)
     {
-        if(i == 0 || i == 10) setItemStyleSheet(i, 5, 90);
-        else if(i == 1 || i == 9) setItemStyleSheet(i, 4, 80);
-        else if(i == 2 || i == 8) setItemStyleSheet(i, 3, 60);
-        else if(i == 3 || i == 7) setItemStyleSheet(i, 2, 40);
-        else if(i == 4 || i == 6) setItemStyleSheet(i, 1, 20);
-        else setItemStyleSheet(i, 0, 0);
+        for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
+        {
+            if(i == 0 || i == 10) setItemStyleSheet(i, 5, 90);
+            else if(i == 1 || i == 9) setItemStyleSheet(i, 4, 80);
+            else if(i == 2 || i == 8) setItemStyleSheet(i, 3, 60);
+            else if(i == 3 || i == 7) setItemStyleSheet(i, 2, 40);
+            else if(i == 4 || i == 6) setItemStyleSheet(i, 1, 20);
+            else setItemStyleSheet(i, 0, 0);
+        }
+    }
+    else if(length == 9)
+    {
+        for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
+        {
+            if(i == 0 || i == 8) setItemStyleSheet(i, 8, 90);
+            else if(i == 1 || i == 7) setItemStyleSheet(i, 6, 75);
+            else if(i == 2 || i == 6) setItemStyleSheet(i, 4, 50);
+            else if(i == 3 || i == 5) setItemStyleSheet(i, 2, 25);
+            else setItemStyleSheet(i, 0, 0);
+        }
+    }
+    else if(length == 7)
+    {
+        for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
+        {
+            if(i == 0 || i == 6) setItemStyleSheet(i, 12, 90);
+            else if(i == 1 || i == 5) setItemStyleSheet(i, 8, 60);
+            else if(i == 2 || i == 4) setItemStyleSheet(i, 4, 30);
+            else setItemStyleSheet(i, 0, 0);
+        }
+    }
+    else if(length == 5)
+    {
+        for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
+        {
+            if(i == 0 || i == 4) setItemStyleSheet(i, 16, 90);
+            else if(i == 1 || i == 3) setItemStyleSheet(i, 8, 45);
+            else setItemStyleSheet(i, 0, 0);
+        }
+    }
+    else if(length == 3)
+    {
+        for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
+        {
+            if(i == 0 || i == 2) setItemStyleSheet(i, 20, 90);
+            else setItemStyleSheet(i, 0, 0);
+        }
     }
 }
 
@@ -624,6 +710,26 @@ void MusicLrcContainerForInline::setItemStyleSheet(int index, int size, int tran
     {
         w->setLinearGradientColor(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcBgColorChoiced").toString()));
         setMaskLinearGradientColor(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcFgColorChoiced").toString()));
+    }
+}
+
+void MusicLrcContainerForInline::setLrcSizeProperty(int property)
+{
+    int length = MUSIC_LRC_INLINE_MAX_LINE - property;
+    m_lrcAnalysis->setLineMax(length);
+    for(int i=0; i<MUSIC_LRC_INLINE_MAX_LINE; ++i)
+    {
+        m_musicLrcContainer[i]->show();
+        m_musicLrcContainer[i]->reset();
+        m_layoutWidget->removeWidget(m_musicLrcContainer[i]);
+    }
+    for(int i=0; i<length; ++i)
+    {
+        m_layoutWidget->addWidget(m_musicLrcContainer[i]);
+    }
+    for(int i=length; i<MUSIC_LRC_INLINE_MAX_LINE; ++i)
+    {
+        m_musicLrcContainer[i]->hide();
     }
 }
 

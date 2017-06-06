@@ -6,6 +6,7 @@
 MusicDownLoadQueryWYPlaylistThread::MusicDownLoadQueryWYPlaylistThread(QObject *parent)
     : MusicDownLoadQueryThreadAbstract(parent)
 {
+    m_pageSize = 30;
     m_queryServer = "WangYi";
 }
 
@@ -22,15 +23,22 @@ void MusicDownLoadQueryWYPlaylistThread::startSearchSong(QueryType type, const Q
     }
     else
     {
-        startSearchSongAll(playlist);
+        m_searchText = playlist.isEmpty() ? "all" : playlist;
+        startSearchSong(0);
     }
 }
 
-void MusicDownLoadQueryWYPlaylistThread::startSearchSongAll(const QString &type)
+void MusicDownLoadQueryWYPlaylistThread::startSearchSong(int offset)
 {
-    QString key = type.isEmpty() ? "all" : type;
-    QUrl musicUrl = MusicCryptographicHash::decryptData(WY_PLAYLIST_URL, URL_KEY).arg(key);
+    if(!m_manager)
+    {
+        return;
+    }
+
     deleteAll();
+    m_pageTotal = 0;
+    QUrl musicUrl = MusicCryptographicHash::decryptData(WY_PLAYLIST_URL, URL_KEY)
+                    .arg(m_searchText).arg(m_pageSize).arg(m_pageSize*offset);
 
     QNetworkRequest request;
     request.setUrl(musicUrl);
@@ -50,6 +58,11 @@ void MusicDownLoadQueryWYPlaylistThread::startSearchSongAll(const QString &type)
 
 void MusicDownLoadQueryWYPlaylistThread::startSearchSong(const QString &playlist)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     QUrl musicUrl = MusicCryptographicHash::decryptData(WY_PLAYLIST_ATTR_URL, URL_KEY).arg(playlist);
 
     QNetworkRequest request;
@@ -90,6 +103,7 @@ void MusicDownLoadQueryWYPlaylistThread::downLoadFinished()
             QVariantMap value = data.toMap();
             if(value["code"].toInt() == 200 && value.contains("playlists"))
             {
+                m_pageTotal = value["total"].toLongLong();
                 QVariantList datas = value["playlists"].toList();
                 foreach(const QVariant &var, datas)
                 {
@@ -179,7 +193,7 @@ void MusicDownLoadQueryWYPlaylistThread::getDetailsFinished()
                         musicInfo.m_singerName = artistMap["name"].toString();
                     }
 
-                    readFromMusicSongAttribute(&musicInfo, value, m_searchQuality, m_queryAllRecords);
+                    readFromMusicSongAttribute(&musicInfo, m_manager, value, m_searchQuality, m_queryAllRecords);
 
                     if(musicInfo.m_songAttrs.isEmpty())
                     {

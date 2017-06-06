@@ -55,7 +55,7 @@ void MusicLrcSearchTableWidget::musicDownloadLocal(int row)
 
     MusicObject::MusicSongInfomations musicSongInfos(m_downLoadManager->getMusicSongInfos());
     ///download lrc
-    MusicDownLoadThreadAbstract *lrcDownload = M_DOWNLOAD_QUERY_PTR->getDownloadLrc(musicSongInfos[row].m_lrcUrl,
+    MusicDownLoadThreadAbstract *lrcDownload = M_DOWNLOAD_QUERY_PTR->getDownloadLrcThread(musicSongInfos[row].m_lrcUrl,
                              MusicUtils::Core::lrcPrefix() + m_downLoadManager->getSearchedText() + LRC_FILE,
                              MusicDownLoadThreadAbstract::Download_Lrc, this);
     connect(lrcDownload, SIGNAL(downLoadDataChanged(QString)),
@@ -80,30 +80,30 @@ void MusicLrcSearchTableWidget::createSearchedItems(const MusicSearchedItem &son
 
                       item = new QTableWidgetItem;
     item->setText(MusicUtils::Widget::elidedText(font(), songItem.m_songname, Qt::ElideRight, 170));
-    item->setTextColor(QColor(50, 50, 50));
+    item->setTextColor(QColor(100, 100, 100));
     item->setTextAlignment(Qt::AlignCenter);
     item->setToolTip(songItem.m_songname);
     setItem(count, 1, item);
 
                       item = new QTableWidgetItem;
     item->setText(MusicUtils::Widget::elidedText(font(), songItem.m_artistname, Qt::ElideRight, 144));
-    item->setTextColor(QColor(50, 50, 50));
+    item->setTextColor(QColor(100, 100, 100));
     item->setTextAlignment(Qt::AlignCenter);
     item->setToolTip(songItem.m_artistname);
     setItem(count, 2, item);
 
                       item = new QTableWidgetItem(songItem.m_time);
-    item->setTextColor(QColor(50, 50, 50));
+    item->setTextColor(QColor(100, 100, 100));
     item->setTextAlignment(Qt::AlignCenter);
     setItem(count, 3, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/tiny/lb_server_type")));
-    item->setToolTip(songItem.m_type);
+    item->setIcon(QIcon(randToGetStrength()));
     setItem(count, 4, item);
 
                       item = new QTableWidgetItem;
-    item->setIcon(QIcon(QString::fromUtf8(":/tiny/lb_star")));
+    item->setIcon(QIcon(QString::fromUtf8(":/tiny/lb_server_type")));
+    item->setToolTip(songItem.m_type);
     setItem(count, 5, item);
 }
 

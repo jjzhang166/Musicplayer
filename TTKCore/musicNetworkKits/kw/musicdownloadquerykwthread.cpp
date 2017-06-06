@@ -18,6 +18,11 @@ QString MusicDownLoadQueryKWThread::getClassName()
 
 void MusicDownLoadQueryKWThread::startSearchSong(QueryType type, const QString &text)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     m_searchText = text.trimmed();
     m_currentType = type;
     QUrl musicUrl = MusicCryptographicHash::decryptData(KW_SONG_SEARCH_URL, URL_KEY).arg(text).arg(0).arg(50);
@@ -38,7 +43,7 @@ void MusicDownLoadQueryKWThread::startSearchSong(QueryType type, const QString &
 
 void MusicDownLoadQueryKWThread::downLoadFinished()
 {
-    if(m_reply == nullptr)
+    if(!m_reply || !m_manager)
     {
         deleteAll();
         return;
@@ -104,8 +109,8 @@ void MusicDownLoadQueryKWThread::downLoadFinished()
                     {
                         //mv
                         musicInfo.m_songId = value["MUSICRID"].toString().replace("MUSIC_", "");
-                        readFromMusicMVInfoAttribute(&musicInfo, musicInfo.m_songId, "mkv");
-                        readFromMusicMVInfoAttribute(&musicInfo, musicInfo.m_songId, "mp4");
+                        readFromMusicMVInfoAttribute(&musicInfo, MB_750, musicInfo.m_songId, "mp4");
+                        readFromMusicMVInfoAttribute(&musicInfo, MB_1000, musicInfo.m_songId, "mkv");
 
                         if(musicInfo.m_songAttrs.isEmpty())
                         {
@@ -126,7 +131,7 @@ void MusicDownLoadQueryKWThread::downLoadFinished()
     }
 
     ///extra yyt movie
-    if(m_currentType == MovieQuery)
+    if(m_queryExtraMovie && m_currentType == MovieQuery)
     {
         MusicSemaphoreLoop loop;
         MusicDownLoadQueryYYTThread *yyt = new MusicDownLoadQueryYYTThread(this);
@@ -141,7 +146,7 @@ void MusicDownLoadQueryKWThread::downLoadFinished()
     deleteAll();
 }
 
-void MusicDownLoadQueryKWThread::readFromMusicMVInfoAttribute(MusicObject::MusicSongInfomation *info,
+void MusicDownLoadQueryKWThread::readFromMusicMVInfoAttribute(MusicObject::MusicSongInfomation *info, int bitrate,
                                                               const QString &id, const QString &format)
 {
     if(id.isEmpty())
@@ -150,7 +155,7 @@ void MusicDownLoadQueryKWThread::readFromMusicMVInfoAttribute(MusicObject::Music
     }
 
     MusicObject::MusicSongAttribute attr;
-    attr.m_bitrate = 1000;
+    attr.m_bitrate = bitrate;
     attr.m_format = format;
     attr.m_size = "-";
     attr.m_url = MusicCryptographicHash::decryptData(KW_MV_ATTR_URL, URL_KEY).arg(id).arg(format);

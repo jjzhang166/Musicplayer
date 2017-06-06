@@ -6,6 +6,7 @@
 MusicDownLoadQueryKWPlaylistThread::MusicDownLoadQueryKWPlaylistThread(QObject *parent)
     : MusicDownLoadQueryThreadAbstract(parent)
 {
+    m_pageSize = 30;
     m_queryServer = "Kuwo";
 }
 
@@ -22,15 +23,22 @@ void MusicDownLoadQueryKWPlaylistThread::startSearchSong(QueryType type, const Q
     }
     else
     {
-        startSearchSongAll(playlist);
+        m_searchText = playlist.isEmpty() ? "167" : playlist;
+        startSearchSong(0);
     }
 }
 
-void MusicDownLoadQueryKWPlaylistThread::startSearchSongAll(const QString &type)
+void MusicDownLoadQueryKWPlaylistThread::startSearchSong(int offset)
 {
-    QString key = type.isEmpty() ? "167" : type;
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KW_PLAYLIST_URL, URL_KEY).arg(key);
+    if(!m_manager)
+    {
+        return;
+    }
+
     deleteAll();
+    m_pageTotal = 0;
+    QUrl musicUrl = MusicCryptographicHash::decryptData(KW_PLAYLIST_URL, URL_KEY)
+                    .arg(m_searchText).arg(offset).arg(m_pageSize);
 
     QNetworkRequest request;
     request.setUrl(musicUrl);
@@ -48,6 +56,11 @@ void MusicDownLoadQueryKWPlaylistThread::startSearchSongAll(const QString &type)
 
 void MusicDownLoadQueryKWPlaylistThread::startSearchSong(const QString &playlist)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     QUrl musicUrl = MusicCryptographicHash::decryptData(KW_PLAYLIST_ATTR_URL, URL_KEY).arg(playlist);
 
     QNetworkRequest request;
@@ -84,6 +97,7 @@ void MusicDownLoadQueryKWPlaylistThread::downLoadFinished()
         if(ok)
         {
             QVariantMap value = data.toMap();
+            m_pageTotal = value["total"].toString().toLongLong();
             if(value.contains("child"))
             {
                 m_tags = value["ninfo"].toMap()["name"].toString();
@@ -113,7 +127,7 @@ void MusicDownLoadQueryKWPlaylistThread::getDetailsFinished()
     emit clearAllItems();      ///Clear origin items
     m_musicSongInfos.clear();  ///Empty the last search to songsInfo
 
-    if(reply && reply->error() == QNetworkReply::NoError)
+    if(reply && m_manager && reply->error() == QNetworkReply::NoError)
     {
         QByteArray bytes = reply->readAll();
 
@@ -198,6 +212,11 @@ void MusicDownLoadQueryKWPlaylistThread::getMorePlaylistDetailsFinished()
 
 void MusicDownLoadQueryKWPlaylistThread::getMorePlaylistDetails(const QString &pid)
 {
+    if(!m_manager)
+    {
+        return;
+    }
+
     QUrl musicUrl = MusicCryptographicHash::decryptData(KW_PLAYLIST_ATTR_URL, URL_KEY).arg(pid);
 
     QNetworkRequest request;

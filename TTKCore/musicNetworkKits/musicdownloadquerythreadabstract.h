@@ -46,6 +46,16 @@ typedef struct MUSIC_NETWORK_EXPORT MusicPlaylistItem
 }MusicPlaylistItem;
 TTK_DECLARE_LISTS(MusicPlaylistItem)
 
+typedef struct MUSIC_NETWORK_EXPORT MusicSongCommentItem
+{
+    QString m_nickName;
+    QString m_avatarUrl;
+    QString m_time;
+    QString m_content;
+    QString m_likedCount;
+}MusicSongCommentItem;
+TTK_DECLARE_LISTS(MusicSongCommentItem)
+
 /*! @brief The class to abstract query download data from net.
  * @author Greedysky <greedysky@163.com>
  */
@@ -57,7 +67,8 @@ public:
     {
         MusicQuery, ///*query music*/
         MovieQuery, ///*query movie*/
-        LrcQuery    ///*query lrc*/
+        LrcQuery,   ///*query lrc*/
+        OtherQuery, ///*query external*/
     };
 
     explicit MusicDownLoadQueryThreadAbstract(QObject *parent = 0);
@@ -78,6 +89,10 @@ public:
     /*!
      * Start to search data from name and type.
      * Subclass should implement this function.
+     */
+    virtual void startSearchSong(int offset);
+    /*!
+     * Start to search data from name and type bt paging.
      */
     inline void setSearchQuality(const QString &qual) { m_searchQuality = qual;}
     /*!
@@ -103,6 +118,10 @@ public:
     /*!
      * Get query simplify flag.
      */
+    inline void setQueryExtraMovie(bool state) { m_queryExtraMovie = state;}
+    /*!
+     * Set query extra movie flag.
+     */
     inline QueryType getQueryType() const { return m_currentType;}
     /*!
      * Return the current song query type.
@@ -123,6 +142,14 @@ public:
     /*!
      * Return the current raw data.
      */
+    inline int getPageSize() const { return m_pageSize; }
+    /*!
+     * Return the each page max size.
+     */
+    inline int getPageTotal() const { return m_pageTotal; }
+    /*!
+     * Return the page total number.
+     */
 
 Q_SIGNALS:
     void clearAllItems();
@@ -140,11 +167,12 @@ protected:
      * Map query server string.
      */
 
+    int m_pageSize, m_pageTotal;
     MusicObject::MusicSongInfomations m_musicSongInfos;
     QString m_searchText, m_searchQuality;
     QString m_queryServer;
     QueryType m_currentType;
-    bool m_queryAllRecords, m_querySimplify;
+    bool m_queryAllRecords, m_querySimplify, m_queryExtraMovie;
     QVariantMap m_rawData;
 
 };

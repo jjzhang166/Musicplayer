@@ -6,6 +6,7 @@
 MusicDownLoadQueryQQPlaylistThread::MusicDownLoadQueryQQPlaylistThread(QObject *parent)
     : MusicDownLoadQueryThreadAbstract(parent)
 {
+    m_pageSize = 30;
     m_queryServer = "QQ";
 }
 
@@ -22,15 +23,22 @@ void MusicDownLoadQueryQQPlaylistThread::startSearchSong(QueryType type, const Q
     }
     else
     {
-        startSearchSongAll(playlist);
+        m_searchText = playlist.isEmpty() ? "10000000" : playlist;
+        startSearchSong(0);
     }
 }
 
-void MusicDownLoadQueryQQPlaylistThread::startSearchSongAll(const QString &type)
+void MusicDownLoadQueryQQPlaylistThread::startSearchSong(int offset)
 {
-    QString key = type.isEmpty() ? "10000000" : type;
-    QUrl musicUrl = MusicCryptographicHash::decryptData(QQ_PLAYLIST_URL, URL_KEY).arg(key);
+    if(!m_manager)
+    {
+        return;
+    }
+
     deleteAll();
+    m_pageTotal = 0;
+    QUrl musicUrl = MusicCryptographicHash::decryptData(QQ_PLAYLIST_URL, URL_KEY)
+                    .arg(m_searchText).arg(m_pageSize*offset).arg(m_pageSize*(offset + 1) - 1);
 
     QNetworkRequest request;
     request.setUrl(musicUrl);
@@ -49,6 +57,10 @@ void MusicDownLoadQueryQQPlaylistThread::startSearchSongAll(const QString &type)
 
 void MusicDownLoadQueryQQPlaylistThread::startSearchSong(const QString &playlist)
 {
+    if(!m_manager)
+    {
+        return;
+    }
     QUrl musicUrl = MusicCryptographicHash::decryptData(QQ_PLAYLIST_ATTR_URL, URL_KEY).arg(playlist);
 
     QNetworkRequest request;
@@ -90,6 +102,7 @@ void MusicDownLoadQueryQQPlaylistThread::downLoadFinished()
             if(value["code"].toInt() == 0 && value.contains("data"))
             {
                 value = value["data"].toMap();
+                m_pageTotal = value["sum"].toLongLong();
                 QVariantList datas = value["list"].toList();
                 foreach(const QVariant &var, datas)
                 {
@@ -127,7 +140,7 @@ void MusicDownLoadQueryQQPlaylistThread::getDetailsFinished()
     emit clearAllItems();      ///Clear origin items
     m_musicSongInfos.clear();  ///Empty the last search to songsInfo
 
-    if(reply && reply->error() == QNetworkReply::NoError)
+    if(reply && m_manager && reply->error() == QNetworkReply::NoError)
     {
         QByteArray bytes = reply->readAll();
         bytes = bytes.replace("jsonCallback(", "");

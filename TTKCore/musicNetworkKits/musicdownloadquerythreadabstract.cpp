@@ -3,8 +3,11 @@
 MusicDownLoadQueryThreadAbstract::MusicDownLoadQueryThreadAbstract(QObject *parent)
     : MusicNetworkAbstract(parent)
 {
+    m_pageSize = 0;
+    m_pageTotal = 0;
     m_queryAllRecords = false;
     m_querySimplify = false;
+    m_queryExtraMovie = true;
     m_searchQuality = tr("SD");
     m_queryServer = "Invalid";
 
@@ -33,6 +36,11 @@ void MusicDownLoadQueryThreadAbstract::deleteAll()
         m_reply->deleteLater();
         m_reply = nullptr;
     }
+}
+
+void MusicDownLoadQueryThreadAbstract::startSearchSong(int offset)
+{
+    Q_UNUSED(offset);
 }
 
 QString MusicDownLoadQueryThreadAbstract::mapQueryServerString() const

@@ -17,11 +17,11 @@
 class MUSIC_EXTRAS_EXPORT QAesWrap
 {
 public:
-    static QByteArray encrypt(const QString &in, const QString &key, const QString &iv);
+    static QByteArray encrypt(const QByteArray &in, const QByteArray &key, const QByteArray &iv);
     /*!
      * Encrypt aes by input.
      */
-    static QByteArray decrypt(const QByteArray &in, const QString &key, const QString &iv);
+    static QByteArray decrypt(const QByteArray &in, const QByteArray &key, const QByteArray &iv);
     /*!
      * Decrypt aes by input.
      */
