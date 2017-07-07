@@ -9,12 +9,12 @@
  * works are strictly forbiden.
    =================================================*/
 
-#include "musicnetworkabstract.h"
+#include "musicdownloaddiscoverlistthread.h"
 
 /*! @brief The class to wangyi discover toplist.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_NETWORK_EXPORT MusicWYDiscoverListThread : public MusicNetworkAbstract
+class MUSIC_NETWORK_EXPORT MusicWYDiscoverListThread : public MusicDownLoadDiscoverListThread
 {
     Q_OBJECT
 public:
@@ -23,24 +23,13 @@ public:
      * Object contsructor.
      */
 
-    virtual ~MusicWYDiscoverListThread();
-
     static QString getClassName();
     /*!
      * Get class object name.
      */
-    virtual void deleteAll() override;
+    virtual void startToSearch() override;
     /*!
-     * Release the network object.
-     */
-    void startSearchSong();
-    /*!
-     * Start to Search data from page.
-     */
-
-    inline QString getTopListInfo() const { return m_topListInfo; }
-    /*!
-     * Get top list info.
+     * Start to Search data from toplist.
      */
 
 public Q_SLOTS:
@@ -58,8 +47,6 @@ protected:
     /*!
      * Search top list information.
      */
-
-    QString m_topListInfo;
 
 };
 

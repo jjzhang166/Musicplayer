@@ -14,6 +14,7 @@
 #include "musicuiobject.h"
 #include "musicsettingmanager.h"
 
+class MusicLrcAnalysis;
 class MusicLrcSearchWidget;
 
 /*! @brief The class of the lrc container base.
@@ -43,12 +44,11 @@ public:
      * Stop timer clock to draw lrc.
      * Subclass should implement this function.
      */
-    virtual void setMaskLinearGradientColor(const QList<QColor> &colors) const = 0;
+    void setLinearGradientColor(MusicLRCColor::LrcColorType lrcColorType);
     /*!
-     * Set mask linear gradient color.
-     * Subclass should implement this function.
+     * Set linear gradient color.
      */
-    virtual void setLinearGradientColor(MusicLRCManager::LrcColorType lrcColorType) const;
+    void setLinearGradientColor(const MusicLRCColor &color);
     /*!
      * Set linear gradient color.
      */
@@ -74,6 +74,15 @@ public:
      * Get current play total time.
      */
 
+    inline void setLrcAnalysisModel(MusicLrcAnalysis *analysis)  { m_lrcAnalysis = analysis;}
+    /*!
+     * Set lrc analysis model.
+     */
+    inline MusicLrcAnalysis* getLrcAnalysisModel() const { return m_lrcAnalysis;}
+    /*!
+     * Get lrc analysis model.
+     */
+
 Q_SIGNALS:
     void theCurrentLrcUpdated();
     /*!
@@ -86,6 +95,14 @@ Q_SIGNALS:
     void changeCurrentLrcColorSetting();
     /*!
      * Change current setting widget to setting widget.
+     */
+    void maskLinearGradientColorChanged();
+    /*!
+     * Mask linear gradient color changed.
+     */
+    void linearGradientColorChanged();
+    /*!
+     * Linear gradient color changed.
      */
 
 public Q_SLOTS:
@@ -119,15 +136,11 @@ public Q_SLOTS:
      */
 
 protected:
-    void createColorMenu(QMenu &menu);
-    /*!
-     * Create color menu.
-     */
     void clearAllMusicLRCManager();
     /*!
      * Clear all music lrc manager.
      */
-    void setSettingParameter(const QString &t) const;
+    void setSettingParameter(const QString &t);
     /*!
      * Set setting parameter by diff type.
      */
@@ -135,6 +148,7 @@ protected:
     bool m_linkLocalLrc;
     qint64 m_currentTime, m_totalTime;
     QString m_currentSongName, m_containerType;
+    MusicLrcAnalysis *m_lrcAnalysis;
     QList<MusicLRCManager*> m_musicLrcContainer;
     MusicLrcSearchWidget *m_musicLrcSearchWidget;
 

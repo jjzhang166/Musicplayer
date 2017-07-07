@@ -19,11 +19,11 @@ HEADERS  += \
     $$PWD/musiclrccontainerforinline.h \
     $$PWD/musiclrcsearchwidget.h \
     $$PWD/musiclrcsearchtablewidget.h \
-    $$PWD/musiclrcartphotolabel.h \
     $$PWD/musiclrcartphotouploadwidget.h \
     $$PWD/musiclrcfloatwidget.h \
     $$PWD/musiclrcfloatsettingwidget.h \
     $$PWD/musiclrcfloatphotowidget.h \
+    $$PWD/musiclrcfloatplaywidget.h \
     $$PWD/musiclrcmakerwidget.h \
     $$PWD/musiclrcanalysis.h \
     $$PWD/musiclrcerrorwidget.h \
@@ -31,7 +31,8 @@ HEADERS  += \
     $$PWD/musiclrcfromkrc.h \
     $$PWD/musiclrccolorwidget.h \
     $$PWD/musiclrccommentswidget.h \
-    $$PWD/musiclrctranslatedwidget.h
+    $$PWD/musiclrctranslatedwidget.h \
+    $$PWD/musiclrccontainerforwallpaper.h
 
 }
 
@@ -46,11 +47,11 @@ SOURCES += \
     $$PWD/musiclrccontainerforinline.cpp \
     $$PWD/musiclrcsearchwidget.cpp \
     $$PWD/musiclrcsearchtablewidget.cpp \
-    $$PWD/musiclrcartphotolabel.cpp \
     $$PWD/musiclrcartphotouploadwidget.cpp \
     $$PWD/musiclrcfloatwidget.cpp \
     $$PWD/musiclrcfloatsettingwidget.cpp \
     $$PWD/musiclrcfloatphotowidget.cpp \
+    $$PWD/musiclrcfloatplaywidget.cpp \
     $$PWD/musiclrcmakerwidget.cpp \
     $$PWD/musiclrcanalysis.cpp \
     $$PWD/musiclrcerrorwidget.cpp \
@@ -58,6 +59,7 @@ SOURCES += \
     $$PWD/musiclrcfromkrc.cpp \
     $$PWD/musiclrccolorwidget.cpp \
     $$PWD/musiclrccommentswidget.cpp \
-    $$PWD/musiclrctranslatedwidget.cpp
+    $$PWD/musiclrctranslatedwidget.cpp \
+    $$PWD/musiclrccontainerforwallpaper.cpp
 
 }

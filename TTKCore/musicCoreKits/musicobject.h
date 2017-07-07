@@ -29,6 +29,9 @@
 #define THEME_DIR               "MTheme/"
 #define CACHE_DIR               "MCached/"
 #define ART_DIR                 "MArt/"
+#define RES_DIR                 "MRes/"
+#define AVATAR_DIR              "avatar/"
+#define USER_THEME_DIR          "theme/"
 #define PLUGINS_DIR             "MPlugins/"
 #define BACKGROUND_DIR          "MArt/background/"
 #define LANGUAGE_DIR            "MLanguage/"
@@ -61,7 +64,6 @@
 #define DARABASEPATH            "musicuser.dll"
 #define USERPATH                "musicuser.ttk"
 #define BARRAGEPATH             "musicbarrage.ttk"
-#define SOUNDPATH               "sound.wav"
 
 ///////////////////////////////////////
 #if defined (Q_OS_ANDROID)
@@ -88,11 +90,12 @@
 #define DARABASEPATH_FULL       APPDATA_DIR_FULL + DARABASEPATH
 #define USERPATH_FULL           APPDATA_DIR_FULL + USERPATH
 #define BARRAGEPATH_FULL        APPDATA_DIR_FULL + BARRAGEPATH
+#define AVATAR_DIR_FULL         APPDATA_DIR_FULL + AVATAR_DIR
+#define USER_THEME_DIR_FULL     APPDATA_DIR_FULL + USER_THEME_DIR
 
 #define THEME_DIR_FULL          MusicObject::getAppDir() + THEME_DIR
 #define PLUGINS_DIR_FULL        MusicObject::getAppDir() + PLUGINS_DIR
 #define LANGUAGE_DIR_FULL       MusicObject::getAppDir() + LANGUAGE_DIR
-#define SOUNDPATH_FULL          MusicObject::getAppDir() + SOUNDPATH
 
 #define MAKE_TRANSFORM_FULL     MusicObject::getAppDir() + MAKE_TRANSFORM
 #define MAKE_KRC2LRC_FULL       MusicObject::getAppDir() + MAKE_KRC2LRC
@@ -113,6 +116,8 @@
 #define DEFAULT_INDEX_LEVEL3    -777
 #define DEFAULT_INDEX_LEVEL4    -666
 #define DEFAULT_INDEX_LEVEL5    -555
+///////////////////////////////////////
+#define STRING_SPLITER          "*|||*"
 ///////////////////////////////////////
 
 /*! @brief The namespace of the application object.

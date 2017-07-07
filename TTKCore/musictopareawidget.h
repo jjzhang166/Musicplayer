@@ -16,7 +16,6 @@
 class MusicUserWindow;
 class MusicRemoteWidget;
 class MusicBackgroundSkinDialog;
-class MusicWYDiscoverListThread;
 class MusicCounterPVDownloadThread;
 
 namespace Ui {
@@ -105,7 +104,7 @@ Q_SIGNALS:
      */
 
 public Q_SLOTS:
-    void musicSearchTopListInfoFinished();
+    void musicSearchTopListInfoFinished(const QString &data);
     /*!
      * Search top list information finished.
      */
@@ -194,6 +193,10 @@ public Q_SLOTS:
     /*!
      * Switch to diff remote type.
      */
+    void musicRemoteTypeChanged(int type);
+    /*!
+     * Switch to diff remote type.
+     */
 
 protected:
     void createRemoteWidget();
@@ -213,13 +216,11 @@ protected:
     MusicUserWindow *m_musicUserWindow;
     MusicBackgroundSkinDialog *m_musicbgskin;
     MusicRemoteWidget *m_musicRemoteWidget;
-    MusicWYDiscoverListThread *m_getDiscoverThread;
     MusicCounterPVDownloadThread *m_counterPVThread;
 
     QString m_currentBgSkin;
     int m_alpha, m_listAlpha;
     QTimer m_pictureCarouselTimer;
-    bool m_currentPlayStatus;
 
     static MusicTopAreaWidget *m_instance;
 };

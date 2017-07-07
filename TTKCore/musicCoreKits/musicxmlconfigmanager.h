@@ -32,7 +32,7 @@ public:
     /*!
      * Read config datas from xml file by given name.
      */
-    inline bool readMusicXMLConfig(){ return readConfig(MUSICPATH_FULL); }
+    inline bool readMusicXMLConfig() { return readConfig(MUSICPATH_FULL); }
     /*!
      * Read music datas from xml file by given name.
      */
@@ -68,6 +68,16 @@ public:
     { return readXmlAttributeByTagNameValue("closeNetwork").toInt(); }
     /*!
      * Read Close Network Config.
+     */
+    inline int readWindowConciseConfig() const
+    { return readXmlAttributeByTagNameValue("windowConcise").toInt(); }
+    /*!
+     * Read Window Concise Config.
+     */
+    inline int readRemoteWidgetModeConfig() const
+    { return readXmlAttributeByTagNameValue("remoteWidgetMode").toInt(); }
+    /*!
+     * Read Remote Widget Mode Config.
      */
     inline int readSystemAutoPlayConfig() const
     { return readXmlAttributeByTagNameValue("autoPlay").toInt(); }

@@ -14,20 +14,20 @@ QString MusicDownLoadQueryKWArtistThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryKWArtistThread::startSearchSong(QueryType type, const QString &artist)
+void MusicDownLoadQueryKWArtistThread::startToSearch(QueryType type, const QString &artist)
 {
     Q_UNUSED(type);
-    startSearchSong(artist);
+    startToSearch(artist);
 }
 
-void MusicDownLoadQueryKWArtistThread::startSearchSong(const QString &artist)
+void MusicDownLoadQueryKWArtistThread::startToSearch(const QString &artist)
 {
     if(!m_manager)
     {
         return;
     }
 
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KW_ARTIST_URL, URL_KEY).arg(artist).arg(0).arg(50);
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(KW_ARTIST_URL, false).arg(artist).arg(0).arg(50);
     deleteAll();
 
     QNetworkRequest request;
@@ -88,7 +88,7 @@ void MusicDownLoadQueryKWArtistThread::downLoadFinished()
                         musicInfo.m_albumId = value["ALBUMID"].toString();
 
                         readFromMusicSongPic(&musicInfo, musicInfo.m_songId, m_manager);
-                        musicInfo.m_lrcUrl = MusicCryptographicHash::decryptData(KW_SONG_INFO_URL, URL_KEY).arg(musicInfo.m_songId);
+                        musicInfo.m_lrcUrl = MusicUtils::Algorithm::mdII(KW_SONG_INFO_URL, false).arg(musicInfo.m_songId);
                         ///music normal songs urls
                         readFromMusicSongAttribute(&musicInfo, value["FORMATS"].toString(), m_searchQuality, m_queryAllRecords);
 

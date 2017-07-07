@@ -7,4 +7,4 @@
 # =================================================
 
 TEMPLATE = subdirs
-SUBDIRS = zlib MusicExtras
+SUBDIRS = zlib MusicExtras Devicewatcher

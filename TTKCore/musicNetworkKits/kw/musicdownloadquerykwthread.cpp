@@ -16,7 +16,7 @@ QString MusicDownLoadQueryKWThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryKWThread::startSearchSong(QueryType type, const QString &text)
+void MusicDownLoadQueryKWThread::startToSearch(QueryType type, const QString &text)
 {
     if(!m_manager)
     {
@@ -25,7 +25,7 @@ void MusicDownLoadQueryKWThread::startSearchSong(QueryType type, const QString &
 
     m_searchText = text.trimmed();
     m_currentType = type;
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KW_SONG_SEARCH_URL, URL_KEY).arg(text).arg(0).arg(50);
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(KW_SONG_SEARCH_URL, false).arg(text).arg(0).arg(50);
     deleteAll();
 
     QNetworkRequest request;
@@ -87,7 +87,7 @@ void MusicDownLoadQueryKWThread::downLoadFinished()
                         if(!m_querySimplify)
                         {
                             readFromMusicSongPic(&musicInfo, musicInfo.m_songId, m_manager);
-                            musicInfo.m_lrcUrl = MusicCryptographicHash::decryptData(KW_SONG_INFO_URL, URL_KEY).arg(musicInfo.m_songId);
+                            musicInfo.m_lrcUrl = MusicUtils::Algorithm::mdII(KW_SONG_INFO_URL, false).arg(musicInfo.m_songId);
                             ///music normal songs urls
                             readFromMusicSongAttribute(&musicInfo, value["FORMATS"].toString(), m_searchQuality, m_queryAllRecords);
 
@@ -137,7 +137,7 @@ void MusicDownLoadQueryKWThread::downLoadFinished()
         MusicDownLoadQueryYYTThread *yyt = new MusicDownLoadQueryYYTThread(this);
         connect(yyt, SIGNAL(createSearchedItems(MusicSearchedItem)), SIGNAL(createSearchedItems(MusicSearchedItem)));
         connect(yyt, SIGNAL(downLoadDataChanged(QString)), &loop, SLOT(quit()));
-        yyt->startSearchSong(MusicDownLoadQueryYYTThread::MovieQuery, m_searchText);
+        yyt->startToSearch(MusicDownLoadQueryYYTThread::MovieQuery, m_searchText);
         loop.exec();
         m_musicSongInfos << yyt->getMusicSongInfos();
     }
@@ -158,6 +158,6 @@ void MusicDownLoadQueryKWThread::readFromMusicMVInfoAttribute(MusicObject::Music
     attr.m_bitrate = bitrate;
     attr.m_format = format;
     attr.m_size = "-";
-    attr.m_url = MusicCryptographicHash::decryptData(KW_MV_ATTR_URL, URL_KEY).arg(id).arg(format);
+    attr.m_url = MusicUtils::Algorithm::mdII(KW_MV_ATTR_URL, false).arg(id).arg(format);
     info->m_songAttrs.append(attr);
 }

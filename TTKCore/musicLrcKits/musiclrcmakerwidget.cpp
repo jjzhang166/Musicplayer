@@ -346,7 +346,7 @@ void MusicLrcMakerWidget::setCurrentSecondWidget()
         return;
     }
 
-    if(MusicApplication::instance()->getPlayState() != MusicPlayer::PlayingState)
+    if(!MusicApplication::instance()->isPlaying())
     {
         firstWidgetStateButtonClicked();
     }
@@ -560,7 +560,7 @@ void MusicLrcMakerWidget::createMainWidget()
 
 void MusicLrcMakerWidget::createFirstWidget()
 {
-    m_ui->stateButton_F->setText(MusicApplication::instance()->getPlayState() != MusicPlayer::PlayingState ? tr("Play") : tr("Stop"));
+    m_ui->stateButton_F->setText(!MusicApplication::instance()->isPlaying() ? tr("Play") : tr("Stop"));
 
     m_ui->artNameEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
     m_ui->songNameEdit->setStyleSheet(MusicUIObject::MLineEditStyle01);
@@ -639,7 +639,7 @@ void MusicLrcMakerWidget::createThirdWidget()
         m_musicLrcContainer.append(w);
     }
     ///////////////////////////////////////////////////////////////
-    m_ui->stateButton_T->setText(MusicApplication::instance()->getPlayState() != MusicPlayer::PlayingState  ? tr("Play") : tr("Stop"));
+    m_ui->stateButton_T->setText(!MusicApplication::instance()->isPlaying() ? tr("Play") : tr("Stop"));
     m_ui->timeSlider_T->setFocusPolicy(Qt::NoFocus);
     m_ui->lrc_make_up_T->setToolTip(tr("Before 1s"));
     m_ui->lrc_make_down_T->setToolTip(tr("After 1s"));
@@ -748,37 +748,17 @@ void MusicLrcMakerWidget::setItemStyleSheet(int index, int size, int transparent
     value = (value > 100) ? 100 : value;
     w->setFontTransparent(value);
     w->setTransparent(value);
+
     if(M_SETTING_PTR->value("LrcColorChoiced").toInt() != -1)
     {
-        switch((MusicLRCManager::LrcColorType)M_SETTING_PTR->value("LrcColorChoiced").toInt())
-        {
-            case MusicLRCManager::Origin:
-                w->setLinearGradientColor(QList<QColor>() << CL_Origin << CL_White << CL_Origin);break;
-            case MusicLRCManager::Red:
-                w->setLinearGradientColor(QList<QColor>() << CL_Red << CL_White << CL_Red);break;
-            case MusicLRCManager::Orange:
-                w->setLinearGradientColor(QList<QColor>() << CL_Orange << CL_White << CL_Orange);break;
-            case MusicLRCManager::Yellow:
-                w->setLinearGradientColor(QList<QColor>() << CL_Yellow << CL_White << CL_Yellow);break;
-            case MusicLRCManager::Green:
-                w->setLinearGradientColor(QList<QColor>() << CL_Green << CL_White << CL_Green);break;
-            case MusicLRCManager::Blue:
-                w->setLinearGradientColor(QList<QColor>() << CL_Blue << CL_White << CL_Blue);break;
-            case MusicLRCManager::Indigo:
-                w->setLinearGradientColor(QList<QColor>() << CL_Indigo << CL_White << CL_Indigo);break;
-            case MusicLRCManager::Purple:
-                w->setLinearGradientColor(QList<QColor>() << CL_Purple << CL_White << CL_Purple);break;
-            case MusicLRCManager::White:
-                w->setLinearGradientColor(QList<QColor>() << CL_White << CL_White << CL_White);break;
-            case MusicLRCManager::Black:
-                w->setLinearGradientColor(QList<QColor>() << CL_Black << CL_White << CL_Black);break;
-            default: break;
-        }
-        w->setMaskLinearGradientColor( QList<QColor>() << CL_Mask << CL_White << CL_Mask );
+        MusicLRCColor::LrcColorType index = MStatic_cast(MusicLRCColor::LrcColorType, M_SETTING_PTR->value("LrcColorChoiced").toInt());
+        MusicLRCColor cl = MusicLRCManager::mapIndexToColor(index);
+        w->setLinearGradientColor(cl);
     }
     else
     {
-        w->setLinearGradientColor(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcBgColorChoiced").toString()));
-        w->setMaskLinearGradientColor(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcFgColorChoiced").toString()));
+        MusicLRCColor cl(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcFgColorChoiced").toString()),
+                         MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcBgColorChoiced").toString()));
+        w->setLinearGradientColor(cl);
     }
 }

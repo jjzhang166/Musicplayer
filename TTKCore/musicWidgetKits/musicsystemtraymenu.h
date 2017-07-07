@@ -24,7 +24,7 @@ class MUSIC_WIDGET_EXPORT MusicSystemTrayMenu : public QMenu
 {
     Q_OBJECT
 public:
-    MusicSystemTrayMenu(QWidget *parent = 0);
+    explicit MusicSystemTrayMenu(QWidget *parent = 0);
     /*!
      * Object contsructor.
      */
@@ -51,16 +51,6 @@ public:
      * Set current play volume.
      */
 
-Q_SIGNALS:
-    void setShowDesktopLrc(bool status);
-    /*!
-     * Set show desktop lrc state changed.
-     */
-    void setWindowLockedChanged();
-    /*!
-     * Lock current desktop lrc state changed.
-     */
-
 public Q_SLOTS:
     void showDesktopLrc();
     /*!
@@ -69,6 +59,10 @@ public Q_SLOTS:
     void lockDesktopLrc(bool lock);
     /*!
      * Lock current desktop lrc or not.
+     */
+    void setWindowLockedChanged();
+    /*!
+     * Lock current desktop lrc state changed.
      */
 
 protected:

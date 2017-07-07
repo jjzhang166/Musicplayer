@@ -17,7 +17,7 @@ QString MusicDownLoadQueryKGThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryKGThread::startSearchSong(QueryType type, const QString &text)
+void MusicDownLoadQueryKGThread::startToSearch(QueryType type, const QString &text)
 {
     if(!m_manager)
     {
@@ -26,7 +26,7 @@ void MusicDownLoadQueryKGThread::startSearchSong(QueryType type, const QString &
 
     m_searchText = text.trimmed();
     m_currentType = type;
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KG_SONG_SEARCH_URL, URL_KEY).arg(text).arg(0).arg(50);
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(KG_SONG_SEARCH_URL, false).arg(text).arg(0).arg(50);
     deleteAll();
 
     QNetworkRequest request;
@@ -133,7 +133,7 @@ void MusicDownLoadQueryKGThread::downLoadFinished()
         MusicDownLoadQueryYYTThread *yyt = new MusicDownLoadQueryYYTThread(this);
         connect(yyt, SIGNAL(createSearchedItems(MusicSearchedItem)), SIGNAL(createSearchedItems(MusicSearchedItem)));
         connect(yyt, SIGNAL(downLoadDataChanged(QString)), &loop, SLOT(quit()));
-        yyt->startSearchSong(MusicDownLoadQueryYYTThread::MovieQuery, m_searchText);
+        yyt->startToSearch(MusicDownLoadQueryYYTThread::MovieQuery, m_searchText);
         loop.exec();
         m_musicSongInfos << yyt->getMusicSongInfos();
     }
@@ -150,9 +150,8 @@ void MusicDownLoadQueryKGThread::readFromMusicMVAttribute(MusicObject::MusicSong
         return;
     }
 
-    QByteArray encodedData = QCryptographicHash::hash(QString("%1kugoumvcloud").arg(hash).toUtf8(),
-                                                      QCryptographicHash::Md5).toHex().toLower();
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KG_MV_ATTR_URL, URL_KEY).arg(QString(encodedData)).arg(hash);
+    QByteArray encodedData = MusicUtils::Algorithm::md5(QString("%1kugoumvcloud").arg(hash).toUtf8()).toHex().toLower();
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(KG_MV_ATTR_URL, false).arg(QString(encodedData)).arg(hash);
 
     QNetworkRequest request;
     request.setUrl(musicUrl);

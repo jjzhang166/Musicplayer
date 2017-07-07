@@ -13,8 +13,8 @@
 #include "musiclrccontainer.h"
 
 class MusicLrcFloatWidget;
+class MusicLrcFloatPlayWidget;
 class MusicClickedLabel;
-class MusicLrcAnalysis;
 class MusicLrcCommentsWidget;
 class MusicLrcTranslatedWidget;
 class MusicLayoutAnimation;
@@ -44,11 +44,7 @@ public:
     /*!
      * Stop timer clock to draw lrc.
      */
-    virtual void setMaskLinearGradientColor(const QList<QColor> &colors) const override;
-    /*!
-     * Set mask linear gradient color.
-     */
-    virtual void setSettingParameter();
+    virtual void setSettingParameter() override;
     /*!
      * Set setting parameter.
      */
@@ -86,6 +82,7 @@ public:
     /*!
      * Get state of background is artist shown.
      */
+
     void setLrcSize(int size);
     /*!
      * Set current lrc size.
@@ -97,6 +94,15 @@ public:
     void resizeWindow();
     /*!
      * Resize window bound by widgte resize called.
+     */
+
+    void createFloatPlayWidget();
+    /*!
+     * Create float play widget.
+     */
+    void showFullOrNormal();
+    /*!
+     * Show full container or not.
      */
 
 Q_SIGNALS:
@@ -179,6 +185,10 @@ protected:
     /*!
      * Override the widget event.
      */
+    void createColorMenu(QMenu &menu);
+    /*!
+     * Create color menu.
+     */
     void changeLrcPostion(const QString &type);
     /*!
      * Change lrc postion by diff type mouse or wheel.
@@ -225,9 +235,10 @@ protected:
     bool m_lrcDisplayAll;
     int m_animationFreshTime;
     qint64 m_changeSpeedValue;
+    QWidget *m_functionLabel;
     MusicLrcFloatWidget *m_lrcFloatWidget;
+    MusicLrcFloatPlayWidget *m_floatPlayWidget;
     MusicClickedLabel *m_noLrcCurrentInfo;
-    MusicLrcAnalysis *m_lrcAnalysis;
     MusicLrcCommentsWidget *m_commentsWidget;
     MusicLrcTranslatedWidget *m_translatedWidget;
     MusicLayoutAnimation *m_layoutWidget;

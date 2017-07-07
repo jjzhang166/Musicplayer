@@ -57,10 +57,6 @@ MusicApplication::MusicApplication(QWidget *parent)
     connect(m_topAreaWidget, SIGNAL(setTransparent(int)), m_musicSongTree, SLOT(setTransparent(int)));
     connect(m_rightAreaWidget, SIGNAL(updateBgThemeDownload()), m_topAreaWidget, SLOT(musicBgThemeDownloadFinished()));
     connect(m_rightAreaWidget, SIGNAL(updateBackgroundTheme()), m_topAreaWidget, SLOT(musicBgTransparentChanged()));
-    connect(m_bottomAreaWidget, SIGNAL(setShowDesktopLrc(bool)), m_rightAreaWidget, SLOT(setDestopLrcVisible(bool)));
-    connect(m_bottomAreaWidget, SIGNAL(setWindowLockedChanged()), m_rightAreaWidget, SLOT(setWindowLockedChanged()));
-    connect(m_rightAreaWidget, SIGNAL(lockDesktopLrc(bool)), m_bottomAreaWidget, SLOT(lockDesktopLrc(bool)));
-    connect(m_rightAreaWidget, SIGNAL(desktopLrcClosed()), m_bottomAreaWidget, SLOT(desktopLrcClosed()));
 
     setAcceptDrops(true);
 
@@ -265,12 +261,12 @@ void MusicApplication::updateCurrentArtist()
     m_musicSongTree->updateCurrentArtist();
 }
 
-int MusicApplication::getPlayState() const
+bool MusicApplication::isPlaying() const
 {
-    return m_musicPlayer->state();
+    return m_musicPlayer->isPlaying();
 }
 
-int MusicApplication::getPlayMode() const
+MusicObject::SongPlayMode MusicApplication::getPlayMode() const
 {
     return m_musicList->playbackMode();
 }
@@ -746,17 +742,27 @@ void MusicApplication::musicCreateRightMenu()
     QMenu musicPlaybackMode(tr("playbackMode"), &rightClickMenu);
     rightClickMenu.addMenu(&musicPlaybackMode);
 
-    MusicObject::SongPlayMode songplaymode = m_musicList->playbackMode();
-    QAction *order = musicPlaybackMode.addAction(tr("OrderPlay"), this, SLOT(musicPlayOrder()));
-    QAction *random = musicPlaybackMode.addAction(tr("RandomPlay"), this, SLOT(musicPlayRandom()));
-    QAction *lCycle = musicPlaybackMode.addAction(tr("ListCycle"), this, SLOT(musicPlayListLoop()));
-    QAction *sCycle = musicPlaybackMode.addAction(tr("SingleCycle"), this, SLOT(musicPlayOneLoop()));
-    QAction *once = musicPlaybackMode.addAction(tr("PlayOnce"), this, SLOT(musicPlayItemOnce()));
-    (songplaymode == MusicObject::MC_PlayOrder) ? order->setIcon(QIcon(":/contextMenu/btn_selected")) : order->setIcon(QIcon());
-    (songplaymode == MusicObject::MC_PlayRandom) ? random->setIcon(QIcon(":/contextMenu/btn_selected")) : random->setIcon(QIcon());
-    (songplaymode == MusicObject::MC_PlayListLoop) ? lCycle->setIcon(QIcon(":/contextMenu/btn_selected")) : lCycle->setIcon(QIcon());
-    (songplaymode == MusicObject::MC_PlayOneLoop) ? sCycle->setIcon(QIcon(":/contextMenu/btn_selected")) : sCycle->setIcon(QIcon());
-    (songplaymode == MusicObject::MC_PlayOnce) ? once->setIcon(QIcon(":/contextMenu/btn_selected")) : once->setIcon(QIcon());
+    MusicObject::SongPlayMode mode = m_musicList->playbackMode();
+    QList<QAction*> actions;
+    actions << musicPlaybackMode.addAction(tr("OrderPlay"), this, SLOT(musicPlayOrder()));
+    actions << musicPlaybackMode.addAction(tr("RandomPlay"), this, SLOT(musicPlayRandom()));
+    actions << musicPlaybackMode.addAction(tr("ListCycle"), this, SLOT(musicPlayListLoop()));
+    actions << musicPlaybackMode.addAction(tr("SingleCycle"), this, SLOT(musicPlayOneLoop()));
+    actions << musicPlaybackMode.addAction(tr("PlayOnce"), this, SLOT(musicPlayItemOnce()));
+    int index = -1;
+    switch(mode)
+    {
+        case MusicObject::MC_PlayOrder: index = 0; break;
+        case MusicObject::MC_PlayRandom: index = 1; break;
+        case MusicObject::MC_PlayListLoop: index = 2; break;
+        case MusicObject::MC_PlayOneLoop: index = 3; break;
+        case MusicObject::MC_PlayOnce: index = 4; break;
+        default: break;
+    }
+    if(index > -1 && index < actions.count())
+    {
+        actions[index]->setIcon(QIcon(":/contextMenu/btn_selected"));
+    }
 
     rightClickMenu.addSeparator();
     QMenu musicRemoteControl(tr("RemoteControl"), &rightClickMenu);
@@ -862,6 +868,7 @@ void MusicApplication::setDeleteItemAt(const MusicObject::MIntList &index, bool 
         m_playControl = true;
         musicStatePlay();
         m_playControl = false;
+
         if(remove)
         {
             QFile::remove(prePlayName);
@@ -971,7 +978,7 @@ void MusicApplication::contextMenuEvent(QContextMenuEvent *event)
 
 void MusicApplication::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if(event->pos().y() <= 50)
+    if(event->pos().y() <= 50 && !M_SETTING_PTR->value(MusicSettingManager::WindowConciseChoiced).toBool())
     {
         MusicAbstractMoveResizeWidget::mouseDoubleClickEvent(event);
     }
@@ -1038,6 +1045,13 @@ void MusicApplication::readXMLConfigFromText()
         default:break;
     }
     //////////////////////////////////////////////////////////////
+    value = xml.readRemoteWidgetModeConfig();
+    if(value != 0)
+    {
+        m_topAreaWidget->musicRemoteTypeChanged(value);
+        M_SETTING_PTR->setValue(MusicSettingManager::RemoteWidgetModeChoiced, value);
+    }
+    //////////////////////////////////////////////////////////////
     //The size of the volume of the allocation of songs
     value = xml.readMusicPlayVolumeConfig();
     musicVolumeChanged(value);
@@ -1066,6 +1080,19 @@ void MusicApplication::readXMLConfigFromText()
     M_SETTING_PTR->setValue(MusicSettingManager::EnhancedSOXChoiced, xml.readEnhancedSOX());
     //////////////////////////////////////////////////////////////
     xml.readOtherLoadConfig();
+
+    ////////////////////////music hotkey
+    //////////////////////////////////////////////////////////////
+    if(M_SETTING_PTR->value(MusicSettingManager::HotkeyEnableChoiced).toBool())
+    {
+        QStringList hotkeys = M_SETTING_PTR->value(MusicSettingManager::HotkeyStringChoiced).toString().split(STRING_SPLITER);
+        if(hotkeys.count() != M_HOTKEY_PTR->count())
+        {
+            hotkeys = M_HOTKEY_PTR->getDefaultKeys();
+        }
+        M_HOTKEY_PTR->setHotKeys(hotkeys);
+        M_HOTKEY_PTR->enabledAll(true);
+    }
 
     ////////////////////////musicSetting
     //////////////////////////////////////////////////////////////
@@ -1113,6 +1140,7 @@ void MusicApplication::readXMLConfigFromText()
     }
     m_bottomAreaWidget->showPlayStatus(m_playControl);
     m_rightAreaWidget->showPlayStatus(m_playControl);
+    m_topAreaWidget->showPlayStatus(m_playControl);
     //////////////////////////////////////////////////////////////
     //When the configuration is close to the direct exit
     value = xml.readSystemCloseConfig();
@@ -1151,6 +1179,12 @@ void MusicApplication::readXMLConfigFromText()
     M_SETTING_PTR->setValue(MusicSettingManager::CurrentLanIndexChoiced, xml.readLanguageIndex());
 
     setGeometry( xml.readWindowGeometry() );
+    value = xml.readWindowConciseConfig();
+    M_SETTING_PTR->setValue(MusicSettingManager::WindowConciseChoiced, value);
+    if(value == 1)
+    {
+        musicWindowConciseChanged();
+    }
 }
 
 void MusicApplication::writeXMLConfigToText()

@@ -9,7 +9,7 @@
 #include "qjson/parser.h"
 
 MusicBackgroundDownload::MusicBackgroundDownload(const QString &name, const QString &save,
-                                           QObject *parent)
+                                                 QObject *parent)
     : QObject(parent), m_artName(name), m_savePath(save), m_index(0), m_counter(0)
 {
 
@@ -25,7 +25,7 @@ void MusicBackgroundDownload::startToDownload()
     MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
     ///Set search image API
     connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(downLoadFinished(QByteArray)));
-    download->startToDownload(MusicCryptographicHash::decryptData(BIG_ART_URL, URL_KEY).arg(m_artName));
+    download->startToDownload(MusicUtils::Algorithm::mdII(BIG_ART_URL, false).arg(m_artName));
 }
 
 void MusicBackgroundDownload::downLoadFinished(const QByteArray &bytes)

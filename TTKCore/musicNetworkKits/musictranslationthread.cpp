@@ -20,12 +20,12 @@ QString MusicTranslationThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicTranslationThread::startToTranslation(TranslationType from, TranslationType to, const QString &data)
+void MusicTranslationThread::startToDownload(TranslationType from, TranslationType to, const QString &data)
 {
     m_manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
-    request.setUrl( MusicCryptographicHash::decryptData(TRANSLATION_URL, URL_KEY).arg(mapTypeFromEnumToString(from))
+    request.setUrl( MusicUtils::Algorithm::mdII(TRANSLATION_URL, false).arg(mapTypeFromEnumToString(from))
                                             .arg(data).arg(mapTypeFromEnumToString(to)) );
 #ifndef QT_NO_SSL
     connect(m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),

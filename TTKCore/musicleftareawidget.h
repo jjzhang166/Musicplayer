@@ -54,6 +54,11 @@ public:
      * Create sound KMicro widget.
      */
 
+    bool isFullOrNormal() const;
+    /*!
+     * Current is show full container.
+     */
+
 Q_SIGNALS:
     void currentLoveStateChanged();
     /*!
@@ -109,6 +114,10 @@ public Q_SLOTS:
     /*!
      * All files upload finsihed.
      */
+    void showFullOrNormal();
+    /*!
+     * Show full container or not.
+     */
 
 protected:
     void switchToSelectedItemStyle(int index);
@@ -119,6 +128,7 @@ protected:
     Ui::MusicApplication *m_ui;
 
     int m_currentIndex;
+    bool m_isFullOrNormal;
     QWidget *m_stackedWidget;
     MusicSoundKMicroWidget *m_soundKMicroWidget;
     MusicQualityChoicePopWidget *m_qualityChoiceWidget;

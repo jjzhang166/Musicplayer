@@ -12,6 +12,7 @@
 #include "musiccloudsharedsongwidget.h"
 #include "musicqualitychoicepopwidget.h"
 #include "musicsoundkmicrowidget.h"
+#include "musicrightareawidget.h"
 ///qmmp incldue
 #include "visual.h"
 #include "visualfactory.h"
@@ -27,6 +28,8 @@ MusicLeftAreaWidget::MusicLeftAreaWidget(QWidget *parent)
     m_qualityChoiceWidget = nullptr;
     m_cloudSharedSongWidget = nullptr;
     m_currentIndex = 0;
+    m_isFullOrNormal = true;
+    Visual::initialize(MusicApplication::instance());
 }
 
 MusicLeftAreaWidget::~MusicLeftAreaWidget()
@@ -123,6 +126,11 @@ void MusicLeftAreaWidget::createSoundKMicroWidget(const QString &name)
     }
     m_soundKMicroWidget->startSeachKMicro(name);
     m_soundKMicroWidget->show();
+}
+
+bool MusicLeftAreaWidget::isFullOrNormal() const
+{
+    return !m_isFullOrNormal;
 }
 
 void MusicLeftAreaWidget::musicDownloadSongToLocal()
@@ -246,7 +254,6 @@ void MusicLeftAreaWidget::musicStackedCloudWidgetChanged()
 
 void MusicLeftAreaWidget::musicAnalyzerSpectrumWidget()
 {
-    Visual::initialize(MusicApplication::instance());
     foreach(VisualFactory *v, Visual::factories())
     {
         if(v->properties().shortName.contains("analyzer"))
@@ -258,7 +265,6 @@ void MusicLeftAreaWidget::musicAnalyzerSpectrumWidget()
 
 void MusicLeftAreaWidget::musicProjectMSpectrumWidget()
 {
-    Visual::initialize(MusicApplication::instance());
     foreach(VisualFactory *v, Visual::factories())
     {
         if(v->properties().shortName.contains("projectm"))
@@ -288,6 +294,26 @@ void MusicLeftAreaWidget::cloudSharedSongUploadAllDone()
     m_cloudSharedSongWidget = nullptr;
 }
 
+void MusicLeftAreaWidget::showFullOrNormal()
+{
+    if(m_ui->musiclrccontainerforinline->lrcDisplayExpand())
+    {
+        MusicRightAreaWidget::instance()->musicLrcDisplayAllButtonClicked();
+    }
+
+    m_isFullOrNormal = !m_isFullOrNormal;
+    m_ui->topWidget->setVisible(m_isFullOrNormal);
+    m_ui->bottomWidget->setVisible(m_isFullOrNormal);
+    m_ui->centerLeftWidget->setVisible(m_isFullOrNormal);
+    m_ui->songsContainer->setVisible(m_isFullOrNormal);
+    m_ui->stackedFunctionWidget->setVisible(m_isFullOrNormal);
+    m_ui->lrcDisplayAllButton->setVisible(m_isFullOrNormal);
+
+    m_ui->musiclrccontainerforinline->createFloatPlayWidget();
+    m_isFullOrNormal ? MusicApplication::instance()->showNormal() : MusicApplication::instance()->showFullScreen();
+    m_ui->musiclrccontainerforinline->showFullOrNormal();
+}
+
 void MusicLeftAreaWidget::switchToSelectedItemStyle(int index)
 {
     m_ui->musicButton_cloud->setStyleSheet(MusicUIObject::MKGItemFavourite);
@@ -300,11 +326,16 @@ void MusicLeftAreaWidget::switchToSelectedItemStyle(int index)
     switch(index)
     {
         case 0: m_ui->musicButton_playlist->setStyleSheet(MusicUIObject::MKGItemMusicClicked); break;
-        case 1: m_ui->musicButton_radio->setStyleSheet(MusicUIObject::MKGItemRadioClicked);break;
-        case 2: m_ui->musicButton_mydownl->setStyleSheet(MusicUIObject::MKGItemDownloadClicked);break;
-        case 3: m_ui->musicButton_mobile->setStyleSheet(MusicUIObject::MKGItemMobileClicked);break;
-        case 4: m_ui->musicButton_cloud->setStyleSheet(MusicUIObject::MKGItemFavouriteClicked);break;
-        case 5: m_ui->musicButton_tools->setStyleSheet(MusicUIObject::MKGItemMoreClicked);break;
+        case 1: m_ui->musicButton_radio->setStyleSheet(MusicUIObject::MKGItemRadioClicked); break;
+        case 2: m_ui->musicButton_mydownl->setStyleSheet(MusicUIObject::MKGItemDownloadClicked); break;
+        case 3: m_ui->musicButton_mobile->setStyleSheet(MusicUIObject::MKGItemMobileClicked); break;
+        case 4: m_ui->musicButton_cloud->setStyleSheet(MusicUIObject::MKGItemFavouriteClicked); break;
+        case 5: m_ui->musicButton_tools->setStyleSheet(MusicUIObject::MKGItemMoreClicked); break;
         default: break;
+    }
+
+    if(m_ui->musiclrccontainerforinline->lrcDisplayExpand())
+    {
+        MusicRightAreaWidget::instance()->musicLrcDisplayAllButtonClicked();
     }
 }

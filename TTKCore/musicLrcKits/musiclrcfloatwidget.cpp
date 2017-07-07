@@ -2,6 +2,8 @@
 #include "musiclrcfloatphotowidget.h"
 #include "musiclrcfloatsettingwidget.h"
 #include "musicinlinefloatuiobject.h"
+#include "musicrightareawidget.h"
+#include "musicleftareawidget.h"
 
 #include <QPushButton>
 
@@ -45,11 +47,16 @@ MusicLrcFloatWidget::MusicLrcFloatWidget(QWidget *parent)
     m_wallp->setCursor(QCursor(Qt::PointingHandCursor));
     m_photo->setCursor(QCursor(Qt::PointingHandCursor));
 
+#ifdef Q_OS_UNIX
+    m_wallp->setEnabled(false);
+#endif
+
     connect(m_update, SIGNAL(clicked()), parent, SIGNAL(theCurrentLrcUpdated()));
     connect(m_search, SIGNAL(clicked()), parent, SLOT(searchMusicLrcs()));
+    connect(m_wallp, SIGNAL(clicked()), SLOT(musicContainerForWallpaperClicked()));
     connect(m_photo, SIGNAL(clicked()), m_floatPhotoWidget, SLOT(show()));
     connect(m_floatSettingWidget, SIGNAL(widgetClose()), SLOT(closeFloatSettingWidget()));
-    connect(m_more, SIGNAL(clicked()), this, SLOT(showFloatSettingWidget()));
+    connect(m_more, SIGNAL(clicked()), SLOT(showFloatSettingWidget()));
 }
 
 MusicLrcFloatWidget::~MusicLrcFloatWidget()
@@ -89,4 +96,24 @@ void MusicLrcFloatWidget::closeFloatSettingWidget()
 {
     m_floatSettingWidget->close();
     setBlockAnimation(false);
+}
+
+void MusicLrcFloatWidget::musicContainerForWallpaperClicked()
+{
+    if(m_wallp->styleSheet().contains(MusicUIObject::MKGInlineFloatWallpaper))
+    {
+        m_wallp->setStyleSheet(MusicUIObject::MKGInlineFloatWallpaperOn + MusicUIObject::MPushButtonStyle14 +
+                               MusicUIObject::MPushButtonStyle01);
+    }
+    else
+    {
+        m_wallp->setStyleSheet(MusicUIObject::MKGInlineFloatWallpaper + MusicUIObject::MPushButtonStyle09 +
+                               MusicUIObject::MPushButtonStyle01);
+    }
+
+    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    {
+        MusicLeftAreaWidget::instance()->showFullOrNormal();
+    }
+    MusicRightAreaWidget::instance()->musicContainerForWallpaperClicked();
 }

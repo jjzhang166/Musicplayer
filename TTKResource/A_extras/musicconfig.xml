@@ -12,12 +12,18 @@
         <closeEvent value="1"/>
         <closeNetwork value="0"/>
         <fileAssociation value="0"/>
+        <windowConcise value="0"/>
+        <remoteWidgetMode value="0"/>
     </settings>
     <backgroundSkin>
         <bgTheme value="theme-15"/>
         <bgTransparent value="100"/>
         <bgListTransparent value="33"/>
     </backgroundSkin>
+    <hotkey>
+        <hotkeyEnable value="0"/>
+        <hotkeyString value=""/>
+    </hotkey>
     <inlineLrc>
         <showInlineLrc value="1"/>
         <lrcColor value="-1"/>

@@ -5,7 +5,6 @@
 #include "musiccoremplayer.h"
 #include "musicdownloadwidget.h"
 #include "musicitemdelegate.h"
-#include "musiccryptographichash.h"
 #include "musicsettingmanager.h"
 #include "musicconnectionpool.h"
 #include "musicdatadownloadthread.h"
@@ -87,7 +86,7 @@ void MusicSongSearchOnlineTableWidget::startSearchQuery(const QString &text)
     m_loadingLabel->show();
     m_loadingLabel->start();
     m_downLoadManager->setQueryAllRecords(m_queryAllRecords);
-    m_downLoadManager->startSearchSong(MusicDownLoadQueryThreadAbstract::MusicQuery, text);
+    m_downLoadManager->startToSearch(MusicDownLoadQueryThreadAbstract::MusicQuery, text);
 }
 
 void MusicSongSearchOnlineTableWidget::musicDownloadLocal(int row)
@@ -345,7 +344,7 @@ void MusicSongSearchOnlineTableWidget::addSearchMusicToPlayList(int row)
     MusicObject::MusicSongInfomation musicSongInfo = musicSongInfos[row];
     MusicObject::MusicSongAttribute musicSongAttr = musicSongInfo.m_songAttrs.first();
     QString musicSong = item(row, 2)->toolTip() + " - " + item(row, 1)->toolTip();
-    QString musicEnSong = MusicCryptographicHash::encryptData(musicSong, DOWNLOAD_KEY);
+    QString musicEnSong = MusicUtils::Algorithm::mdII(musicSong, ALG_DOWNLOAD_KEY, true);
     QString downloadName = QString("%1%2.%3").arg(CACHE_DIR_FULL).arg(musicEnSong).arg(musicSongAttr.m_format);
     MusicDataDownloadThread *downSong = new MusicDataDownloadThread( musicSongAttr.m_url, downloadName,
                                                                      MusicDownLoadThreadAbstract::Download_Music, this);
@@ -489,6 +488,7 @@ void MusicSongSearchOnlineWidget::createToolWidget(QWidget *widget)
     m_textLabel = new QLabel(this);
     m_textLabel->setTextFormat(Qt::RichText);
     m_textLabel->setText(tr("&nbsp;find no result"));
+    m_textLabel->setStyleSheet(MusicUIObject::MColorStyle03);
     funcLayout->addWidget(m_textLabel);
 
     m_playButton = new QPushButton(tr("Play"), this);
@@ -564,7 +564,7 @@ void MusicSongSearchOnlineWidget::setResizeLabelText(const QString &name)
     }
 
     width = width - WINDOW_WIDTH_MIN + 240;
-    m_textLabel->setText(tr("&nbsp;find <font color=red> %1 </font> result")
+    m_textLabel->setText(tr("&nbsp;find <font color=#80B7F1> %1 </font> result")
                          .arg(MusicUtils::Widget::elidedText(font(), name, Qt::ElideRight, width)));
     m_textLabel->setToolTip(name);
 }

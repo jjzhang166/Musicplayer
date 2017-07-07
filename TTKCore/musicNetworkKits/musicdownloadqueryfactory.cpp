@@ -29,12 +29,19 @@
 #include "musicdownloadquerykgplaylistthread.h"
 #include "musicdownloadquerykwplaylistthread.h"
 
-#include "musicdownloadquerywycommentsthread.h"
-#include "musicdownloadqueryxmcommentsthread.h"
-#include "musicdownloadquerybdcommentsthread.h"
-#include "musicdownloadquerykgcommentsthread.h"
-#include "musicdownloadquerykwcommentsthread.h"
-#include "musicdownloadqueryqqcommentsthread.h"
+#include "musicwycommentsthread.h"
+#include "musicxmcommentsthread.h"
+#include "musicbdcommentsthread.h"
+#include "musickgcommentsthread.h"
+#include "musickwcommentsthread.h"
+#include "musicqqcommentsthread.h"
+
+#include "musicwydiscoverlistthread.h"
+#include "musicxmdiscoverlistthread.h"
+#include "musicbddiscoverlistthread.h"
+#include "musicqqdiscoverlistthread.h"
+#include "musickgdiscoverlistthread.h"
+#include "musickwdiscoverlistthread.h"
 
 #include "musicdatadownloadthread.h"
 
@@ -121,21 +128,37 @@ MusicDownLoadQueryThreadAbstract *MusicDownLoadQueryFactory::getPlaylistThread(Q
     return thread;
 }
 
-MusicDownLoadQueryThreadAbstract *MusicDownLoadQueryFactory::getCommentThread(QObject *parent)
+MusicDownLoadCommentsThread *MusicDownLoadQueryFactory::getCommentThread(QObject *parent)
 {
-    MusicDownLoadQueryThreadAbstract *thread = nullptr;
+    MusicDownLoadCommentsThread *thread = nullptr;
     int index = M_SETTING_PTR->value(MusicSettingManager::DownloadServerChoiced).toInt();
     switch( index )
     {
-        case 0:  thread = new MusicDownLoadQueryWYCommentsThread(parent); break;
-        case 1:  thread = new MusicDownLoadQueryQQCommentsThread(parent); break;
-        case 2:  thread = new MusicDownLoadQueryXMCommentsThread(parent); break;
-        case 3:  thread = new MusicDownLoadQueryBDCommentsThread(parent); break;
-        case 4:  thread = new MusicDownLoadQueryKWCommentsThread(parent); break;
-        case 5:  thread = new MusicDownLoadQueryKGCommentsThread(parent); break;
-        default: thread = new MusicDownLoadQueryWYCommentsThread(parent);
+        case 0:  thread = new MusicWYCommentsThread(parent); break;
+        case 1:  thread = new MusicQQCommentsThread(parent); break;
+        case 2:  thread = new MusicXMCommentsThread(parent); break;
+        case 3:  thread = new MusicBDCommentsThread(parent); break;
+        case 4:  thread = new MusicKWCommentsThread(parent); break;
+        case 5:  thread = new MusicKGCommentsThread(parent); break;
+        default: thread = new MusicWYCommentsThread(parent);
     }
-    M_LOGGER_INFO(QString("getCommentThread server: %1").arg(thread->getQueryServer()));
+    return thread;
+}
+
+MusicDownLoadDiscoverListThread *MusicDownLoadQueryFactory::getDiscoverListThread(QObject *parent)
+{
+    MusicDownLoadDiscoverListThread *thread = nullptr;
+    int index = M_SETTING_PTR->value(MusicSettingManager::DownloadServerChoiced).toInt();
+    switch( index )
+    {
+        case 0:  thread = new MusicWYDiscoverListThread(parent); break;
+        case 1:  thread = new MusicQQDiscoverListThread(parent); break;
+        case 2:  thread = new MusicXMDiscoverListThread(parent); break;
+        case 3:  thread = new MusicBDDiscoverListThread(parent); break;
+        case 4:  thread = new MusicKWDiscoverListThread(parent); break;
+        case 5:  thread = new MusicKGDiscoverListThread(parent); break;
+        default: thread = new MusicWYDiscoverListThread(parent);
+    }
     return thread;
 }
 

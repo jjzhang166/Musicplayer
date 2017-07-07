@@ -2,6 +2,7 @@
 #include "musiclrcmanagerforinline.h"
 #include "musiclrcartphotouploadwidget.h"
 #include "musiclrcfloatwidget.h"
+#include "musiclrcfloatplaywidget.h"
 #include "musiclrclocallinkwidget.h"
 #include "musicuiobject.h"
 #include "musictoastlabel.h"
@@ -45,7 +46,6 @@ MusicLrcContainerForInline::MusicLrcContainerForInline(QWidget *parent)
     }
     vBoxLayout->addWidget(m_layoutWidget);
 
-    setLinearGradientColor(MusicLRCManager::Origin);
     m_mouseMovedAt = QPoint(-1, -1);
     m_mousePressedAt = QPoint(-1, -1);
     m_mouseLeftPressed = false;
@@ -57,6 +57,7 @@ MusicLrcContainerForInline::MusicLrcContainerForInline(QWidget *parent)
     initFunctionLabel();
 
     m_lrcFloatWidget = new MusicLrcFloatWidget(this);
+    m_floatPlayWidget = nullptr;
     initCurrentLrc(tr("noCurrentSongPlay"));
     createNoLrcCurrentInfo();
 
@@ -68,7 +69,9 @@ MusicLrcContainerForInline::~MusicLrcContainerForInline()
 {
     clearAllMusicLRCManager();
     delete m_lrcAnalysis;
+    delete m_functionLabel;
     delete m_lrcFloatWidget;
+    delete m_floatPlayWidget;
     delete m_noLrcCurrentInfo;
     delete m_commentsWidget;
     delete m_translatedWidget;
@@ -89,11 +92,6 @@ void MusicLrcContainerForInline::stopLrcMask()
 {
     m_musicLrcContainer[m_lrcAnalysis->getMiddle()]->stopLrcMask();
     m_layoutWidget->stop();
-}
-
-void MusicLrcContainerForInline::setMaskLinearGradientColor(const QList<QColor> &colors) const
-{
-    m_musicLrcContainer[m_lrcAnalysis->getMiddle()]->setMaskLinearGradientColor(colors);
 }
 
 void MusicLrcContainerForInline::setSettingParameter()
@@ -217,7 +215,35 @@ void MusicLrcContainerForInline::resizeWindow()
     {
         width += 320;
     }
+    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    {
+        width += (m_lrcDisplayAll ? 50 : (320 + 50));
+    }
+
     resizeWidth(width - WINDOW_WIDTH_MIN, height - WINDOW_HEIGHT_MIN);
+}
+
+void MusicLrcContainerForInline::createFloatPlayWidget()
+{
+    delete m_floatPlayWidget;
+    m_floatPlayWidget = nullptr;
+    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    {
+        m_floatPlayWidget = new MusicLrcFloatPlayWidget(this);
+    }
+}
+
+void MusicLrcContainerForInline::showFullOrNormal()
+{
+    QHBoxLayout *l = MStatic_cast(QHBoxLayout*, m_functionLabel->layout());
+    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    {
+        l->removeItem(l->itemAt(l->count() - 1));
+    }
+    else
+    {
+        l->addStretch(1);
+    }
 }
 
 void MusicLrcContainerForInline::lrcSizeChanged(QAction *action)
@@ -344,6 +370,10 @@ void MusicLrcContainerForInline::musicSongMovieClicked()
         return;
     }
 
+    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    {
+        MusicLeftAreaWidget::instance()->showFullOrNormal();
+    }
     MusicRightAreaWidget::instance()->musicVideoButtonSearched(m_currentSongName);
 }
 
@@ -379,6 +409,9 @@ void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *)
     menu.addAction(tr("makeLrc"), this, SLOT(theCurrentLrcMaked()));
     menu.addAction(tr("errorLrc"), this, SLOT(theCurrentLrcError()));
     menu.addSeparator();
+    menu.addAction(MusicLeftAreaWidget::instance()->isFullOrNormal() ? tr("showNormalMode") : tr("showFullMode"),
+                   MusicLeftAreaWidget::instance(), SLOT(showFullOrNormal()));
+    menu.addSeparator();
     menu.addMenu(&changColorMenu);
     menu.addMenu(&changeLrcSize);
 
@@ -391,22 +424,25 @@ void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *)
 
     //////////////////////////////////////////////////
     QActionGroup *group = new QActionGroup(this);
-    QAction *ac1 = group->addAction(changeLrcSize.addAction(tr("smaller")));
-    QAction *ac2 = group->addAction(changeLrcSize.addAction(tr("small")));
-    QAction *ac3 = group->addAction(changeLrcSize.addAction(tr("middle")));
-    QAction *ac4 = group->addAction(changeLrcSize.addAction(tr("big")));
-    QAction *ac5 = group->addAction(changeLrcSize.addAction(tr("bigger")));
-    int size = M_SETTING_PTR->value(MusicSettingManager::LrcSizeChoiced).toInt();
-    (size == 14) ? ac1->setIcon(QIcon(":/contextMenu/btn_selected")) : ac1->setIcon(QIcon());
-    (size == 18) ? ac2->setIcon(QIcon(":/contextMenu/btn_selected")) : ac2->setIcon(QIcon());
-    (size == 26) ? ac3->setIcon(QIcon(":/contextMenu/btn_selected")) : ac3->setIcon(QIcon());
-    (size == 36) ? ac4->setIcon(QIcon(":/contextMenu/btn_selected")) : ac4->setIcon(QIcon());
-    (size == 72) ? ac5->setIcon(QIcon(":/contextMenu/btn_selected")) : ac5->setIcon(QIcon());
-    ac1->setData(0);
-    ac2->setData(1);
-    ac3->setData(2);
-    ac4->setData(3);
-    ac5->setData(4);
+    group->addAction(changeLrcSize.addAction(tr("smaller")))->setData(0);
+    group->addAction(changeLrcSize.addAction(tr("small")))->setData(1);
+    group->addAction(changeLrcSize.addAction(tr("middle")))->setData(2);
+    group->addAction(changeLrcSize.addAction(tr("big")))->setData(3);
+    group->addAction(changeLrcSize.addAction(tr("bigger")))->setData(4);
+    int index = -1, size = M_SETTING_PTR->value(MusicSettingManager::LrcSizeChoiced).toInt();
+    switch(size)
+    {
+        case 14: index = 0; break;
+        case 18: index = 1; break;
+        case 26: index = 2; break;
+        case 36: index = 3; break;
+        case 72: index = 4; break;
+        default: break;
+    }
+    if(index > -1 && index < group->actions().count())
+    {
+        group->actions()[index]->setIcon(QIcon(":/contextMenu/btn_selected"));
+    }
     connect(group, SIGNAL(triggered(QAction*)), SLOT(lrcSizeChanged(QAction*)));
 
     changeLrcSize.addSeparator();
@@ -500,6 +536,29 @@ void MusicLrcContainerForInline::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void MusicLrcContainerForInline::createColorMenu(QMenu &menu)
+{
+    QActionGroup *group = new QActionGroup(this);
+    group->addAction(menu.addAction(tr("IYellow")))->setData(0);
+    group->addAction(menu.addAction(tr("IBlue")))->setData(1);
+    group->addAction(menu.addAction(tr("IGray")))->setData(2);
+    group->addAction(menu.addAction(tr("IPink")))->setData(3);
+    group->addAction(menu.addAction(tr("IGreen")))->setData(4);
+    group->addAction(menu.addAction(tr("IRed")))->setData(5);
+    group->addAction(menu.addAction(tr("IPurple")))->setData(6);
+    group->addAction(menu.addAction(tr("IOrange")))->setData(7);
+    group->addAction(menu.addAction(tr("IIndigo")))->setData(8);
+    connect(group, SIGNAL(triggered(QAction*)), SLOT(changeCurrentLrcColor(QAction*)));
+    menu.addSeparator();
+    menu.addAction(tr("custom"), this, SLOT(currentLrcCustom()));
+
+    int index = M_SETTING_PTR->value("LrcColorChoiced").toInt();
+    if(index > -1 && index < group->actions().count())
+    {
+        group->actions()[index]->setIcon(QIcon(":/contextMenu/btn_selected"));
+    }
+}
+
 void MusicLrcContainerForInline::changeLrcPostion(const QString &type)
 {
     int index = m_lrcAnalysis->getCurrentIndex();
@@ -589,9 +648,9 @@ void MusicLrcContainerForInline::initCurrentLrc(const QString &str)
 
 void MusicLrcContainerForInline::initFunctionLabel()
 {
-    QWidget *functionLabel = new QWidget(this);
-    functionLabel->setFixedHeight(40);
-    QHBoxLayout *functionLayout = new QHBoxLayout(functionLabel);
+    m_functionLabel = new QWidget(this);
+    m_functionLabel->setFixedHeight(40);
+    QHBoxLayout *functionLayout = new QHBoxLayout(m_functionLabel);
     functionLayout->setContentsMargins(0, 0, 0, 0);
 
     QPushButton *translation = new QPushButton(this);
@@ -630,9 +689,9 @@ void MusicLrcContainerForInline::initFunctionLabel()
     functionLayout->addWidget(microphone);
     functionLayout->addWidget(message);
     functionLayout->addStretch(1);
-    functionLabel->setLayout(functionLayout);
+    m_functionLabel->setLayout(functionLayout);
 
-    layout()->addWidget(functionLabel);
+    layout()->addWidget(m_functionLabel);
 }
 
 void MusicLrcContainerForInline::setItemStyleSheet()
@@ -701,15 +760,17 @@ void MusicLrcContainerForInline::setItemStyleSheet(int index, int size, int tran
     value = (value > 100) ? 100 : value;
     w->setFontTransparent(value);
     w->setTransparent(value);
+
     if(M_SETTING_PTR->value("LrcColorChoiced").toInt() != -1)
     {
-        setLinearGradientColor((MusicLRCManager::LrcColorType)M_SETTING_PTR->value("LrcColorChoiced").toInt());
-        setMaskLinearGradientColor( QList<QColor>() << CL_Mask << CL_White << CL_Mask );
+        MusicLRCColor::LrcColorType index = MStatic_cast(MusicLRCColor::LrcColorType, M_SETTING_PTR->value("LrcColorChoiced").toInt());
+        setLinearGradientColor(index);
     }
     else
     {
-        w->setLinearGradientColor(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcBgColorChoiced").toString()));
-        setMaskLinearGradientColor(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcFgColorChoiced").toString()));
+        MusicLRCColor cl(MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcFgColorChoiced").toString()),
+                         MusicUtils::String::readColorConfig(M_SETTING_PTR->value("LrcBgColorChoiced").toString()));
+        setLinearGradientColor(cl);
     }
 }
 
@@ -738,7 +799,12 @@ void MusicLrcContainerForInline::resizeWidth(int w, int h)
     for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
     {
         MStatic_cast(MusicLRCManagerForInline*, m_musicLrcContainer[i])->setLrcPerWidth(w);
-        m_lrcFloatWidget->resizeWindow(w, h);
+    }
+
+    m_lrcFloatWidget->resizeWindow(w, h);
+    if(m_floatPlayWidget)
+    {
+        m_floatPlayWidget->resizeWindow(w, h);
     }
 
     if(m_lrcAnalysis->isEmpty())

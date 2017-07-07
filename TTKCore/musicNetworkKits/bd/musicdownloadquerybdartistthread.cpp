@@ -14,20 +14,20 @@ QString MusicDownLoadQueryBDArtistThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryBDArtistThread::startSearchSong(QueryType type, const QString &artist)
+void MusicDownLoadQueryBDArtistThread::startToSearch(QueryType type, const QString &artist)
 {
     Q_UNUSED(type);
-    startSearchSong(artist);
+    startToSearch(artist);
 }
 
-void MusicDownLoadQueryBDArtistThread::startSearchSong(const QString &artist)
+void MusicDownLoadQueryBDArtistThread::startToSearch(const QString &artist)
 {
     if(!m_manager)
     {
         return;
     }
 
-    QUrl musicUrl = MusicCryptographicHash::decryptData(BD_ARTIST_URL, URL_KEY).arg(artist).arg(0).arg(50);
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(BD_ARTIST_URL, false).arg(artist).arg(0).arg(50);
     deleteAll();
 
     QNetworkRequest request;

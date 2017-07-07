@@ -40,6 +40,8 @@ public:
         CloseNetWorkChoiced,            ///*Close NetWork Parameter*/
         FileAssociationChoiced,         ///*File Association Parameter*/
         ExtraDevicePathChoiced,         ///*Set Extra Device Path Parameter*/
+        WindowConciseChoiced,           ///*Window Concise Parameter*/
+        RemoteWidgetModeChoiced,        ///*Remote Widget Mode Parameter*/
 
         BgThemeChoiced,                 ///*Bg Theme Parameter*/
         BgTransparentChoiced,           ///*Bg Transparent Parameter*/
@@ -104,7 +106,10 @@ public:
         DownloadLimitChoiced,           ///*Download Limit Parameter*/
         DownloadServerChoiced,          ///*Download Server Parameter*/
         DownloadDLoadLimitChoiced,      ///*Download DLoad Limit Parameter*/
-        DownloadULoadLimitChoiced       ///*Download ULoad Limit Parameter*/
+        DownloadULoadLimitChoiced,      ///*Download ULoad Limit Parameter*/
+
+        HotkeyEnableChoiced,            ///*Hotkey Enable Parameter*/
+        HotkeyStringChoiced             ///*Hotkey String Parameter*/
 
 #ifdef MUSIC_MOBILE
         ,MobileWifiConnectChoiced       ///*Mobile Wifi Connect Parameter*/

@@ -27,7 +27,7 @@ void MusicRadioSongsThread::startToDownload(const QString &id)
     m_manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
-    request.setUrl(QUrl(MusicCryptographicHash::decryptData(songsUrl, URL_KEY) + id));
+    request.setUrl(QUrl(MusicUtils::Algorithm::mdII(SONG_URL, false) + id));
 #ifndef QT_NO_SSL
     connect(m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
                        SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
@@ -48,7 +48,7 @@ void MusicRadioSongsThread::startToDownload(const QString &id)
 
 }
 
-SongRadioInfo MusicRadioSongsThread::getMusicSongInfo()
+MusicRadioSongInfo MusicRadioSongsThread::getMusicSongInfo()
 {
     return m_songInfo;
 }
@@ -86,7 +86,13 @@ void MusicRadioSongsThread::downLoadFinished()
                 m_songInfo.m_artistName = value["artistName"].toString();
                 m_songInfo.m_songPicUrl = value["songPicRadio"].toString();
                 m_songInfo.m_albumName = value["albumName"].toString();
-                m_songInfo.m_lrcUrl = MusicCryptographicHash::decryptData("NmdYZm9tYkZjdHJOc1ZNNjIxSFdsc0NZc0xWa1RsM0dhMCtSaTdveGZPaz0=", URL_KEY) + value["lrcLink"].toString();
+                m_songInfo.m_lrcUrl = value["lrcLink"].toString();
+
+                QString lrcPrefix = MusicUtils::Algorithm::mdII(LRC_URL, false);
+                if(!m_songInfo.m_lrcUrl.contains(lrcPrefix))
+                {
+                    m_songInfo.m_lrcUrl = lrcPrefix + m_songInfo.m_lrcUrl;
+                }
             }
         }
     }

@@ -14,13 +14,13 @@ QString MusicDownLoadQueryXMArtistThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryXMArtistThread::startSearchSong(QueryType type, const QString &artist)
+void MusicDownLoadQueryXMArtistThread::startToSearch(QueryType type, const QString &artist)
 {
     Q_UNUSED(type);
-    startSearchSong(artist);
+    startToSearch(artist);
 }
 
-void MusicDownLoadQueryXMArtistThread::startSearchSong(const QString &artist)
+void MusicDownLoadQueryXMArtistThread::startToSearch(const QString &artist)
 {
     if(!m_manager)
     {
@@ -31,8 +31,8 @@ void MusicDownLoadQueryXMArtistThread::startSearchSong(const QString &artist)
 
     QNetworkRequest request;
     makeTokenQueryUrl(m_manager, &request,
-                      MusicCryptographicHash::decryptData(XM_ARTIST_DATA_URL, URL_KEY).arg(artist).arg(1).arg(30),
-                      MusicCryptographicHash::decryptData(XM_ARTIST_URL, URL_KEY));
+                      MusicUtils::Algorithm::mdII(XM_ARTIST_DATA_URL, false).arg(artist).arg(1).arg(30),
+                      MusicUtils::Algorithm::mdII(XM_ARTIST_URL, false));
 #ifndef QT_NO_SSL
     QSslConfiguration sslConfig = request.sslConfiguration();
     sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);

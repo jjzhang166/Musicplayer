@@ -14,13 +14,13 @@ QString MusicDownLoadQueryXMAlbumThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryXMAlbumThread::startSearchSong(QueryType type, const QString &album)
+void MusicDownLoadQueryXMAlbumThread::startToSearch(QueryType type, const QString &album)
 {
     Q_UNUSED(type);
-    startSearchSong(album);
+    startToSearch(album);
 }
 
-void MusicDownLoadQueryXMAlbumThread::startSearchSong(const QString &album)
+void MusicDownLoadQueryXMAlbumThread::startToSearch(const QString &album)
 {
     if(!m_manager)
     {
@@ -31,8 +31,8 @@ void MusicDownLoadQueryXMAlbumThread::startSearchSong(const QString &album)
 
     QNetworkRequest request;
     makeTokenQueryUrl(m_manager, &request,
-                      MusicCryptographicHash::decryptData(XM_ALBUM_DATA_URL, URL_KEY).arg(album),
-                      MusicCryptographicHash::decryptData(XM_ALBUM_URL, URL_KEY));
+                      MusicUtils::Algorithm::mdII(XM_ALBUM_DATA_URL, false).arg(album),
+                      MusicUtils::Algorithm::mdII(XM_ALBUM_URL, false));
     request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 #ifndef QT_NO_SSL
     QSslConfiguration sslConfig = request.sslConfiguration();

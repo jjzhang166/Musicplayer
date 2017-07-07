@@ -47,10 +47,6 @@ public:
     /*!
      * Stop timer clock to draw lrc.
      */
-    virtual void setMaskLinearGradientColor(const QList<QColor> &colors) const override;
-    /*!
-     * Set mask linear gradient color.
-     */
     virtual void setSettingParameter() override;
     /*!
      * Set setting parameter.
@@ -78,10 +74,6 @@ public:
      */
 
 Q_SIGNALS:
-    void desktopLrcClosed();
-    /*!
-     * Desktop lrc close state changed emit.
-     */
     void setWindowLockedChanged(bool lock);
     /*!
      * Lock current desktop lrc state changed emit.
@@ -114,6 +106,10 @@ public Q_SLOTS:
      */
 
 protected:
+    void createColorMenu(QMenu &menu);
+    /*!
+     * Create color menu.
+     */
     void setSelfGeometry() const;
     /*!
      * Set self geometry.

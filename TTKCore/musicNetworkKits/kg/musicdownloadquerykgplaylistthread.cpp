@@ -15,20 +15,20 @@ QString MusicDownLoadQueryKGPlaylistThread::getClassName()
     return staticMetaObject.className();
 }
 
-void MusicDownLoadQueryKGPlaylistThread::startSearchSong(QueryType type, const QString &playlist)
+void MusicDownLoadQueryKGPlaylistThread::startToSearch(QueryType type, const QString &playlist)
 {
     if(type == MusicQuery)
     {
-        startSearchSong(playlist);
+        startToSearch(playlist);
     }
     else
     {
         m_searchText = playlist;
-        startSearchSong(0);
+        startToPage(0);
     }
 }
 
-void MusicDownLoadQueryKGPlaylistThread::startSearchSong(int offset)
+void MusicDownLoadQueryKGPlaylistThread::startToPage(int offset)
 {
     if(!m_manager)
     {
@@ -37,7 +37,7 @@ void MusicDownLoadQueryKGPlaylistThread::startSearchSong(int offset)
 
     deleteAll();
     m_pageTotal = 0;
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KG_PLAYLIST_URL, URL_KEY)
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(KG_PLAYLIST_URL, false)
                     .arg(offset + 1).arg(m_pageSize).arg(m_searchText);
 
     QNetworkRequest request;
@@ -54,14 +54,14 @@ void MusicDownLoadQueryKGPlaylistThread::startSearchSong(int offset)
                      SLOT(replyError(QNetworkReply::NetworkError)));
 }
 
-void MusicDownLoadQueryKGPlaylistThread::startSearchSong(const QString &playlist)
+void MusicDownLoadQueryKGPlaylistThread::startToSearch(const QString &playlist)
 {
     if(!m_manager)
     {
         return;
     }
 
-    QUrl musicUrl = MusicCryptographicHash::decryptData(KG_PLAYLIST_ATTR_URL, URL_KEY).arg(playlist);
+    QUrl musicUrl = MusicUtils::Algorithm::mdII(KG_PLAYLIST_ATTR_URL, false).arg(playlist);
 
     QNetworkRequest request;
     request.setUrl(musicUrl);

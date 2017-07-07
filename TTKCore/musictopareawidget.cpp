@@ -15,7 +15,8 @@
 #include "musicuiobject.h"
 #include "musictinyuiobject.h"
 #include "musicfunctionuiobject.h"
-#include "musicwydiscoverlistthread.h"
+#include "musicdownloaddiscoverlistthread.h"
+#include "musicdownloadqueryfactory.h"
 #include "musiccounterpvdownloadthread.h"
 
 MusicTopAreaWidget *MusicTopAreaWidget::m_instance = nullptr;
@@ -30,14 +31,13 @@ MusicTopAreaWidget::MusicTopAreaWidget(QWidget *parent)
     connect(&m_pictureCarouselTimer, SIGNAL(timeout()), SLOT(musicBackgroundChanged()));
     connect(M_BACKGROUND_PTR, SIGNAL(userSelectIndexChanged()), SLOT(musicBackgroundChanged()));
     ///////////////////////////////////////////////////////
-    m_getDiscoverThread = new MusicWYDiscoverListThread(this);
-    connect(m_getDiscoverThread, SIGNAL(downLoadDataChanged(QString)), SLOT(musicSearchTopListInfoFinished()));
-    m_getDiscoverThread->startSearchSong();
+    MusicDownLoadDiscoverListThread *discover = M_DOWNLOAD_QUERY_PTR->getDiscoverListThread(this);
+    connect(discover, SIGNAL(downLoadDataChanged(QString)), SLOT(musicSearchTopListInfoFinished(QString)));
+    discover->startToSearch();
 
     m_counterPVThread = new MusicCounterPVDownloadThread(this);
     m_counterPVThread->startToDownload();
     ///////////////////////////////////////////////////////
-    m_currentPlayStatus = true;
     m_listAlpha = 40;
 }
 
@@ -46,7 +46,6 @@ MusicTopAreaWidget::~MusicTopAreaWidget()
     delete m_musicUserWindow;
     delete m_musicbgskin;
     delete m_musicRemoteWidget;
-    delete m_getDiscoverThread;
     delete m_counterPVThread;
 }
 
@@ -136,7 +135,6 @@ void MusicTopAreaWidget::setTimerStop()
 
 void MusicTopAreaWidget::showPlayStatus(bool status)
 {
-    m_currentPlayStatus = status;
     if(m_musicRemoteWidget)
     {
         m_musicRemoteWidget->showPlayStatus(status);
@@ -159,9 +157,9 @@ void MusicTopAreaWidget::setVolumeValue(int value) const
     }
 }
 
-void MusicTopAreaWidget::musicSearchTopListInfoFinished()
+void MusicTopAreaWidget::musicSearchTopListInfoFinished(const QString &data)
 {
-    m_ui->musicSongSearchLine->setPlaceholderText( m_getDiscoverThread->getTopListInfo() );
+    m_ui->musicSongSearchLine->setPlaceholderText( data );
 }
 
 void MusicTopAreaWidget::musicShowSkinChangedWindow()
@@ -360,22 +358,35 @@ void MusicTopAreaWidget::musicDeleteRemote()
 
 void MusicTopAreaWidget::musicRemoteTypeChanged(QAction *type)
 {
-    MusicRemoteWidget *tempRemote = m_musicRemoteWidget;
-    m_musicRemoteWidget = nullptr;
-    if(type->text() == tr("CircleRemote")) musicCircleRemote();
-    else if(type->text() == tr("DiamondRemote")) musicDiamondRemote();
-    else if(type->text() == tr("SquareRemote")) musicSquareRemote();
-    else if(type->text() == tr("RectangleRemote")) musicRectangleRemote();
-    else if(type->text() == tr("SimpleStyleRemote")) musicSimpleStyleRemote();
-    else if(type->text() == tr("ComplexStyleRemote")) musicComplexStyleRemote();
-    else if(type->text() == tr("StripRemote")) musicStripRemote();
-    else if(type->text() == tr("RipplesRemote")) musicRipplesRemote();
-    else
+    if(!m_musicRemoteWidget)
     {
-        m_musicRemoteWidget = tempRemote;
         return;
     }
-    tempRemote->deleteLater();
+
+    MusicRemoteWidget *tempRemote = m_musicRemoteWidget;
+    m_musicRemoteWidget = nullptr;
+
+    musicRemoteTypeChanged(type->data().toInt());
+
+    if(m_musicRemoteWidget)
+    {
+        tempRemote->deleteLater();
+    }
+}
+
+void MusicTopAreaWidget::musicRemoteTypeChanged(int type)
+{
+    switch(type)
+    {
+        case MusicRemoteWidget::Circle: musicCircleRemote(); break;
+        case MusicRemoteWidget::Square: musicSquareRemote(); break;
+        case MusicRemoteWidget::Rectangle: musicRectangleRemote(); break;
+        case MusicRemoteWidget::SimpleStyle: musicSimpleStyleRemote(); break;
+        case MusicRemoteWidget::ComplexStyle: musicComplexStyleRemote(); break;
+        case MusicRemoteWidget::Diamond: musicDiamondRemote(); break;
+        case MusicRemoteWidget::Strip: musicStripRemote(); break;
+        case MusicRemoteWidget::Ripples: musicRipplesRemote(); break;
+    }
 }
 
 void MusicTopAreaWidget::createRemoteWidget()
@@ -385,7 +396,7 @@ void MusicTopAreaWidget::createRemoteWidget()
         return;
     }
 
-    m_musicRemoteWidget->showPlayStatus(m_currentPlayStatus);
+    m_musicRemoteWidget->showPlayStatus(!MusicApplication::instance()->isPlaying());
     m_musicRemoteWidget->setVolumeValue(m_ui->musicSound->value());
     connect(m_musicRemoteWidget, SIGNAL(musicWindowSignal()), MusicApplication::instance(), SLOT(showNormal()));
     connect(m_musicRemoteWidget, SIGNAL(musicPlayPreviousSignal()), MusicApplication::instance(), SLOT(musicPlayPrevious()));
@@ -399,8 +410,10 @@ void MusicTopAreaWidget::createRemoteWidget()
 
 void MusicTopAreaWidget::drawWindowBackgroundRect()
 {
-    QString path = THEME_DIR_FULL + m_currentBgSkin + SKN_FILE;
+    QString path = USER_THEME_DIR_FULL + m_currentBgSkin + SKN_FILE;
+    MusicBackgroundSkinDialog::themeValidCheck(m_currentBgSkin, path);
     M_BACKGROUND_PTR->setMBackground(path);
+
     if(m_musicbgskin)
     {
         m_musicbgskin->updateBackground(path);

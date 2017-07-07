@@ -12,7 +12,7 @@
 #include "musicnumberdefine.h"
 #include "musicglobaldefine.h"
 
-/*! @brief The class of the utils object namespace.
+/*! @brief The class of the utils string object namespace.
  * @author Greedysky <greedysky@163.com>
  */
 namespace MusicUtils
@@ -23,15 +23,15 @@ namespace MusicUtils
         /*!
          * Remove given key in string, default is space.
          */
-        MUSIC_CORE_EXPORT QStringList splitString(const QString &value);
+        MUSIC_CORE_EXPORT QStringList splitString(const QString &value, const QString &key = "-");
         /*!
          * Get split string value.
          */
-        MUSIC_CORE_EXPORT QString artistName(const QString &value);
+        MUSIC_CORE_EXPORT QString artistName(const QString &value, const QString &key = "-");
         /*!
          * Get song artist name.
          */
-        MUSIC_CORE_EXPORT QString songName(const QString &value);
+        MUSIC_CORE_EXPORT QString songName(const QString &value, const QString &key = "-");
         /*!
          * Get song name.
          */

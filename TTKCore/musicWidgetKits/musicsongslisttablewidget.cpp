@@ -15,6 +15,7 @@
 #include "musicapplication.h"
 #include "musicleftareawidget.h"
 
+#include <qmath.h>
 #include <QUrl>
 #include <QAction>
 #include <QTimer>
@@ -22,6 +23,14 @@
 #include <QMouseEvent>
 
 #define ROW_HIGHT   30
+#define SEARCH_ITEM_DEFINE(index, names) \
+    case index: \
+    if(names.count() >= index + 1) \
+    { \
+        MusicRightAreaWidget::instance()->songResearchButtonSearched(names[index]); \
+    } \
+    break;
+
 
 MusicSongsListTableWidget::MusicSongsListTableWidget(int index, QWidget *parent)
     : MusicSongsListAbstractTableWidget(parent), m_openFileWidget(nullptr),
@@ -338,33 +347,7 @@ void MusicSongsListTableWidget::listCellEntered(int row, int column)
     {
         unsetCursor();
     }
-    ///current play table item should not clear something
-    bool isCurrentIndex;
-    emit isCurrentIndexs(isCurrentIndex);
-    if(isCurrentIndex)
-    {
-        if((it = item(m_playRowIndex, 0)) != nullptr)
-        {
-            it->setIcon(QIcon());
-        }
-        if((it = item(m_playRowIndex, 2)) != nullptr)
-        {
-            it->setIcon(QIcon());
-        }
-        if((it = item(m_playRowIndex, 3)) != nullptr)
-        {
-            it->setIcon(QIcon());
-        }
-        if((it = item(m_playRowIndex, 4)) != nullptr)
-        {
-            it->setIcon(QIcon());
-        }
-        if((it = item(m_playRowIndex, 5)) != nullptr)
-        {
-            it->setText(QString());
-            it->setIcon(QIcon());
-        }
-    }
+
     MusicSongsListAbstractTableWidget::listCellEntered(row, column);
 
     //To show music Songs Item information
@@ -502,9 +485,9 @@ void MusicSongsListTableWidget::showTimeOut()
         m_musicSongsInfoWidget->setMusicSongInformation( song );
         m_musicSongsInfoWidget->setGeometry(mapToGlobal(QPoint(width(), 0)).x() + 8,
                                             QCursor::pos().y(), 264, 108);
-        bool isCurrentIndex;
-        emit isCurrentIndexs(isCurrentIndex);
-        m_musicSongsInfoWidget->setVisible( isCurrentIndex ? (m_musicSongsPlayWidget &&
+        bool state;
+        emit isCurrentIndexs(state);
+        m_musicSongsInfoWidget->setVisible( state ? (m_musicSongsPlayWidget &&
                                             !m_musicSongsPlayWidget->getItemRenameState()) : true);
     }
 }
@@ -609,25 +592,12 @@ void MusicSongsListTableWidget::musicSearchQuery(QAction *action)
     QStringList names(MusicUtils::String::splitString(songName));
     switch(action->data().toInt() - DEFAULT_INDEX_LEVEL1)
     {
-        case 0:
-            if(names.count() >= 1)
-            {
-                MusicRightAreaWidget::instance()->songResearchButtonSearched(names[0]);
-            }
+        SEARCH_ITEM_DEFINE(0, names);
+        SEARCH_ITEM_DEFINE(1, names);
+        SEARCH_ITEM_DEFINE(2, names);
+        default:
+            MusicRightAreaWidget::instance()->songResearchButtonSearched(songName);
             break;
-        case 1:
-            if(names.count() >= 2)
-            {
-                MusicRightAreaWidget::instance()->songResearchButtonSearched(names[1]);
-            }
-            break;
-        case 2:
-            if(names.count() >= 3)
-            {
-                MusicRightAreaWidget::instance()->songResearchButtonSearched(names[2]);
-            }
-            break;
-        default: break;
     }
 }
 
@@ -754,17 +724,27 @@ void MusicSongsListTableWidget::contextMenuEvent(QContextMenuEvent *event)
     rightClickMenu.addSeparator();
 
     rightClickMenu.addMenu(&musicPlaybackMode);
-    QAction *order = musicPlaybackMode.addAction(tr("OrderPlay"), MusicApplication::instance(), SLOT(musicPlayOrder()));
-    QAction *random = musicPlaybackMode.addAction(tr("RandomPlay"), MusicApplication::instance(), SLOT(musicPlayRandom()));
-    QAction *lCycle = musicPlaybackMode.addAction(tr("ListCycle"), MusicApplication::instance(), SLOT(musicPlayListLoop()));
-    QAction *sCycle = musicPlaybackMode.addAction(tr("SingleCycle"), MusicApplication::instance(), SLOT(musicPlayOneLoop()));
-    QAction *once = musicPlaybackMode.addAction(tr("PlayOnce"), MusicApplication::instance(), SLOT(musicPlayItemOnce()));
-    MusicObject::SongPlayMode mode = MStatic_cast(MusicObject::SongPlayMode, MusicApplication::instance()->getPlayMode());
-    (mode == MusicObject::MC_PlayOrder) ? order->setIcon(QIcon(":/contextMenu/btn_selected")) : order->setIcon(QIcon());
-    (mode == MusicObject::MC_PlayRandom) ? random->setIcon(QIcon(":/contextMenu/btn_selected")) : random->setIcon(QIcon());
-    (mode == MusicObject::MC_PlayListLoop) ? lCycle->setIcon(QIcon(":/contextMenu/btn_selected")) : lCycle->setIcon(QIcon());
-    (mode == MusicObject::MC_PlayOneLoop) ? sCycle->setIcon(QIcon(":/contextMenu/btn_selected")) : sCycle->setIcon(QIcon());
-    (mode == MusicObject::MC_PlayOnce) ? once->setIcon(QIcon(":/contextMenu/btn_selected")) : once->setIcon(QIcon());
+    QList<QAction*> actions;
+    actions << musicPlaybackMode.addAction(tr("OrderPlay"), MusicApplication::instance(), SLOT(musicPlayOrder()));
+    actions << musicPlaybackMode.addAction(tr("RandomPlay"), MusicApplication::instance(), SLOT(musicPlayRandom()));
+    actions << musicPlaybackMode.addAction(tr("ListCycle"), MusicApplication::instance(), SLOT(musicPlayListLoop()));
+    actions << musicPlaybackMode.addAction(tr("SingleCycle"), MusicApplication::instance(), SLOT(musicPlayOneLoop()));
+    actions << musicPlaybackMode.addAction(tr("PlayOnce"), MusicApplication::instance(), SLOT(musicPlayItemOnce()));
+    MusicObject::SongPlayMode mode = MusicApplication::instance()->getPlayMode();
+    int index = -1;
+    switch(mode)
+    {
+        case MusicObject::MC_PlayOrder: index = 0; break;
+        case MusicObject::MC_PlayRandom: index = 1; break;
+        case MusicObject::MC_PlayListLoop: index = 2; break;
+        case MusicObject::MC_PlayOneLoop: index = 3; break;
+        case MusicObject::MC_PlayOnce: index = 4; break;
+        default: break;
+    }
+    if(index > -1 && index < actions.count())
+    {
+        actions[index]->setIcon(QIcon(":/contextMenu/btn_selected"));
+    }
 
     QMenu musicAddNewFiles(tr("addNewFiles"), &rightClickMenu);
     rightClickMenu.addMenu(&musicAddNewFiles);
@@ -885,9 +865,9 @@ void MusicSongsListTableWidget::startToDrag()
             item(i, 5)->setText(songs[i].getMusicTime());
         }
 
-        bool isCurrent;
-        emit isCurrentIndexs(isCurrent);
-        if(isCurrent)
+        bool state;
+        emit isCurrentIndexs(state);
+        if(state)
         {
             selectRow(index);
         }
@@ -902,5 +882,6 @@ void MusicSongsListTableWidget::createContextMenu(QMenu &menu)
     {
         menu.addAction(tr("search '%1'").arg(names[i].trimmed()))->setData(i + DEFAULT_INDEX_LEVEL1);
     }
+    menu.addAction(tr("search '%1'").arg(songName))->setData(DEFAULT_INDEX_LEVEL5);
     connect(&menu, SIGNAL(triggered(QAction*)), SLOT(musicSearchQuery(QAction*)));
 }

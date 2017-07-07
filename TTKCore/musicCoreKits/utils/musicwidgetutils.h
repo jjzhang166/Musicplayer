@@ -15,7 +15,7 @@ class QComboBox;
 #include "musicnumberdefine.h"
 #include "musicglobaldefine.h"
 
-/*! @brief The class of the utils object namespace.
+/*! @brief The class of the utils widget object namespace.
  * @author Greedysky <greedysky@163.com>
  */
 namespace MusicUtils
@@ -67,6 +67,7 @@ namespace MusicUtils
         /*!
          * Get bitmap mask from rect.
          */
+
         MUSIC_CORE_EXPORT void reRenderImage(int delta, const QImage *input, QImage *output);
         /*!
          * Rerender the image by color burn transform.

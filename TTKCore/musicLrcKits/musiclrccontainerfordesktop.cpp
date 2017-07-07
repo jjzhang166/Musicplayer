@@ -4,13 +4,15 @@
 #include "musicfunctionuiobject.h"
 #include "musicdesktoplrcuiobject.h"
 #include "musicsettingmanager.h"
-#include "musicapplication.h"
 #include "musiclrcdefines.h"
+
+#include "musicapplication.h"
+#include "musicbottomareawidget.h"
 
 MusicLrcContainerForDesktop::MusicLrcContainerForDesktop(QWidget *parent)
     : MusicLrcContainer(parent)
 {
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint );
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
 
@@ -46,14 +48,6 @@ void MusicLrcContainerForDesktop::stopLrcMask()
     foreach(MusicLRCManager *manager, m_musicLrcContainer)
     {
         manager->stopLrcMask();
-    }
-}
-
-void MusicLrcContainerForDesktop::setMaskLinearGradientColor(const QList<QColor> &colors) const
-{
-    foreach(MusicLRCManager *manager, m_musicLrcContainer)
-    {
-        manager->setMaskLinearGradientColor(colors);
     }
 }
 
@@ -120,7 +114,7 @@ void MusicLrcContainerForDesktop::setWindowLockedChanged()
        setStyleSheet(MusicUIObject::MBackgroundStyle01);
     }
     M_SETTING_PTR->setValue(MusicSettingManager::DLrcLockedChoiced,  m_windowLocked ? 1 : 0);
-    emit setWindowLockedChanged(m_windowLocked);
+    MusicBottomAreaWidget::instance()->lockDesktopLrc(m_windowLocked);
 }
 
 void MusicLrcContainerForDesktop::setLrcBiggerChanged()
@@ -168,6 +162,27 @@ void MusicLrcContainerForDesktop::setSingleLineTypeChanged()
         m_musicLrcContainer[1]->show();
     }
     m_musicLrcContainer[1]->setText(QString());
+}
+
+void MusicLrcContainerForDesktop::createColorMenu(QMenu &menu)
+{
+    QActionGroup *group = new QActionGroup(this);
+    group->addAction(menu.addAction(tr("DWhite")))->setData(0 + LRC_COLOR_OFFSET);
+    group->addAction(menu.addAction(tr("DBlue")))->setData(1 + LRC_COLOR_OFFSET);
+    group->addAction(menu.addAction(tr("DRed")))->setData(2 + LRC_COLOR_OFFSET);
+    group->addAction(menu.addAction(tr("DBlack")))->setData(3 + LRC_COLOR_OFFSET);
+    group->addAction(menu.addAction(tr("DYellow")))->setData(4 + LRC_COLOR_OFFSET);
+    group->addAction(menu.addAction(tr("DPurple")))->setData(5 + LRC_COLOR_OFFSET);
+    group->addAction(menu.addAction(tr("DGreen")))->setData(6 + LRC_COLOR_OFFSET);
+    connect(group, SIGNAL(triggered(QAction*)), SLOT(changeCurrentLrcColor(QAction*)));
+    menu.addSeparator();
+    menu.addAction(tr("custom"), this, SLOT(currentLrcCustom()));
+
+    int index = M_SETTING_PTR->value("DLrcColorChoiced").toInt() - LRC_COLOR_OFFSET;
+    if(index > -1 && index < group->actions().count())
+    {
+        group->actions()[index]->setIcon(QIcon(":/contextMenu/btn_selected"));
+    }
 }
 
 void MusicLrcContainerForDesktop::setSelfGeometry() const
@@ -380,7 +395,7 @@ void MusicLrcContainerForDesktop::leaveEvent(QEvent *event)
 void MusicLrcContainerForDesktop::closeEvent(QCloseEvent *event)
 {
     MusicLrcContainer::closeEvent(event);
-    emit desktopLrcClosed();
+    MusicBottomAreaWidget::instance()->desktopLrcClosed();
 }
 
 void MusicLrcContainerForDesktop::contextMenuEvent(QContextMenuEvent *event)
@@ -399,7 +414,7 @@ void MusicLrcContainerForDesktop::contextMenuEvent(QContextMenuEvent *event)
     QAction *lrcLinkAc = menu.addAction(tr("localLinkOff"), this, SLOT(theLinkLrcChanged()));
     m_linkLocalLrc ? lrcLinkAc->setText(tr("localLinkOff")) : lrcLinkAc->setText(tr("localLinkOn"));
     menu.addAction(tr("hide"), this, SLOT(close()));
-    menu.addAction(QIcon(":/contextMenu/btn_lock"), tr("lockLrc"), this, SLOT(setWindowLockedChanged()));
+    menu.addAction(QIcon(":/contextMenu/btn_lock"), m_windowLocked ? tr("unlockLrc"): tr("lockLrc"), this, SLOT(setWindowLockedChanged()));
     menu.addMenu(&changColorMenu);
     menu.addSeparator();
 

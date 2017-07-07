@@ -15,6 +15,7 @@
 class MusicSettingWidget;
 class MusicDownloadStatusObject;
 class MusicLrcContainerForDesktop;
+class MusicLrcContainerForWallpaper;
 
 namespace Ui {
     class MusicApplication;
@@ -133,14 +134,6 @@ Q_SIGNALS:
     /*!
      * Current background transparent changed.
      */
-    void desktopLrcClosed();
-    /*!
-     * Set desktop lrc close state.
-     */
-    void lockDesktopLrc(bool lock);
-    /*!
-     * Lock or not current desktop lrc emit.
-     */
 
 public Q_SLOTS:
     void musicFunctionClicked(int index);
@@ -211,6 +204,10 @@ public Q_SLOTS:
     /*!
      * Lrc display all button clicked.
      */
+    void musicContainerForWallpaperClicked();
+    /*!
+     * Lrc desktop wallpaper button clicked.
+     */
 
 protected:
     void musicButtonStyleClear(bool fore);
@@ -222,6 +219,7 @@ protected:
     Ui::MusicApplication *m_ui;
     MusicSettingWidget *m_setting;
     MusicLrcContainerForDesktop *m_musicLrcForDesktop;
+    MusicLrcContainerForWallpaper *m_musicLrcForWallpaper;
     MusicDownloadStatusObject *m_downloadStatusLabel;
 
     static MusicRightAreaWidget *m_instance;

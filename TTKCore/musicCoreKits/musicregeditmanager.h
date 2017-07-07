@@ -18,23 +18,25 @@
 class MUSIC_CORE_EXPORT MusicRegeditManager
 {
 public:
-    MusicRegeditManager() = default;
-    /*!
-     * Object contsructor.
-     */
-
     static QString getClassName();
     /*!
      * Get class object name.
+     */
+
+    bool isFileAssociate();
+    /*!
+     * Check current is file associate.
      */
     void setMusicRegeditAssociateFileIcon();
     /*!
      * Set music regedit associate file icon.
      */
+
     void setDesktopWallAutoStart(bool state);
     /*!
      * Set desktop wall auto start.
      */
+
     void getDesktopWallControlPanel(QString &originPath, int &originType);
     /*!
      * Get desktop wall control panel.
@@ -49,7 +51,7 @@ protected:
     /*!
      * Check current regedit item has exist.
      */
-    void createMusicRegedit(const QString &key, int index);
+    void createMusicRegedit(const QString &key);
     /*!
      * Create music regedit item.
      */
