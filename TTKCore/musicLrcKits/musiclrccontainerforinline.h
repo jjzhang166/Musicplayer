@@ -17,7 +17,7 @@ class MusicLrcFloatPlayWidget;
 class MusicClickedLabel;
 class MusicLrcCommentsWidget;
 class MusicLrcTranslatedWidget;
-class MusicLayoutAnimation;
+class MusicLayoutAnimationWidget;
 
 /*! @brief The class of the inline lrc container.
  * @author Greedysky <greedysky@163.com>
@@ -180,6 +180,7 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     /*!
@@ -241,7 +242,7 @@ protected:
     MusicClickedLabel *m_noLrcCurrentInfo;
     MusicLrcCommentsWidget *m_commentsWidget;
     MusicLrcTranslatedWidget *m_translatedWidget;
-    MusicLayoutAnimation *m_layoutWidget;
+    MusicLayoutAnimationWidget *m_layoutWidget;
 
 };
 

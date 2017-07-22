@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 add_definitions(-DMUSIC_LIBRARY)
 
-set(TTK_VERSION "2.5.1.0")
+set(TTK_VERSION "2.5.2.0")
 
 # Find includes in the build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -77,6 +77,9 @@ include_directories(${MUSIC_UI_DIR})
 include_directories(${MUSIC_THIRDPARTY_DIR})
 include_directories(${MUSIC_THIRDPARTY_DIR}/zlib)
 include_directories(${MUSIC_THIRDPARTY_DIR}/Devicewatcher)
+if(WIN32)
+include_directories(${MUSIC_THIRDPARTY_DIR}/MiniDumper)
+endif()
 include_directories(${MUSIC_THIRDPARTY_DIR}/MusicExtras)
 include_directories(${MUSIC_THIRDPARTY_DIR}/MusicExtras/qaes)
 include_directories(${MUSIC_THIRDPARTY_DIR}/MusicExtras/qhz2py)

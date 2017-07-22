@@ -10,6 +10,7 @@
    =================================================*/
 
 #include <QListWidget>
+#include "musicobject.h"
 #include "musicuiobject.h"
 #include "musicglobaldefine.h"
 
@@ -40,6 +41,10 @@ public Q_SLOTS:
     /*!
      * Add tool sets list into list widget.
      */
+    void resetFlag(MusicObject::ToolsType flag);
+    /*!
+     * Reset window open flag.
+     */
 
 protected:
     void clearAllItems();
@@ -51,7 +56,7 @@ protected:
      * Override the widget event.
      */
 
-    QWidget *m_containItem;
+    MusicObject::ToolsTypes m_toolsFlags;
 
 };
 

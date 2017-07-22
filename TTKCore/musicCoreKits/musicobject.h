@@ -29,6 +29,7 @@
 #define THEME_DIR               "MTheme/"
 #define CACHE_DIR               "MCached/"
 #define ART_DIR                 "MArt/"
+#define UPDATE_DIR              "MUpdate/"
 #define RES_DIR                 "MRes/"
 #define AVATAR_DIR              "avatar/"
 #define USER_THEME_DIR          "theme/"
@@ -81,6 +82,7 @@
 #define CACHE_DIR_FULL          DOWNLOADS_DIR_FULL + CACHE_DIR
 #define ART_DIR_FULL            DOWNLOADS_DIR_FULL + ART_DIR
 #define BACKGROUND_DIR_FULL     DOWNLOADS_DIR_FULL + BACKGROUND_DIR
+#define UPDATE_DIR_FULL         DOWNLOADS_DIR_FULL + UPDATE_DIR
 
 #define COFIGPATH_FULL          APPDATA_DIR_FULL + COFIGPATH
 #define MUSICPATH_FULL          APPDATA_DIR_FULL + MUSICPATH
@@ -189,6 +191,26 @@ namespace MusicObject
         FT_FixedPitch = 0x00020,   ///*font fixedPitch*/
         FT_Kerningt =   0x00040    ///*font kerningt*/
     };
+
+    enum ToolsType
+    {
+        TT_LocalManager =   0x00001,   ///*Local Manager*/
+        TT_AudioRecord =    0x00002,   ///*Audio Record*/
+        TT_RingTone =       0x00004,   ///*Ring Tone*/
+        TT_Timer =          0x00008,   ///*Timer*/
+        TT_Transform =      0x00010,   ///*Transform*/
+        TT_Spectrum =       0x00020,   ///*Spectrum*/
+        TT_Wallpaper =      0x00040,   ///*Wallpaper*/
+        TT_Mobile =         0x00080,   ///*Mobile*/
+        TT_SpeedTest =      0x00100,   ///*Speed Test*/
+        TT_ConnectionTest = 0x00200,   ///*Connection Test*/
+        TT_SoundGain =      0x00400,   ///*Sound Gain*/
+        TT_Identify =       0x00800,   ///*Identify*/
+        TT_SoundTouch =     0x01000,   ///*Sound Touch*/
+        TT_GrabWindow =     0x02000,   ///*Grab Window*/
+        TT_SoundKMicro =    0x04000    ///*Sound KMicro*/
+    };
+    TTK_DECLARE_FLAGS(ToolsTypes, ToolsType)
 
     static QString getAppDir()
     {

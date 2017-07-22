@@ -1,5 +1,4 @@
 #include "musicgrabwidget.h"
-#include "musicobject.h"
 
 #include <QMenu>
 #include <QScreen>
@@ -14,8 +13,13 @@
 #endif
 
 MusicGrabWidget::MusicGrabWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(nullptr)
 {
+    Q_UNUSED(parent);
+
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    setAttribute(Qt::WA_QuitOnClose, true);
+
     setWindowFlags( Qt::Widget | Qt::FramelessWindowHint );
     resize(QApplication::desktop()->width(), QApplication::desktop()->height());
     setCursor(Qt::CrossCursor);
@@ -58,8 +62,14 @@ void MusicGrabWidget::musicCreateRightMenu(const QString &path)
     if(!m_grabPixmap.isNull())
     {
         m_grabPixmap.save(path, 0, 100);
-        deleteLater();
+        close();
     }
+}
+
+void MusicGrabWidget::closeEvent(QCloseEvent *event)
+{
+    QWidget::closeEvent(event);
+    emit resetFlag(MusicObject::TT_GrabWindow);
 }
 
 void MusicGrabWidget::paintEvent(QPaintEvent *event)
@@ -138,7 +148,7 @@ void MusicGrabWidget::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_Escape)
     {
-        deleteLater();
+        close();
     }
 }
 

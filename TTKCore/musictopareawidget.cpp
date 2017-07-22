@@ -17,7 +17,7 @@
 #include "musicfunctionuiobject.h"
 #include "musicdownloaddiscoverlistthread.h"
 #include "musicdownloadqueryfactory.h"
-#include "musiccounterpvdownloadthread.h"
+#include "musicdownloadcounterpvthread.h"
 
 MusicTopAreaWidget *MusicTopAreaWidget::m_instance = nullptr;
 
@@ -35,10 +35,11 @@ MusicTopAreaWidget::MusicTopAreaWidget(QWidget *parent)
     connect(discover, SIGNAL(downLoadDataChanged(QString)), SLOT(musicSearchTopListInfoFinished(QString)));
     discover->startToSearch();
 
-    m_counterPVThread = new MusicCounterPVDownloadThread(this);
+    m_counterPVThread = new MusicDownloadCounterPVThread(this);
     m_counterPVThread->startToDownload();
     ///////////////////////////////////////////////////////
     m_listAlpha = 40;
+    m_lastRemoteBeforeWallpaper = -1;
 }
 
 MusicTopAreaWidget::~MusicTopAreaWidget()
@@ -183,6 +184,7 @@ void MusicTopAreaWidget::musicBgTransparentChanged(int index)
     {
         return;
     }
+
     if(m_musicbgskin)
     {
         m_musicbgskin->setSkinTransToolText(index);
@@ -193,15 +195,26 @@ void MusicTopAreaWidget::musicBgTransparentChanged(int index)
 
 void MusicTopAreaWidget::musicBgTransparentChanged(const QString &fileName)
 {
-    if(m_musicbgskin)
-    {
-        m_musicbgskin->updateBackground(fileName);
-    }
     if(m_ui->surfaceStackedWidget->currentIndex() == 1)
     {
         return;
     }
+
     drawWindowBackgroundRectString(fileName);
+}
+
+void MusicTopAreaWidget::musicSetAsArtBackground()
+{
+    QString path = M_BACKGROUND_PTR->getArtPhotoPathNoIndex();
+    if(!path.isEmpty())
+    {
+        path = MusicBackgroundSkinDialog::cpoyArtFileToLocal(path);
+        if(m_musicbgskin)
+        {
+            m_musicbgskin->updateArtFileTheme(path);
+        }
+        musicBackgroundSkinChanged(path);
+    }
 }
 
 void MusicTopAreaWidget::musicBgTransparentChanged()
@@ -218,7 +231,15 @@ void MusicTopAreaWidget::musicBackgroundSkinChanged(const QString &fileName)
 void MusicTopAreaWidget::musicBackgroundChanged()
 {
     QString art_path = M_BACKGROUND_PTR->getArtPhotoPath();
-    !art_path.isEmpty() ? drawWindowBackgroundRectString(art_path) : drawWindowBackgroundRect();
+    if(!art_path.isEmpty())
+    {
+        M_BACKGROUND_PTR->indexIncrease();
+        drawWindowBackgroundRectString(art_path);
+    }
+    else
+    {
+        drawWindowBackgroundRect();
+    }
 }
 
 void MusicTopAreaWidget::musicBackgroundSliderStateChanged(bool state)
@@ -328,15 +349,26 @@ void MusicTopAreaWidget::musicComplexStyleRemote()
     createRemoteWidget();
 }
 
-void MusicTopAreaWidget::musicStripRemote()
+void MusicTopAreaWidget::musicWallpaperRemote(bool create)
 {
-    if(m_musicRemoteWidget)
+    if(create)
+    {
+        if(m_musicRemoteWidget)
+        {
+            m_lastRemoteBeforeWallpaper = m_musicRemoteWidget->mapRemoteTypeIndex();
+            delete m_musicRemoteWidget;
+        }
+        m_musicRemoteWidget = new MusicRemoteWidgetForStrip;
+        m_musicRemoteWidget->setLabelText(m_ui->showCurrentSong->text());
+        createRemoteWidget();
+    }
+    else
     {
         delete m_musicRemoteWidget;
+        m_musicRemoteWidget = nullptr;
+        musicRemoteTypeChanged(m_lastRemoteBeforeWallpaper);
+        m_lastRemoteBeforeWallpaper = -1;
     }
-    m_musicRemoteWidget = new MusicRemoteWidgetForStrip;
-    m_musicRemoteWidget->setLabelText(m_ui->showCurrentSong->text());
-    createRemoteWidget();
 }
 
 void MusicTopAreaWidget::musicRipplesRemote()
@@ -384,14 +416,13 @@ void MusicTopAreaWidget::musicRemoteTypeChanged(int type)
         case MusicRemoteWidget::SimpleStyle: musicSimpleStyleRemote(); break;
         case MusicRemoteWidget::ComplexStyle: musicComplexStyleRemote(); break;
         case MusicRemoteWidget::Diamond: musicDiamondRemote(); break;
-        case MusicRemoteWidget::Strip: musicStripRemote(); break;
         case MusicRemoteWidget::Ripples: musicRipplesRemote(); break;
     }
 }
 
 void MusicTopAreaWidget::createRemoteWidget()
 {
-    if(m_musicRemoteWidget == nullptr)
+    if(!m_musicRemoteWidget)
     {
         return;
     }
@@ -410,14 +441,7 @@ void MusicTopAreaWidget::createRemoteWidget()
 
 void MusicTopAreaWidget::drawWindowBackgroundRect()
 {
-    QString path = USER_THEME_DIR_FULL + m_currentBgSkin + SKN_FILE;
-    MusicBackgroundSkinDialog::themeValidCheck(m_currentBgSkin, path);
-    M_BACKGROUND_PTR->setMBackground(path);
-
-    if(m_musicbgskin)
-    {
-        m_musicbgskin->updateBackground(path);
-    }
+    QString path = MusicBackgroundSkinDialog::setMBackground(m_currentBgSkin);
     m_pictureCarouselTimer.stop();
     drawWindowBackgroundRectString(path);
 }

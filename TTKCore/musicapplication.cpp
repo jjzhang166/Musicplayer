@@ -33,8 +33,8 @@ MusicApplication::MusicApplication(QWidget *parent)
 {
     m_instance = this;
     m_applicationObject = new MusicApplicationObject(this);
-    m_bottomAreaWidget = new MusicBottomAreaWidget(this);
     m_topAreaWidget = new MusicTopAreaWidget(this);
+    m_bottomAreaWidget = new MusicBottomAreaWidget(this);
     m_rightAreaWidget = new MusicRightAreaWidget(this);
     m_leftAreaWidget = new MusicLeftAreaWidget(this);
     ////////////////////////////////////////////////
@@ -198,10 +198,6 @@ void MusicApplication::musicImportSongsSettingPath(const QStringList &items)
     if(m_currentMusicSongTreeIndex == MUSIC_NORMAL_LIST)
     {
         m_musicList->appendMedia(files);
-    }
-    if(files.count() > 0 && m_musicList->currentIndex() < 0 && m_musicSongTree->getCurrentPlayToolIndex() == 0)
-    {
-        m_musicList->setCurrentIndex(0);
     }
 }
 
@@ -369,6 +365,7 @@ void MusicApplication::musicStatePlay()
     {
         return;//The playlist is not performing space-time
     }
+
     if(m_playControl)
     {
         m_ui->musicKey->setStyleSheet(MusicUIObject::MKGBtnPause);
@@ -772,24 +769,13 @@ void MusicApplication::musicCreateRightMenu()
     musicRemoteControl.addAction(tr("DiamondRemote"), m_topAreaWidget, SLOT(musicDiamondRemote()));
     musicRemoteControl.addAction(tr("SimpleStyleRemote"), m_topAreaWidget, SLOT(musicSimpleStyleRemote()));
     musicRemoteControl.addAction(tr("ComplexStyleRemote"), m_topAreaWidget, SLOT(musicComplexStyleRemote()));
-    musicRemoteControl.addAction(tr("StripRemote"), m_topAreaWidget, SLOT(musicStripRemote()));
     musicRemoteControl.addAction(tr("RipplesRemote"), m_topAreaWidget, SLOT(musicRipplesRemote()));
     musicRemoteControl.addAction(tr("CircleRemote"), m_topAreaWidget, SLOT(musicCircleRemote()));
     musicRemoteControl.addAction(tr("DeleteRemote"), m_topAreaWidget, SLOT(musicDeleteRemote()));
 
     rightClickMenu.addAction(QIcon(":/contextMenu/btn_equalizer"), tr("Equalizer"), m_applicationObject, SLOT(musicSetEqualizer()));
     rightClickMenu.addAction(tr("SoundEffect"), m_applicationObject, SLOT(musicSetSoundEffect()));
-    rightClickMenu.addAction(tr("AudioRecorder"), m_applicationObject, SLOT(musicAudioRecorder()));
     rightClickMenu.addAction(tr("TimingSettings"), m_applicationObject, SLOT(musicTimerWidget()));
-    QMenu spectrumControl(tr("ShowingSpectrum"), &rightClickMenu);
-    spectrumControl.addAction(tr("AnalyzerSpectrum"), m_leftAreaWidget, SLOT(musicAnalyzerSpectrumWidget()));
-    spectrumControl.addAction(tr("ProjectMSpectrum"), m_leftAreaWidget, SLOT(musicProjectMSpectrumWidget()))->setEnabled(
-#if !defined Q_OS_WIN || defined MUSIC_GREATER_NEW
-    false);
-#else
-    true);
-#endif
-    rightClickMenu.addMenu(&spectrumControl);
     rightClickMenu.addSeparator();
 
     QAction *window = rightClickMenu.addAction(tr("windowTop"), m_applicationObject, SLOT(musicSetWindowToTop()));
@@ -1112,6 +1098,12 @@ void MusicApplication::readXMLConfigFromText()
                                    xml.readBackgroundTransparent().toInt(),
                                    xml.readBackgroundListTransparent().toInt());
     //////////////////////////////////////////////////////////////
+    M_SETTING_PTR->setValue(MusicSettingManager::OtherBgLosslessChoiced, xml.readOtherBgLossless().toInt());
+    M_SETTING_PTR->setValue(MusicSettingManager::OtherUpdateChoiced, xml.readOtherUpdate().toInt());
+    M_SETTING_PTR->setValue(MusicSettingManager::OtherSearchChoiced, xml.readOtherSearch().toInt());
+    M_SETTING_PTR->setValue(MusicSettingManager::OtherAlbumChoiced, xml.readOtherAlbum().toInt());
+    M_SETTING_PTR->setValue(MusicSettingManager::OtherInfoChoiced, xml.readOtherInfo().toInt());
+    //////////////////////////////////////////////////////////////
     //Configuration from next time also stopped at the last record.
     QStringList keyList;
     xml.readSystemLastPlayIndexConfig(keyList);
@@ -1119,13 +1111,17 @@ void MusicApplication::readXMLConfigFromText()
     //add new music file to playlist
     value = keyList[1].toInt();
     m_musicList->addMedia(m_musicSongTree->getMusicSongsFilePath(value));
-    m_ui->musicPlayedList->append(value, songs[value].m_songs);
+    if(-1 < value && value < songs.count())
+    {
+        m_ui->musicPlayedList->append(value, songs[value].m_songs);
+    }
     if(success && keyList[0] == "1")
     {
         QTimer::singleShot(MT_MS, m_musicSongTree, SLOT(setCurrentIndex()));
-        m_currentMusicSongTreeIndex = value;
+        int index = keyList[2].toInt();
+        m_currentMusicSongTreeIndex = (index == DEFAULT_INDEX_LEVEL0) ? DEFAULT_INDEX_LEVEL0 : value;
         m_musicList->blockSignals(true);
-        m_musicList->setCurrentIndex(keyList[2].toInt());
+        m_musicList->setCurrentIndex(index);
         m_musicList->blockSignals(false);
         m_ui->musicPlayedList->setCurrentIndex(m_musicList->currentMediaString());
     }

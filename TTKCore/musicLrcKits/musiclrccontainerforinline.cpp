@@ -15,8 +15,10 @@
 #include "musicrightareawidget.h"
 #include "musiclrccommentswidget.h"
 #include "musiclrctranslatedwidget.h"
-#include "musiclayoutanimation.h"
+#include "musiclayoutanimationwidget.h"
 #include "musicleftareawidget.h"
+#include "musictopareawidget.h"
+#include "musicbackgroundmanager.h"
 
 #include <QPainter>
 #include <QClipboard>
@@ -36,7 +38,7 @@ MusicLrcContainerForInline::MusicLrcContainerForInline(QWidget *parent)
     m_lrcAnalysis->setLineMax(MUSIC_LRC_INLINE_MAX_LINE);
 
     m_containerType = "INLINE";
-    m_layoutWidget = new MusicLayoutAnimation(this);
+    m_layoutWidget = new MusicLayoutAnimationWidget(this);
     m_layoutWidget->connectTo(this);
     for(int i=0; i<m_lrcAnalysis->getLineMax(); ++i)
     {
@@ -230,6 +232,7 @@ void MusicLrcContainerForInline::createFloatPlayWidget()
     if(MusicLeftAreaWidget::instance()->isFullOrNormal())
     {
         m_floatPlayWidget = new MusicLrcFloatPlayWidget(this);
+        m_floatPlayWidget->resizeWindow(width(), height());
     }
 }
 
@@ -388,8 +391,9 @@ void MusicLrcContainerForInline::updateAnimationLrc()
     setItemStyleSheet();
 }
 
-void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *)
+void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *event)
 {
+    Q_UNUSED(event);
     QMenu menu(this);
     QMenu changColorMenu(tr("changColorMenu"), this);
     QMenu changeLrcSize(tr("changeLrcSize"), this);
@@ -471,6 +475,8 @@ void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *)
     QAction *showLrc = menu.addAction(tr("lrcoff"), this, SLOT(theLinkLrcChanged()));
     m_linkLocalLrc ? showLrc->setText(tr("lrcoff")) : showLrc->setText(tr("lrcon"));
     menu.addAction(tr("artbgupload"), this, SLOT(theArtBgUploaded()));
+    menu.addAction(tr("artbgsetting"), MusicTopAreaWidget::instance(), SLOT(musicSetAsArtBackground()))
+                   ->setEnabled(!M_BACKGROUND_PTR->isEmpty());
     menu.addSeparator();
 
     QString fileName = m_lrcAnalysis->getCurrentFileName();
@@ -488,8 +494,9 @@ void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *)
     menu.exec(QCursor::pos());
 }
 
-void MusicLrcContainerForInline::paintEvent(QPaintEvent *)
+void MusicLrcContainerForInline::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
     QPainter painter(this);
     QFont font;
     painter.setFont(font);
@@ -530,10 +537,19 @@ void MusicLrcContainerForInline::mouseReleaseEvent(QMouseEvent *event)
     {
         setCursor(Qt::ArrowCursor);
         m_mouseLeftPressed = false;
-        changeLrcPostion("mouse");
+        if(m_mousePressedAt != m_mouseMovedAt)
+        {
+            changeLrcPostion("mouse");
+        }
         m_mouseMovedAt = m_mousePressedAt = QPoint(-1, -1);
         update();
     }
+}
+
+void MusicLrcContainerForInline::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event);
+    MusicLeftAreaWidget::instance()->showFullOrNormal();
 }
 
 void MusicLrcContainerForInline::createColorMenu(QMenu &menu)
@@ -804,7 +820,7 @@ void MusicLrcContainerForInline::resizeWidth(int w, int h)
     m_lrcFloatWidget->resizeWindow(w, h);
     if(m_floatPlayWidget)
     {
-        m_floatPlayWidget->resizeWindow(w, h);
+        m_floatPlayWidget->resizeWindow(width(), height());
     }
 
     if(m_lrcAnalysis->isEmpty())

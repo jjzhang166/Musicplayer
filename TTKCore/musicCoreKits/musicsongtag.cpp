@@ -2,6 +2,7 @@
 #include "musictime.h"
 #include "musicformats.h"
 #include "musicversion.h"
+#include "musiccoreutils.h"
 
 #include <QStringList>
 #include <QPluginLoader>
@@ -14,6 +15,7 @@
 MusicSongTag::MusicSongTag()
 {
     m_tag = nullptr;
+    m_id3v2Version = 3;
 }
 
 MusicSongTag::MusicSongTag(const QString &file)
@@ -57,6 +59,15 @@ QString MusicSongTag::getFilePath() const
     return m_filePath;
 }
 
+void MusicSongTag::setTagVersion(int id3v2Version)
+{
+    m_id3v2Version = id3v2Version;
+    if(m_id3v2Version != 3 && m_id3v2Version != 4)
+    {
+        m_id3v2Version = 3;
+    }
+}
+
 bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
 {
     QPluginLoader loader;
@@ -67,7 +78,8 @@ bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
     {
         if(formats.value(key).contains(suffix))
         {
-            QString path = getNotSupportedPluginPath(key);
+
+            QString path = MusicUtils::Core::pluginPath("Input", key);
             loader.setFileName(path);
             break;
         }
@@ -98,25 +110,6 @@ bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
     }
 
     return !m_parameters.isEmpty();
-}
-
-QString MusicSongTag::getNotSupportedPluginPath(const QString &format)
-{
-    QString path;
-#ifdef Q_OS_WIN
-#  ifdef MUSIC_GREATER_NEW
-    path = QString("plugins/Input/%1.dll").arg(format);
-#  else
-    path = QString("../bin/plugins/Input/%1.dll").arg(format);
-#  endif
-#elif defined Q_OS_UNIX
-#  ifdef MUSIC_GREATER_NEW
-    path = QString("qmmp/Input/%1.so").arg(format);
-#  else
-    path = QString("../lib/qmmp/Input/%1.so").arg(format);
-#  endif
-#endif
-    return path;
 }
 
 QString MusicSongTag::getArtist() const
@@ -177,46 +170,55 @@ QString MusicSongTag::getURL() const
 /////////////////////////////////////////////
 bool MusicSongTag::setArtist(const QString &artist)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_ARTIST, artist);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_ARTIST, artist, m_id3v2Version);
 }
 
 bool MusicSongTag::setTitle(const QString &title)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_TITLE, title);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_TITLE, title, m_id3v2Version);
 }
 
 bool MusicSongTag::setAlbum(const QString &album)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_ALBUM, album);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_ALBUM, album, m_id3v2Version);
 }
 
 bool MusicSongTag::setComment(const QString &comment)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_COMMENT, comment);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_COMMENT, comment, m_id3v2Version);
 }
 
 bool MusicSongTag::setYear(const QString &year)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_YEAR, year);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_YEAR, year, m_id3v2Version);
 }
 
 bool MusicSongTag::setTrackNum(const QString &track)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_TRACK, track);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_TRACK, track, m_id3v2Version);
 }
 
 bool MusicSongTag::setGenre(const QString &genre)
 {
-    return m_tag->writeMusicTag(TagReadAndWrite::TAG_GENRE, genre);
+    return m_tag->writeMusicTag(TagReadAndWrite::TAG_GENRE, genre, m_id3v2Version);
 }
 
 bool MusicSongTag::setCover(const QByteArray &data)
 {
 #if TTKMUSIC_VERSION >= TTKMUSIC_VERSION_CHECK(2,4,7,0)
-    return m_tag->writeCover(data);
+    return m_tag->writeCover(data, m_id3v2Version);
 #else
     Q_UNUSED(data);
     return false;
+#endif
+}
+
+QByteArray MusicSongTag::getCover() const
+{
+#if TTKMUSIC_VERSION >= TTKMUSIC_VERSION_CHECK(2,5,1,0)
+    return m_tag->getCover();
+#else
+    return QByteArray();
 #endif
 }
 

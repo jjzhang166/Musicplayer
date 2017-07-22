@@ -13,12 +13,23 @@
 #include "musicgrabwidget.h"
 #include "musicmessagebox.h"
 #include "musicapplication.h"
-#include "musicleftareawidget.h"
 #include "musicrightareawidget.h"
 #include "musicsoundkmicrowidget.h"
 #include "musicmessagebox.h"
+#include "musicspectrumwidget.h"
 
 #include <QTimer>
+
+#define NEW_OPERATOR(flag, type)  \
+    if((m_toolsFlags & flag) != flag) \
+    { \
+        m_toolsFlags |= flag; \
+        type *w= new type(this); \
+        connect(w, SIGNAL(resetFlag(MusicObject::ToolsType)), SLOT(resetFlag(MusicObject::ToolsType))); \
+        w->raise(); \
+        w->show(); \
+    }
+
 
 MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
     : QListWidget(parent)
@@ -31,7 +42,6 @@ MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
     setViewMode(QListView::IconMode);
     setMovement(QListView::Static);
 
-    m_containItem = nullptr;
 #ifdef Q_OS_WIN
     setSpacing(17);
     addListWidgetItem();
@@ -46,23 +56,12 @@ MusicToolSetsWidget::MusicToolSetsWidget(QWidget *parent)
 
 MusicToolSetsWidget::~MusicToolSetsWidget()
 {
-    delete m_containItem;
     clearAllItems();
 }
 
 QString MusicToolSetsWidget::getClassName()
 {
     return staticMetaObject.className();
-}
-
-void MusicToolSetsWidget::clearAllItems()
-{
-    clear();
-}
-
-void MusicToolSetsWidget::contextMenuEvent(QContextMenuEvent *event)
-{
-    Q_UNUSED(event);
 }
 
 void MusicToolSetsWidget::addListWidgetItem()
@@ -140,7 +139,7 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 1:
             {
-                MusicAudioRecorderWidget(this).exec();
+                NEW_OPERATOR(MusicObject::TT_AudioRecord, MusicAudioRecorderWidget);
                 break;
             }
         case 2:
@@ -164,16 +163,13 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 5:
             {
-                MusicLeftAreaWidget::instance()->musicAnalyzerSpectrumWidget();
+                NEW_OPERATOR(MusicObject::TT_Spectrum, MusicSpectrumWidget);
                 break;
             }
         case 6:
             {
 #ifdef Q_OS_WIN
-                delete m_containItem;
-                MusicDesktopWallpaperWidget *w = new MusicDesktopWallpaperWidget(this);
-                m_containItem = w;
-                w->show();
+                NEW_OPERATOR(MusicObject::TT_Wallpaper, MusicDesktopWallpaperWidget);
 #else
                 MusicMessageBox message;
                 message.setText(tr("Not Supported On Current Plantform!"));
@@ -188,23 +184,17 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 8:
             {
-                delete m_containItem;
-                MusicNetworkSpeedTestWidget *w = new MusicNetworkSpeedTestWidget(this);
-                m_containItem = w;
-                w->show();
+                NEW_OPERATOR(MusicObject::TT_SpeedTest, MusicNetworkSpeedTestWidget);
                 break;
             }
         case 9:
             {
-                delete m_containItem;
-                MusicNetworkConnectionTestWidget *w = new MusicNetworkConnectionTestWidget(this);
-                m_containItem = w;
-                w->show();
+                NEW_OPERATOR(MusicObject::TT_ConnectionTest, MusicNetworkConnectionTestWidget);
                 break;
             }
         case 10:
             {
-                MusicVolumeGainWidget(this).exec();
+                NEW_OPERATOR(MusicObject::TT_SoundGain, MusicVolumeGainWidget);
                 break;
             }
         case 11:
@@ -214,23 +204,35 @@ void MusicToolSetsWidget::itemHasClicked(QListWidgetItem *item)
             }
         case 12:
             {
-                MusicSoundTouchWidget(this).exec();
+                NEW_OPERATOR(MusicObject::TT_SoundTouch, MusicSoundTouchWidget);
                 break;
             }
         case 13:
             {
-                (new MusicGrabWidget)->show();
+                NEW_OPERATOR(MusicObject::TT_GrabWindow, MusicGrabWidget);
                 break;
             }
         case 14:
             {
-                delete m_containItem;
-                MusicSoundKMicroWidget *w = new MusicSoundKMicroWidget(this);
-                m_containItem = w;
-                w->show();
+                NEW_OPERATOR(MusicObject::TT_SoundKMicro, MusicSoundKMicroWidget);
                 break;
             }
         default:
             break;
     }
+}
+
+void MusicToolSetsWidget::resetFlag(MusicObject::ToolsType flag)
+{
+    m_toolsFlags &= ~flag;
+}
+
+void MusicToolSetsWidget::clearAllItems()
+{
+    clear();
+}
+
+void MusicToolSetsWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    Q_UNUSED(event);
 }

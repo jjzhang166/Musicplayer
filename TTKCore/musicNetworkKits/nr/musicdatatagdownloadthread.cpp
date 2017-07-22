@@ -1,5 +1,5 @@
 #include "musicdatatagdownloadthread.h"
-#include "musicsourcedownloadthread.h"
+#include "musicdownloadsourcethread.h"
 #include "musicsemaphoreloop.h"
 #include "musicsongtag.h"
 
@@ -61,7 +61,7 @@ void MusicDataTagDownloadThread::downLoadFinished()
     if(save)
     {
         MusicSemaphoreLoop loop;
-        MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
+        MusicDownloadSourceThread *download = new MusicDownloadSourceThread(this);
         connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(downLoadFinished(QByteArray)));
         download->startToDownload(m_smallPicUrl);
         connect(this, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -77,6 +77,7 @@ void MusicDataTagDownloadThread::downLoadFinished(const QByteArray &data)
     MusicSongTag song;
     if(song.readFile(m_savePathName))
     {
+        song.setTagVersion(3);
         song.setTitle(m_title);
         song.setArtist(m_artist);
         song.setCover(data);

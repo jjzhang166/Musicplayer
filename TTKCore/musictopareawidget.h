@@ -16,7 +16,7 @@
 class MusicUserWindow;
 class MusicRemoteWidget;
 class MusicBackgroundSkinDialog;
-class MusicCounterPVDownloadThread;
+class MusicDownloadCounterPVThread;
 
 namespace Ui {
     class MusicApplication;
@@ -116,6 +116,10 @@ public Q_SLOTS:
     /*!
      * Send user to login.
      */
+    void musicSetAsArtBackground();
+    /*!
+     * Set background as art big picture.
+     */
     void musicBgTransparentChanged();
     /*!
      * Current background transparent changed.
@@ -177,9 +181,9 @@ public Q_SLOTS:
     /*!
      * Changed current remote to complex style mode.
      */
-    void musicStripRemote();
+    void musicWallpaperRemote(bool create);
     /*!
-     * Changed current remote to strip mode.
+     * Changed current remote to wallpaper mode.
      */
     void musicRipplesRemote();
     /*!
@@ -216,8 +220,9 @@ protected:
     MusicUserWindow *m_musicUserWindow;
     MusicBackgroundSkinDialog *m_musicbgskin;
     MusicRemoteWidget *m_musicRemoteWidget;
-    MusicCounterPVDownloadThread *m_counterPVThread;
+    MusicDownloadCounterPVThread *m_counterPVThread;
 
+    int m_lastRemoteBeforeWallpaper;
     QString m_currentBgSkin;
     int m_alpha, m_listAlpha;
     QTimer m_pictureCarouselTimer;

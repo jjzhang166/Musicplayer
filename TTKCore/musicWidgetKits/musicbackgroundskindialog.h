@@ -34,17 +34,27 @@ public:
     /*!
      * Get class object name.
      */
+
+    static QString setMBackground(QString &name);
+    /*!
+     * Set artist background picture by name.
+     */
     static bool themeValidCheck(QString &name, QString &path);
     /*!
      * Theme valid check.
      */
+    static QString cpoyArtFileToLocal(const QString &path);
+    /*!
+     * Copy art file to local themes dir path.
+     */
+    void updateArtFileTheme(const QString &theme);
+    /*!
+     * Update art file theme.
+     */
+
     void setCurrentBgTheme(const QString &theme, int alpha, int listAlpha);
     /*!
      * Select current item by name\alpha\listAlpha when the widget show.
-     */
-    void updateBackground(const QString &text);
-    /*!
-     * Update this bg when user change the current bg.
      */
     int getListBgSkinAlpha() const;
     /*!
@@ -108,6 +118,10 @@ protected:
     void cpoyFileFromLocal(const QString &path);
     /*!
      * Copy custom file to local themes dir path.
+     */
+    static int cpoyFileToLocal(const QString &path);
+    /*!
+     * Copy custom file .
      */
 
     int m_myThemeIndex;

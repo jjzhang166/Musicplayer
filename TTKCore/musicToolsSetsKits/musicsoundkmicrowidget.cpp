@@ -7,7 +7,7 @@
 #include "musiclrcanalysis.h"
 #include "musiclrcmanagerforinline.h"
 #include "musicstringutils.h"
-#include "musicsourcedownloadthread.h"
+#include "musicdownloadsourcethread.h"
 #include "musicvideouiobject.h"
 #include "musictinyuiobject.h"
 #include "musicuiobject.h"
@@ -29,10 +29,11 @@ MusicSoundKMicroWidget::MusicSoundKMicroWidget(QWidget *parent)
 {
     m_ui->setupUi(this);
 
-    setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint );
 #if defined MUSIC_GREATER_NEW
     setAttribute(Qt::WA_TranslucentBackground, false);
 #endif
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    setAttribute(Qt::WA_QuitOnClose, true);
 
     m_ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
     m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
@@ -255,7 +256,7 @@ void MusicSoundKMicroWidget::mvURLChanged(bool mv, const QString &url, const QSt
         m_mediaPlayer->play();
 
         ////////////////////////////////////////////////////////////////
-        MusicSourceDownloadThread *download = new MusicSourceDownloadThread(this);
+        MusicDownloadSourceThread *download = new MusicDownloadSourceThread(this);
         connect(download, SIGNAL(downLoadByteDataChanged(QByteArray)), SLOT(downLoadFinished(QByteArray)));
         download->startToDownload(lrcUrl);
     }
@@ -316,6 +317,7 @@ void MusicSoundKMicroWidget::recordButtonClicked()
 void MusicSoundKMicroWidget::closeEvent(QCloseEvent *event)
 {
     MusicAbstractMoveWidget::closeEvent(event);
+    emit resetFlag(MusicObject::TT_SoundKMicro);
     while(!m_musicLrcContainer.isEmpty())
     {
         delete m_musicLrcContainer.takeLast();

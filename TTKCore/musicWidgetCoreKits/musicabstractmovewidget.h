@@ -24,6 +24,10 @@ public:
     /*!
      * Object contsructor.
      */
+    explicit MusicAbstractMoveWidget(bool transparent, QWidget *parent = 0);
+    /*!
+     * Object contsructor.
+     */
     virtual ~MusicAbstractMoveWidget();
 
     static QString getClassName();
@@ -37,6 +41,12 @@ public:
     inline void blockMoveOption(bool block) { m_moveOption = block;}
     /*!
      * Set or not block widget moving.
+     */
+
+public Q_SLOTS:
+    void backgroundChanged();
+    /*!
+     * Background image changed.
      */
 
 protected:
@@ -55,6 +65,7 @@ protected:
     QPoint m_pressAt;
     bool m_moveOption, m_showShadow;
     bool m_leftButtonPress;
+    QWidget *m_background;
 
 };
 
