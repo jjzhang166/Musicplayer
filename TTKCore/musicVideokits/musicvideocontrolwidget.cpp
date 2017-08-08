@@ -12,8 +12,8 @@
 #include <QPushButton>
 #include <QBoxLayout>
 
-MusicVideoControlWidget::MusicVideoControlWidget(bool popup, QWidget *parent)
-    : QWidget(parent), m_widgetPopup(popup)
+MusicVideoControlWidget::MusicVideoControlWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setStyleSheet(MusicUIObject::MBackgroundStyle06);
 
@@ -22,6 +22,9 @@ MusicVideoControlWidget::MusicVideoControlWidget(bool popup, QWidget *parent)
     m_timeLabel = new QLabel("00:00/00:00", this);
     m_qualityButton = new MusicVideoQualityPopWidget(this);
     m_volumeButton = new MusicVolumePopWidget(this);
+#ifdef Q_OS_UNIX
+    m_playButton->setFocusPolicy(Qt::NoFocus);
+#endif
 
     m_volumeButton->setValue(100);
     m_volumeButton->setFixedSize(20, 20);
@@ -165,7 +168,7 @@ QWidget *MusicVideoControlWidget::createVideoBarrageWidget()
     m_lineEditBarrage->setFixedHeight(24);
     m_lineEditBarrage->setPlaceholderText(tr("just one barrage!"));
 
-    m_lineEditBarrage->setStyleSheet(MusicUIObject::MLineEditStyle05);
+    m_lineEditBarrage->setStyleSheet(MusicUIObject::MLineEditStyle06);
     connect(m_lineEditBarrage, SIGNAL(enterFinished(QString)), SLOT(sendBarrageClicked()));
 
     m_barrageSend = new QPushButton(pairWidget);
@@ -183,6 +186,11 @@ QWidget *MusicVideoControlWidget::createVideoBarrageWidget()
     m_pushBarrage->setCursor(QCursor(Qt::PointingHandCursor));
     connect(m_pushBarrage, SIGNAL(clicked()), SLOT(pushBarrageClicked()));
     pushBarrageClicked();
+
+#ifdef Q_OS_UNIX
+    m_barrageSend->setFocusPolicy(Qt::NoFocus);
+    m_pushBarrage->setFocusPolicy(Qt::NoFocus);
+#endif
 
     barrageLayout->addWidget(m_menuBarrage);
     barrageLayout->addWidget(pairWidget);

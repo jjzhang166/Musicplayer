@@ -11,7 +11,6 @@
 #include <QNetworkRequest>
 #include <QSslConfiguration>
 #include <QNetworkAccessManager>
-#include <QDebug>
 
 void MusicDownLoadBDInterface::readFromMusicSongAttribute(MusicObject::MusicSongInfomation *info,
                                                           const QString &bit)
@@ -157,7 +156,7 @@ void MusicDownLoadBDInterface::readFromMusicLLAttribute(MusicObject::MusicSongIn
     if(ok)
     {
         QVariantMap value = data.toMap();
-        if(value["error_code"].toInt() == 22000 && value.contains("data"))
+        if(value["errorCode"].toInt() == 22000 && value.contains("data"))
         {
             value = value["data"].toMap();
             QVariantList datas = value["songList"].toList();

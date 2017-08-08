@@ -18,11 +18,20 @@ MusicLrcFloatWidget::MusicLrcFloatWidget(QWidget *parent)
     m_floatSettingWidget->hide();
 
     resizeWindow(0, 0);
+
     m_update = new QPushButton(tr(" Update"), this);
     m_search = new QPushButton(tr(" Search"), this);
     m_more = new QPushButton(tr(" More"), this);
     m_wallp = new QPushButton(tr(" Wallp"), this);
     m_photo = new QPushButton(tr(" Photo"), this);
+
+#ifdef Q_OS_UNIX
+    m_update->setFocusPolicy(Qt::NoFocus);
+    m_search->setFocusPolicy(Qt::NoFocus);
+    m_more->setFocusPolicy(Qt::NoFocus);
+    m_wallp->setFocusPolicy(Qt::NoFocus);
+    m_photo->setFocusPolicy(Qt::NoFocus);
+#endif
 
     m_update->setGeometry(15, 10, 80, 20);
     m_search->setGeometry(15, 50, 80, 20);
@@ -111,9 +120,9 @@ void MusicLrcFloatWidget::musicContainerForWallpaperClicked()
                                MusicUIObject::MPushButtonStyle01);
     }
 
-    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    if(MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen())
     {
-        MusicLeftAreaWidget::instance()->showFullOrNormal();
+        MusicLeftAreaWidget::instance()->lrcWidgetShowFullScreen();
     }
     MusicRightAreaWidget::instance()->musicContainerForWallpaperClicked();
 }

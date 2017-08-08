@@ -33,6 +33,11 @@ MusicPlaylistFoundItemWidget::MusicPlaylistFoundItemWidget(QWidget *parent)
     m_playButton->setStyleSheet(MusicUIObject::MKGTinyBtnPlaylist);
     connect(m_playButton, SIGNAL(clicked()), SLOT(currentPlayListClicked()));
 
+#ifdef Q_OS_UNIX
+    m_topListenButton->setFocusPolicy(Qt::NoFocus);
+    m_playButton->setFocusPolicy(Qt::NoFocus);
+#endif
+
     m_iconLabel = new QLabel(this);
     m_iconLabel->setGeometry(0, 0, MIN_LABEL_SIZE, MIN_LABEL_SIZE);
 
@@ -123,6 +128,7 @@ MusicPlaylistFoundWidget::MusicPlaylistFoundWidget(QWidget *parent)
     m_infoWidget = nullptr;
     m_gridLayout = nullptr;
     m_categoryButton = nullptr;
+    m_pagingWidgetObject = nullptr;
     m_downloadThread = M_DOWNLOAD_QUERY_PTR->getPlaylistThread(this);
     connect(m_downloadThread, SIGNAL(createPlaylistItems(MusicPlaylistItem)),
                               SLOT(queryAllFinished(MusicPlaylistItem)));

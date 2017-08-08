@@ -18,16 +18,16 @@ MusicSoundEffectsItemWidget::MusicSoundEffectsItemWidget(QWidget *parent)
     m_enable = false;
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(1, 1, 1, 1);
     layout->setSpacing(0);
 
     m_textLabel = new QLabel(this);
-    m_textLabel->setStyleSheet(MusicUIObject::MBackgroundStyle10);
+    m_textLabel->setStyleSheet(MusicUIObject::MBackgroundStyle08);
 
     setText(tr("null"));
 
     QWidget *func = new QWidget(this);
-    func->setStyleSheet(MusicUIObject::MBackgroundStyle11);
+    func->setStyleSheet(MusicUIObject::MBackgroundStyle04);
     QHBoxLayout *funcLayout = new QHBoxLayout(func);
     funcLayout->setContentsMargins(0, 5, 5, 0);
     funcLayout->setSpacing(0);
@@ -47,6 +47,11 @@ MusicSoundEffectsItemWidget::MusicSoundEffectsItemWidget(QWidget *parent)
     m_openButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_openButton->setFixedSize(16, 16);
     connect(m_openButton, SIGNAL(clicked()), SLOT(setPluginEnable()));
+
+#ifdef Q_OS_UNIX
+    m_settingButton->setFocusPolicy(Qt::NoFocus);
+    m_openButton->setFocusPolicy(Qt::NoFocus);
+#endif
 
     QLabel *iconLabel = new QLabel(func);
     iconLabel->setStyleSheet(MusicUIObject::MBackgroundStyle01);
@@ -167,16 +172,15 @@ MusicSoundEffectsWidget::MusicSoundEffectsWidget(QWidget *parent)
     m_ui->setupUi(this);
 
     m_ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
-    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(m_ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
 
-    m_ui->backgroundMask->setStyleSheet(QString("#backgroundMask{%1}").arg(MusicUIObject::MBackgroundStyle11));
-    m_ui->volumeLeftlabel->setStyleSheet(MusicUIObject::MColorStyle06);
-    m_ui->volumeRightLabel->setStyleSheet(MusicUIObject::MColorStyle06);
+    m_ui->volumeLeftlabel->setStyleSheet(MusicUIObject::MColorStyle03);
+    m_ui->volumeRightLabel->setStyleSheet(MusicUIObject::MColorStyle03);
 
-    m_ui->volumeSlider->setStyleSheet(MusicUIObject::MSliderStyle06);
+    m_ui->volumeSlider->setStyleSheet(MusicUIObject::MSliderStyle08);
     m_ui->volumeSlider->setRange(-100, 100);
     m_ui->volumeSlider->setValue(0);
     m_ui->volumeSlider->setToolTip("0");
@@ -192,6 +196,10 @@ MusicSoundEffectsWidget::MusicSoundEffectsWidget(QWidget *parent)
     m_ui->eqButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->eqEffectButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->eqEffectButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+#ifdef Q_OS_UNIX
+    m_ui->eqButton->setFocusPolicy(Qt::NoFocus);
+    m_ui->eqEffectButton->setFocusPolicy(Qt::NoFocus);
+#endif
 
     ////////////////////////////////////////////////////////////////////
     m_ui->BS2BWidget->setText("BS2B");

@@ -149,9 +149,10 @@ void MusicSongsSummariziedWidget::importOtherMusicSongs(QStringList &filelist)
             continue;
         }
 
-        QString time = tag.readFile(path) ? tag.getLengthString() : "-";
+        bool state = tag.readFile(path);
+        QString time = state ? tag.getLengthString() : "-";
         QString name;
-        if(M_SETTING_PTR->value(MusicSettingManager::OtherInfoChoiced).toBool() &&
+        if(M_SETTING_PTR->value(MusicSettingManager::OtherInfoChoiced).toBool() && state &&
            !tag.getTitle().isEmpty() && !tag.getArtist().isEmpty())
         {
             name = tag.getArtist() + " - "+ tag.getTitle();
@@ -830,6 +831,15 @@ void MusicSongsSummariziedWidget::musicListSongSortBy(int index)
     if(m_currentIndex == m_currentPlayToolIndex)
     {
         MusicApplication::instance()->musicPlaySort(index);
+    }
+}
+
+void MusicSongsSummariziedWidget::setTransparent(int alpha)
+{
+    MusicSongsToolBoxWidget::setTransparent(alpha);
+    if(m_listMaskWidget)
+    {
+        m_listMaskWidget->update();
     }
 }
 

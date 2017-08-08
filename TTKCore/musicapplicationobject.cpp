@@ -1,8 +1,4 @@
 #include "musicapplicationobject.h"
-//#ifdef Q_OS_WIN
-//# include <Windows.h>
-//# include <Dbt.h>
-//#endif
 #include "musicmobiledeviceswidget.h"
 #include "musictimerwidget.h"
 #include "musictimerautoobject.h"
@@ -16,23 +12,31 @@
 #include "musicnumberdefine.h"
 #include "musicapplication.h"
 #include "musictopareawidget.h"
+#include "musicwidgetutils.h"
+
+#include "qdevicewatcher.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QPropertyAnimation>
 
-#include "qdevicewatcher.h"
+#define MARGIN_SIDE     5
+#define MARGIN_SIDE_BY  1
 
 MusicApplicationObject *MusicApplicationObject::m_instance = nullptr;
 
 MusicApplicationObject::MusicApplicationObject(QObject *parent)
-    : QObject(parent), m_mobileDevices(nullptr)
+    : QObject(parent), m_mobileDeviceWidget(nullptr)
 {
     Q_INIT_RESOURCE(MusicPlayer);
     m_instance = this;
 
     musicResetWindow();
-    windowStartAnimationOpacity();
+
+    m_opacityAnimation = new QPropertyAnimation(parent, "windowOpacity", this);
+    m_sideAnimation = new QPropertyAnimation(parent, "geometry", this);;
+    m_opacityAnimation->setDuration(MT_S2MS);
+    m_sideAnimation->setDuration(250*MT_MS);
 
     m_musicTimerAutoObj = new MusicTimerAutoObject(this);
     m_setWindowToTop = false;
@@ -49,9 +53,10 @@ MusicApplicationObject::MusicApplicationObject(QObject *parent)
 MusicApplicationObject::~MusicApplicationObject()
 {
     Q_CLEANUP_RESOURCE(MusicPlayer);
-    delete m_mobileDevices;
+    delete m_mobileDeviceWidget;
     delete m_musicTimerAutoObj;
-    delete m_animation;
+    delete m_opacityAnimation;
+    delete m_sideAnimation;
     delete m_deviceWatcher;
 }
 
@@ -76,85 +81,104 @@ void MusicApplicationObject::getParameterSetting()
 #endif
 }
 
-void MusicApplicationObject::windowStartAnimationOpacity()
-{
-    m_animation = new QPropertyAnimation(MusicApplication::instance(), "windowOpacity", this);
-    m_animation->setDuration(MT_S2MS);
-    m_animation->setStartValue(0);
-    m_animation->setEndValue(1);
-    m_animation->start();
-    QTimer::singleShot(MT_S2MS, this, SLOT(musicBackgroundSliderStateChanged()));
-}
-
 void MusicApplicationObject::windowCloseAnimationOpacity()
 {
-    m_animation->stop();
-    m_animation->setDuration(MT_S2MS);
-    m_animation->setStartValue(1);
-    m_animation->setEndValue(0);
-    m_animation->start();
+    float v = M_SETTING_PTR->value(MusicSettingManager::BgTransparentChoiced).toInt();
+    v = MusicUtils::Widget::reRenderValue<float>(1, 0.35, v);
+    m_opacityAnimation->stop();
+    m_opacityAnimation->setStartValue(v);
+    m_opacityAnimation->setEndValue(0);
+    m_opacityAnimation->start();
     QTimer::singleShot(MT_S2MS, qApp, SLOT(quit()));
 }
 
-#if defined(Q_OS_WIN)
-#  ifdef MUSIC_GREATER_NEW
-void MusicApplicationObject::nativeEvent(const QByteArray &,
-                                         void *message, long *)
+void MusicApplicationObject::soureUpdateCheck()
 {
-    MSG* msg = MReinterpret_cast(MSG*, message);
-#  else
-void MusicApplicationObject::winEvent(MSG *msg, long *)
-{
-#  endif
-    Q_UNUSED(msg);
-//    if(msg->message == WM_DEVICECHANGE)
-//    {
-//        PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)msg->lParam;
-//        switch(msg->wParam)
-//        {
-//            case DBT_DEVICETYPESPECIFIC:
-//                break;
-//            case DBT_DEVICEARRIVAL:
-//                if(lpdb->dbch_devicetype == DBT_DEVTYP_VOLUME)
-//                {
-//                    PDEV_BROADCAST_VOLUME lpdbv = (PDEV_BROADCAST_VOLUME)lpdb;
-//                    if (lpdbv->dbcv_flags == 0)
-//                    {
-//                        DWORD unitmask = lpdbv ->dbcv_unitmask;
-//                        int i;
-//                        for(i = 0; i < 26; ++i)
-//                        {
-//                            if(unitmask & 0x1)
-//                                break;
-//                            unitmask = unitmask >> 1;
-//                        }
-//                        QString dev((char)(i + 'A'));
-//                        M_LOGGER_INFO(QString("USB_Arrived and The USBDisk is: %1").arg(dev));
-//                        M_SETTING_PTR->setValue(MusicSettingManager::ExtraDevicePathChoiced, dev + ":/");
-//                        delete m_mobileDevices;
-//                        m_mobileDevices = new MusicMobileDevicesWidget;
-//                        m_mobileDevices->show();
-//                    }
-//                }
-//                break;
-//            case DBT_DEVICEREMOVECOMPLETE:
-//                if(lpdb->dbch_devicetype == DBT_DEVTYP_VOLUME)
-//                {
-//                    PDEV_BROADCAST_VOLUME lpdbv = (PDEV_BROADCAST_VOLUME)lpdb;
-//                    if (lpdbv -> dbcv_flags == 0)
-//                    {
-//                        M_LOGGER_INFO("USB_remove");
-//                        M_SETTING_PTR->setValue(MusicSettingManager::ExtraDevicePathChoiced, QString());
-//                        delete m_mobileDevices;
-//                        m_mobileDevices = nullptr;
-//                    }
-//                }
-//                break;
-//            default: break;
-//        }
-//    }
+    MusicSourceUpdateNotifyWidget *w = new MusicSourceUpdateNotifyWidget;
+    w->show();
+    w->start();
 }
-#endif
+
+void MusicApplicationObject::sideAnimationByOn()
+{
+    if(!M_SETTING_PTR->value(MusicSettingManager::OtherSideByChoiced).toBool())
+    {
+        return;
+    }
+
+    MusicApplication *w = MusicApplication::instance();
+    if(w->isFullScreen() || w->isMaximized())
+    {
+        return;
+    }
+
+    QPoint pt = w->mapToGlobal(w->rect().topLeft());
+    if(-MARGIN_SIDE <= pt.x() && pt.x() <= MARGIN_SIDE)
+    {
+        m_leftSideByOn = true;
+        m_sideAnimation->stop();
+        m_sideAnimation->setStartValue(w->geometry());
+        m_sideAnimation->setEndValue(QRect(-w->width() + MARGIN_SIDE_BY, w->y(), w->width(), w->height()));
+        m_sideAnimation->start();
+    }
+
+    QWidget *widget = QApplication::desktop();
+    pt = w->mapToGlobal(w->rect().topRight());
+    if(-MARGIN_SIDE + widget->width() <= pt.x() && pt.x() <= MARGIN_SIDE + widget->width())
+    {
+        m_rightSideByOn = true;
+        m_sideAnimation->stop();
+        m_sideAnimation->setStartValue(w->geometry());
+        m_sideAnimation->setEndValue(QRect(widget->width() - MARGIN_SIDE_BY, w->y(), w->width(), w->height()));
+        m_sideAnimation->start();
+    }
+}
+
+void MusicApplicationObject::sideAnimationByOff()
+{
+    if(!M_SETTING_PTR->value(MusicSettingManager::OtherSideByChoiced).toBool())
+    {
+        return;
+    }
+
+    MusicApplication *w = MusicApplication::instance();
+    if(m_leftSideByOn)
+    {
+        m_leftSideByOn = false;
+        m_sideAnimation->stop();
+        m_sideAnimation->setStartValue(w->geometry());
+        m_sideAnimation->setEndValue(QRect(MARGIN_SIDE_BY, w->y(), w->width(), w->height()));
+        m_sideAnimation->start();
+    }
+    else if(m_rightSideByOn)
+    {
+        QWidget *widget = QApplication::desktop();
+        m_rightSideByOn = false;
+        m_sideAnimation->stop();
+        m_sideAnimation->setStartValue(w->geometry());
+        m_sideAnimation->setEndValue(QRect(widget->width() - w->width() - MARGIN_SIDE_BY, w->y(), w->width(), w->height()));
+        m_sideAnimation->start();
+    }
+}
+
+void MusicApplicationObject::sideAnimationReset()
+{
+    if(!M_SETTING_PTR->value(MusicSettingManager::OtherSideByChoiced).toBool())
+    {
+        return;
+    }
+
+    if(m_leftSideByOn)
+    {
+        MusicApplication *w = MusicApplication::instance();
+        w->move(1, w->y());
+    }
+    else if(m_rightSideByOn)
+    {
+        MusicApplication *w = MusicApplication::instance();
+        w->move(QApplication::desktop()->width() - w->width() - 1, w->y());
+    }
+}
 
 void MusicApplicationObject::musicAboutUs()
 {
@@ -180,20 +204,21 @@ void MusicApplicationObject::musicSetWindowToTop()
     m_setWindowToTop = !m_setWindowToTop;
     Qt::WindowFlags flags = MusicApplication::instance()->windowFlags();
     MusicApplication::instance()->setWindowFlags( m_setWindowToTop ?
-                              (flags | Qt::WindowStaysOnTopHint) :
-                              (flags & ~Qt::WindowStaysOnTopHint) );
+                              (flags | Qt::WindowStaysOnTopHint) : (flags & ~Qt::WindowStaysOnTopHint) );
     MusicApplication::instance()->show();
 }
 
 void MusicApplicationObject::musicResetWindow()
 {
+    m_leftSideByOn = false;
+    m_rightSideByOn = false;
+
     QWidget *widget = QApplication::desktop();
     M_SETTING_PTR->setValue(MusicSettingManager::ScreenSize, widget->size());
     M_SETTING_PTR->setValue(MusicSettingManager::WidgetSize, QSize(WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN));
 
     MusicApplication::instance()->setGeometry((widget->width() - WINDOW_WIDTH_MIN)/2,
-                                (widget->height() - WINDOW_HEIGHT_MIN)/2,
-                                WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN);
+                                (widget->height() - WINDOW_HEIGHT_MIN)/2, WINDOW_WIDTH_MIN, WINDOW_HEIGHT_MIN);
 }
 
 void MusicApplicationObject::musicToolSetsParameter()
@@ -208,12 +233,12 @@ void MusicApplicationObject::musicDeviceNameChanged(const QString &name)
 
 void MusicApplicationObject::musicDeviceChanged(bool state)
 {
-    delete m_mobileDevices;
-    m_mobileDevices = nullptr;
+    delete m_mobileDeviceWidget;
+    m_mobileDeviceWidget = nullptr;
     if(state)
     {
-        m_mobileDevices = new MusicMobileDevicesWidget;
-        m_mobileDevices->show();
+        m_mobileDeviceWidget = new MusicMobileDevicesWidget;
+        m_mobileDeviceWidget->show();
     }
     else
     {
@@ -240,11 +265,6 @@ void MusicApplicationObject::musicSetSoundEffect()
     MusicSoundEffectsWidget sound;
     sound.setParentConnect(this);
     sound.exec();
-}
-
-void MusicApplicationObject::musicBackgroundSliderStateChanged()
-{
-    MusicTopAreaWidget::instance()->musicBackgroundSliderStateChanged(false);
 }
 
 bool MusicApplicationObject::closeCurrentEqualizer()

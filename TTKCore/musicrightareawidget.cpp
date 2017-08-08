@@ -32,19 +32,20 @@ MusicRightAreaWidget::MusicRightAreaWidget(QWidget *parent)
     m_stackedFuncWidget = nullptr;
     m_musicLrcForDesktop = nullptr;
     m_musicLrcForWallpaper = nullptr;
+    m_videoPlayerWidget = nullptr;
 
-    m_downloadStatusLabel = new MusicDownloadStatusObject(parent);
-    m_setting = new MusicSettingWidget(this);
-    connect(m_setting, SIGNAL(parameterSettingChanged()), parent,
-                       SLOT(getParameterSetting()));
+    m_downloadStatusObject = new MusicDownloadStatusObject(parent);
+    m_settingWidget = new MusicSettingWidget(this);
+    connect(m_settingWidget, SIGNAL(parameterSettingChanged()), parent, SLOT(getParameterSetting()));
 }
 
 MusicRightAreaWidget::~MusicRightAreaWidget()
 {
-    delete m_setting;
-    delete m_downloadStatusLabel;
+    delete m_settingWidget;
+    delete m_downloadStatusObject;
     delete m_musicLrcForDesktop;
     delete m_musicLrcForWallpaper;
+    delete m_videoPlayerWidget;
 }
 
 QString MusicRightAreaWidget::getClassName()
@@ -78,7 +79,7 @@ void MusicRightAreaWidget::setupUi(Ui::MusicApplication* ui)
     connect(group, SIGNAL(buttonClicked(int)), SLOT(musicFunctionClicked(int)));
 
     ///////////////////////////////////////////////////////
-    connect(ui->musiclrccontainerforinline, SIGNAL(changeCurrentLrcColorCustom()), m_setting,
+    connect(ui->musiclrccontainerforinline, SIGNAL(changeCurrentLrcColorCustom()), m_settingWidget,
                  SLOT(changeInlineLrcWidget()));
     connect(ui->musiclrccontainerforinline, SIGNAL(theCurrentLrcUpdated()), MusicApplication::instance(),
                  SLOT(musicCurrentLrcUpdated()));
@@ -208,13 +209,13 @@ void MusicRightAreaWidget::setSongSpeedAndSlow(qint64 time) const
 
 void MusicRightAreaWidget::musicCheckHasLrcAlready() const
 {
-    m_downloadStatusLabel->musicCheckHasLrcAlready();
+    m_downloadStatusObject->musicCheckHasLrcAlready();
 }
 
 void MusicRightAreaWidget::showSettingWidget() const
 {
-    m_setting->initControllerParameter();
-    m_setting->exec();
+    m_settingWidget->initControllerParameter();
+    m_settingWidget->exec();
 }
 
 void MusicRightAreaWidget::resizeWindow()
@@ -238,9 +239,10 @@ void MusicRightAreaWidget::resizeWindow()
     {
         MObject_cast(MusicPlaylistFoundWidget*, m_stackedFuncWidget)->resizeWindow();
     }
-    else if(MObject_cast(MusicVideoPlayWidget*, m_stackedFuncWidget))
+
+    if(m_videoPlayerWidget && !m_videoPlayerWidget->isPopup())
     {
-        MObject_cast(MusicVideoPlayWidget*, m_stackedFuncWidget)->resizeWindow();
+        m_videoPlayerWidget->resizeWindow();
     }
 }
 
@@ -321,15 +323,19 @@ void MusicRightAreaWidget::musicFunctionClicked(int index)
             }
         case VideoWidget: //insert video widget
             {
-                MusicVideoPlayWidget *videoPlayer = new MusicVideoPlayWidget(false, this);
-                videoPlayer->setObjectToClose(this);
-                videoPlayer->blockMoveOption(true);
-                connect(videoPlayer, SIGNAL(freshButtonClicked(bool)), SLOT(musicVideoSetPopup(bool)));
-                connect(videoPlayer, SIGNAL(fullscreenButtonClicked(bool)), SLOT(musicVideoFullscreen(bool)));
+                if(!m_videoPlayerWidget)
+                {
+                    m_videoPlayerWidget = new MusicVideoPlayWidget(this);
+                    connect(m_videoPlayerWidget, SIGNAL(freshButtonClicked(bool)), SLOT(musicVideoSetPopup(bool)));
+                    connect(m_videoPlayerWidget, SIGNAL(fullscreenButtonClicked(bool)), SLOT(musicVideoFullscreen(bool)));
+                }
+                m_videoPlayerWidget->popup(false);
 
-                m_stackedFuncWidget = videoPlayer;
-                m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
-                m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
+                QWidget *background = new QWidget(this);
+                background->setStyleSheet(MusicUIObject::MBackgroundStyle17);
+                m_stackedFuncWidget = background;
+                m_ui->surfaceStackedWidget->addWidget(m_videoPlayerWidget);
+                m_ui->surfaceStackedWidget->setCurrentWidget(m_videoPlayerWidget);
                 m_ui->musicVideoWidgetButton->setStyleSheet(MusicUIObject::MKGFuncMVForeClicked);
                 emit updateBackgroundTheme();
                 break;
@@ -526,11 +532,11 @@ void MusicRightAreaWidget::setWindowLrcTypeChanged()
 
     connect(m_musicLrcForDesktop, SIGNAL(setWindowLrcTypeChanged()), SLOT(setWindowLrcTypeChanged()));
     connect(m_musicLrcForDesktop, SIGNAL(theCurrentLrcUpdated()), MusicApplication::instance(),
-                 SLOT(musicCurrentLrcUpdated()));
+                                  SLOT(musicCurrentLrcUpdated()));
     connect(m_musicLrcForDesktop, SIGNAL(changeCurrentLrcColorSetting()), MusicApplication::instance(),
-                 SLOT(musicSetting()));
-    connect(m_musicLrcForDesktop, SIGNAL(changeCurrentLrcColorCustom()), m_setting,
-                 SLOT(changeDesktopLrcWidget()));
+                                  SLOT(musicSetting()));
+    connect(m_musicLrcForDesktop, SIGNAL(changeCurrentLrcColorCustom()), m_settingWidget,
+                                  SLOT(changeDesktopLrcWidget()));
 
     M_SETTING_PTR->setValue(MusicSettingManager::DLrcWindowTypeChoiced, type);
     deskLrc->deleteLater();
@@ -572,36 +578,32 @@ void MusicRightAreaWidget::musicButtonStyleClear(bool fore)
 
 void MusicRightAreaWidget::musicVideoButtonSearched(const QString &name)
 {
-    if(MObject_cast(MusicVideoPlayWidget*, m_stackedFuncWidget))
+    if(m_videoPlayerWidget && m_videoPlayerWidget->isPopup())
     {
-        MusicVideoPlayWidget *video = MStatic_cast(MusicVideoPlayWidget*, m_stackedFuncWidget);
-        if(video->isPopup())
-        {
-            video->raise();
-            video->videoResearchButtonSearched(name);
-            return;
-        }
+        m_videoPlayerWidget->raise();
     }
-    musicFunctionClicked(MusicRightAreaWidget::VideoWidget);
-    MusicVideoPlayWidget *video = MStatic_cast(MusicVideoPlayWidget*, m_stackedFuncWidget);
-    if(video)
+    else
     {
-        video->videoResearchButtonSearched(name);
+        musicFunctionClicked(MusicRightAreaWidget::VideoWidget);
     }
+    m_videoPlayerWidget->videoResearchButtonSearched(name);
 }
 
 void MusicRightAreaWidget::musicVideoSetPopup(bool popup)
 {
+    if(!m_videoPlayerWidget)
+    {
+        return;
+    }
+
+    m_videoPlayerWidget->popup(popup);
     if(popup)
     {
-        musicFunctionClicked(MusicRightAreaWidget::LrcWidget);
+        m_ui->surfaceStackedWidget->addWidget(m_stackedFuncWidget);
+        m_ui->surfaceStackedWidget->setCurrentWidget(m_stackedFuncWidget);
 
-        MusicVideoPlayWidget *videoPlayer = new MusicVideoPlayWidget(true);
-        videoPlayer->setObjectToClose(this);
-        videoPlayer->show();
-        m_stackedFuncWidget = videoPlayer;
-        connect(videoPlayer, SIGNAL(freshButtonClicked(bool)), SLOT(musicVideoSetPopup(bool)));
-        connect(videoPlayer, SIGNAL(fullscreenButtonClicked(bool)), SLOT(musicVideoFullscreen(bool)));
+        MusicRegeditManager().setLeftWinEnable();
+        QTimer::singleShot(10*MT_MS, this, SLOT(musicVideoActiveWindow()));
     }
     else
     {
@@ -609,14 +611,31 @@ void MusicRightAreaWidget::musicVideoSetPopup(bool popup)
     }
 }
 
+void MusicRightAreaWidget::musicVideoActiveWindow()
+{
+    if(m_videoPlayerWidget)
+    {
+        MusicApplication::instance()->activateWindow();
+        m_videoPlayerWidget->activateWindow();
+    }
+}
+
+void MusicRightAreaWidget::musicVideoClosed()
+{
+    delete m_videoPlayerWidget;
+    m_videoPlayerWidget = nullptr;
+    musicFunctionClicked(MusicRightAreaWidget::LrcWidget);
+}
+
 void MusicRightAreaWidget::musicVideoFullscreen(bool full)
 {
-    MusicVideoPlayWidget *video = MStatic_cast(MusicVideoPlayWidget*, m_stackedFuncWidget);
-    if(video)
+    if(!m_videoPlayerWidget)
     {
-        video->resizeWindow(full);
-        video->blockMoveOption(full);
+        return;
     }
+
+    m_videoPlayerWidget->resizeWindow(full);
+    m_videoPlayerWidget->blockMoveOption(full);
 }
 
 void MusicRightAreaWidget::musicLrcDisplayAllButtonClicked()

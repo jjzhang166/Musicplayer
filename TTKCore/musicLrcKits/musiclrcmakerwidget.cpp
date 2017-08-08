@@ -156,7 +156,7 @@ MusicLrcMakerWidget::MusicLrcMakerWidget(QWidget *parent)
 
     m_ui->stackedWidget->setFocusPolicy(Qt::StrongFocus);
     m_ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
-    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(m_ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
@@ -515,7 +515,10 @@ void MusicLrcMakerWidget::createMainWidget()
 {
     m_ui->nextButton_M->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->cancelButton_M->setStyleSheet(MusicUIObject::MPushButtonStyle04);
-
+#ifdef Q_OS_UNIX
+    m_ui->nextButton_M->setFocusPolicy(Qt::NoFocus);
+    m_ui->cancelButton_M->setFocusPolicy(Qt::NoFocus);
+#endif
     connect(m_ui->cancelButton_M, SIGNAL(clicked()), SLOT(close()));
     connect(m_ui->nextButton_M, SIGNAL(clicked()), SLOT(setCurrentFirstWidget()));
 
@@ -579,11 +582,18 @@ void MusicLrcMakerWidget::createFirstWidget()
     m_ui->lrcTextEdit->setTextCursor(cur);
 
     m_ui->timeSlider_F->setFocusPolicy(Qt::NoFocus);
-    m_ui->timeSlider_F->setStyleSheet(MusicUIObject::MSliderStyle07);
+    m_ui->timeSlider_F->setStyleSheet(MusicUIObject::MSliderStyle09);
     m_ui->stateButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->previousButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->nextButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->cancelButton_F->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+
+#ifdef Q_OS_UNIX
+    m_ui->stateButton_F->setFocusPolicy(Qt::NoFocus);
+    m_ui->previousButton_F->setFocusPolicy(Qt::NoFocus);
+    m_ui->nextButton_F->setFocusPolicy(Qt::NoFocus);
+    m_ui->cancelButton_F->setFocusPolicy(Qt::NoFocus);
+#endif
 
     connect(m_ui->timeSlider_F, SIGNAL(valueChanged(int)), SLOT(timeSliderValueChanged(int)));
     connect(m_ui->stateButton_F, SIGNAL(clicked(bool)), SLOT(firstWidgetStateButtonClicked()));
@@ -615,10 +625,16 @@ void MusicLrcMakerWidget::createSecondWidget()
     m_ui->makeTextEdit->setFont( font );
 
     m_ui->timeSlider_S->setFocusPolicy(Qt::NoFocus);
-    m_ui->timeSlider_S->setStyleSheet(MusicUIObject::MSliderStyle07);
+    m_ui->timeSlider_S->setStyleSheet(MusicUIObject::MSliderStyle09);
     m_ui->previousButton_S->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->nextButton_S->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->cancelButton_S->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+
+#ifdef Q_OS_UNIX
+    m_ui->previousButton_S->setFocusPolicy(Qt::NoFocus);
+    m_ui->nextButton_S->setFocusPolicy(Qt::NoFocus);
+    m_ui->cancelButton_S->setFocusPolicy(Qt::NoFocus);
+#endif
 
     connect(m_ui->timeSlider_S, SIGNAL(valueChanged(int)), SLOT(timeSliderValueChanged(int)));
     connect(m_ui->cancelButton_S, SIGNAL(clicked()), SLOT(close()));
@@ -648,13 +664,22 @@ void MusicLrcMakerWidget::createThirdWidget()
     connect(m_ui->lrc_make_up_T, SIGNAL(clicked()), SLOT(lrcSpeedSlower()));
     connect(m_ui->lrc_make_down_T, SIGNAL(clicked()), SLOT(lrcSpeedFaster()));
 
-    m_ui->timeSlider_T->setStyleSheet(MusicUIObject::MSliderStyle07);
+    m_ui->timeSlider_T->setStyleSheet(MusicUIObject::MSliderStyle09);
     m_ui->stateButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->remakeButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->uploadButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->saveButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->previousButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->cancelButton_T->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+
+#ifdef Q_OS_UNIX
+    m_ui->stateButton_T->setFocusPolicy(Qt::NoFocus);
+    m_ui->remakeButton_T->setFocusPolicy(Qt::NoFocus);
+    m_ui->uploadButton_T->setFocusPolicy(Qt::NoFocus);
+    m_ui->saveButton_T->setFocusPolicy(Qt::NoFocus);
+    m_ui->previousButton_T->setFocusPolicy(Qt::NoFocus);
+    m_ui->cancelButton_T->setFocusPolicy(Qt::NoFocus);
+#endif
 
     connect(m_ui->timeSlider_T, SIGNAL(valueChanged(int)), SLOT(timeSliderValueChanged(int)));
     connect(m_ui->remakeButton_T, SIGNAL(clicked()), SLOT(reMakeButtonClicked()));

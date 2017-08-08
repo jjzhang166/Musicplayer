@@ -23,6 +23,9 @@ MusicLrcFloatPhotoItem::MusicLrcFloatPhotoItem(int index, QWidget *parent)
     m_checkBox = new QCheckBox(this);
     m_checkBox->setGeometry(90, 45, 20, 20);
     m_checkBox->setStyleSheet(MusicUIObject::MCheckBoxStyle01);
+#ifdef Q_OS_UNIX
+    m_checkBox->setFocusPolicy(Qt::NoFocus);
+#endif
 
     connect(this, SIGNAL(clicked()), SLOT(sendUserSelectArt()));
     connect(m_checkBox, SIGNAL(clicked()), SLOT(sendUserBoxClicked()));
@@ -147,6 +150,13 @@ MusicLrcFloatPhotoWidget::MusicLrcFloatPhotoWidget(QWidget *parent)
     m_previous->setCursor(QCursor(Qt::PointingHandCursor));
     m_next->setCursor(QCursor(Qt::PointingHandCursor));
 
+#ifdef Q_OS_UNIX
+    m_checkBox->setFocusPolicy(Qt::NoFocus);
+    m_confirmButton->setFocusPolicy(Qt::NoFocus);
+    m_previous->setFocusPolicy(Qt::NoFocus);
+    m_next->setFocusPolicy(Qt::NoFocus);
+#endif
+
     m_previous->setStyleSheet(MusicUIObject::MBackgroundStyle10 + MusicUIObject::MBorderStyle01);
     m_next->setStyleSheet(MusicUIObject::MBackgroundStyle10 + MusicUIObject::MBorderStyle01);
 
@@ -184,7 +194,7 @@ QString MusicLrcFloatPhotoWidget::getClassName()
 
 void MusicLrcFloatPhotoWidget::resizeWindow(int width, int height)
 {
-    bool f = MusicLeftAreaWidget::instance()->isFullOrNormal();
+    bool f = MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen();
     m_rectIn = QRect(0, (f ? 680 : 530) + height, 115 + width, 105);
     m_rectOut = QRect(0, (f ? 480 : 330) + height, 662 + width, 180);
 

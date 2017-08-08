@@ -286,17 +286,10 @@ protected:
     virtual void dragMoveEvent(QDragMoveEvent *event) override;
     virtual void dropEvent(QDropEvent *event) override;
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    virtual void enterEvent(QEvent *event) override;
+    virtual void leaveEvent(QEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
-#if defined(Q_OS_WIN)
-#  ifdef MUSIC_GREATER_NEW
-    virtual bool nativeEvent(const QByteArray &, void *, long *) override;
-#  else
-    virtual bool winEvent(MSG *message, long *result) override;
-#  endif
-#endif
-    /*!
-     * Override the widget event.
-     */
 
     void setMusicPlayIndex();
     /*!
@@ -317,8 +310,8 @@ private:
     int m_currentMusicSongTreeIndex;
 
     MusicPlayer* m_musicPlayer;
-    MusicPlaylist* m_musicList;
-    MusicSongsSummariziedWidget *m_musicSongTree;
+    MusicPlaylist* m_musicPlayList;
+    MusicSongsSummariziedWidget *m_musicSongTreeWidget;
     MusicBottomAreaWidget *m_bottomAreaWidget;
     MusicTopAreaWidget *m_topAreaWidget;
     MusicRightAreaWidget *m_rightAreaWidget;

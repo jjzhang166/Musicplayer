@@ -12,41 +12,6 @@
 
 #define ADVANCE_OFFSET  150
 
-MusicModifyLineEdit::MusicModifyLineEdit(QWidget *parent)
-    : QLineEdit(parent)
-{
-    m_isTextEdited = false;
-    connect(this, SIGNAL(textEdited(QString)), SLOT(isTextEdited()));
-}
-
-MusicModifyLineEdit::~MusicModifyLineEdit()
-{
-
-}
-
-QString MusicModifyLineEdit::getClassName()
-{
-    return staticMetaObject.className();
-}
-
-void MusicModifyLineEdit::isTextEdited()
-{
-    m_isTextEdited = true;
-}
-
-void MusicModifyLineEdit::leaveEvent(QEvent *event)
-{
-    QLineEdit::leaveEvent(event);
-    setReadOnly(true);
-}
-
-void MusicModifyLineEdit::mouseDoubleClickEvent(QMouseEvent *event)
-{
-    QLineEdit::mouseDoubleClickEvent(event);
-    setReadOnly(false);
-}
-
-
 MusicFileInformationWidget::MusicFileInformationWidget(QWidget *parent)
     : MusicAbstractMoveDialog(parent),
       m_ui(new Ui::MusicFileInformationWidget)
@@ -54,7 +19,7 @@ MusicFileInformationWidget::MusicFileInformationWidget(QWidget *parent)
     m_ui->setupUi(this);
     
     m_ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
-    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->topTitleCloseButton->setToolTip(tr("Close"));
     connect(m_ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
@@ -73,6 +38,13 @@ MusicFileInformationWidget::MusicFileInformationWidget(QWidget *parent)
     m_ui->saveButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->viewButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->openPixButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+
+#ifdef Q_OS_UNIX
+    m_ui->editButton->setFocusPolicy(Qt::NoFocus);
+    m_ui->saveButton->setFocusPolicy(Qt::NoFocus);
+    m_ui->openPixButton->setFocusPolicy(Qt::NoFocus);
+    m_ui->viewButton->setFocusPolicy(Qt::NoFocus);
+#endif
 
     m_ui->idv3ComboBox->setItemDelegate(new QStyledItemDelegate(m_ui->idv3ComboBox));
     m_ui->idv3ComboBox->setStyleSheet(MusicUIObject::MComboBoxStyle01 + MusicUIObject::MItemView01);
@@ -134,13 +106,12 @@ void MusicFileInformationWidget::musicAdvanceClicked()
         m_ui->label_17->setVisible(true);
         m_ui->idv3ComboBox->setVisible(true);
 
-        MusicSongTag tag;
-        if(!tag.readFile(m_path))
-        {
-            return;
-        }
         QPixmap pix;
-        pix.loadFromData(tag.getCover());
+        MusicSongTag tag;
+        if(tag.readFile(m_path))
+        {
+            pix.loadFromData(tag.getCover());
+        }
         QString text = QString("%1x%2").arg(pix.width()).arg(pix.height());
         if(pix.isNull())
         {
@@ -182,31 +153,31 @@ void MusicFileInformationWidget::musicSaveTag()
     tag.setTagVersion(m_ui->idv3ComboBox->currentIndex() == 0 ? 3 : 4);
 
     QString value = m_ui->fileAlbumEdit->text().trimmed();
-    if(value != "-" && m_ui->fileAlbumEdit->getTextEdited())
+    if(value != "-")
     {
         tag.setAlbum(value);
     }
 
     value = m_ui->fileArtistEdit->text().trimmed();
-    if(value != "-" && m_ui->fileArtistEdit->getTextEdited())
+    if(value != "-")
     {
         tag.setArtist(value);
     }
 
     value = m_ui->fileGenreEdit->text().trimmed();
-    if(value != "-" && m_ui->fileGenreEdit->getTextEdited())
+    if(value != "-")
     {
         tag.setGenre(value);
     }
 
     value = m_ui->fileTitleEdit->text().trimmed();
-    if(value != "-" && m_ui->fileTitleEdit->getTextEdited())
+    if(value != "-")
     {
         tag.setTitle(value);
     }
 
     value = m_ui->fileYearEdit->text().trimmed();
-    if(value != "-" && m_ui->fileYearEdit->getTextEdited())
+    if(value != "-")
     {
         tag.setYear(value);
     }

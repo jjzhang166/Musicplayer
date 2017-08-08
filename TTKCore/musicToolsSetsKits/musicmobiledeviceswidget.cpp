@@ -1,6 +1,7 @@
 #include "musicmobiledeviceswidget.h"
 #include "musiclocalsongsmanagerwidget.h"
 #include "musicsettingmanager.h"
+#include "musicapplication.h"
 
 #include <QToolButton>
 
@@ -17,14 +18,14 @@ MusicMobileDevicesWidget::MusicMobileDevicesWidget(QWidget *parent)
 
     m_closeButton = new QToolButton(this);
     m_closeButton->setIcon(QIcon(":/functions/btn_close_hover"));
-    m_closeButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_closeButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_closeButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_closeButton->setToolTip(tr("Close"));
     m_closeButton->setGeometry(215, 2, 28, 22);
     connect(m_closeButton, SIGNAL(clicked()), SLOT(close()));
 
     m_openButton = new QToolButton(this);
-    m_openButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_openButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_openButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_openButton->setText(tr("MobileOpen"));
     m_openButton->setGeometry(160, 140, 75, 25);
@@ -46,5 +47,9 @@ QString MusicMobileDevicesWidget::getClassName()
 void MusicMobileDevicesWidget::showMobileManager()
 {
     hide();
-    MusicLocalSongsManagerWidget().exec();
+    MusicLocalSongsManagerWidget *w = new MusicLocalSongsManagerWidget(MusicApplication::instance());
+#ifdef Q_OS_WIN
+    w->findExtraDevicePath(M_SETTING_PTR->value(MusicSettingManager::ExtraDevicePathChoiced).toString());
+#endif
+    w->show();
 }

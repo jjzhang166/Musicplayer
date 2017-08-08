@@ -13,9 +13,10 @@
 #include <QMouseEvent>
 #include "musicobject.h"
 #include "musicuiobject.h"
-#include "musicabstractmovedialog.h"
+#include "musicabstractmovewidget.h"
 #include <QFileInfo>
 
+class QFileSystemWatcher;
 class MusicLocalSongsManagerThread;
 
 namespace Ui {
@@ -25,7 +26,7 @@ class MusicLocalSongsManagerWidget;
 /*! @brief The class of the lcal songs manager widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_TOOLSET_EXPORT MusicLocalSongsManagerWidget : public MusicAbstractMoveDialog
+class MUSIC_TOOLSET_EXPORT MusicLocalSongsManagerWidget : public MusicAbstractMoveWidget
 {
     Q_OBJECT
 public:
@@ -40,7 +41,16 @@ public:
      * Get class object name.
      */
 
+    void findExtraDevicePath(const QString &dir);
+    /*!
+     * Find extra device path.
+     */
+
 Q_SIGNALS:
+    void resetFlag(MusicObject::ToolsType flag);
+    /*!
+     * Reset window open flag.
+     */
     void addSongToPlay(const QStringList &names);
     /*!
      * Add current selected song to play lists.
@@ -50,6 +60,18 @@ public Q_SLOTS:
     void selectedAllItems(bool check);
     /*!
      * Select all items.
+     */
+    void watchDirEnable(bool enable);
+    /*!
+     * Watch dir enable or not.
+     */
+    void watchDirSelected();
+    /*!
+     * Watch dir selected.
+     */
+    void watchDirChanged(const QString &path);
+    /*!
+     * Watch dir path changed.
      */
     void auditionButtonClick();
     /*!
@@ -79,21 +101,33 @@ public Q_SLOTS:
     /*!
      * Search file from list.
      */
+    void updateFileLists(const QFileInfoList &list);
+    /*!
+     * Update file lists.
+     */
 
     void setShowlistButton();
     /*!
      * Select to show list mode.
      */
-    void setShowPathButton();
+    void setShowArtButton();
     /*!
-     * Select to show path mode.
+     * Select to show art mode.
      */
-    virtual int exec();
+    void setShowAlbumButton();
     /*!
-     * Override exec function.
+     * Select to show album mode.
+     */
+    void show();
+    /*!
+     * Override show function.
      */
 
 protected:
+    virtual void closeEvent(QCloseEvent *event) override;
+    /*!
+     * Override the widget event.
+     */
     void clearAllItems();
     /*!
      * Clear All Items.
@@ -118,12 +152,20 @@ protected:
     /*!
      * Current custom dir path changed.
      */
+    void controlEnable(bool state);
+    /*!
+     * Control enable or disable.
+     */
+    void loadingLabelState(bool state);
+    /*!
+     * Loading label disable.
+     */
 
     Ui::MusicLocalSongsManagerWidget *m_ui;
-    int m_currentIndex;
-    QFileInfoList m_filenames;
+    QFileInfoList m_fileNames;
     MusicLocalSongsManagerThread *m_thread;
     MusicObject::MIntsListMap m_searchfileListCache;
+    QFileSystemWatcher *m_fileSystemWatcher;
 
 };
 

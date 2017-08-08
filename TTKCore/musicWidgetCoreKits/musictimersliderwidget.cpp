@@ -4,7 +4,6 @@
 #include "musicgiflabelwidget.h"
 
 #include <qmath.h>
-#include <QLabel>
 
 MusicTimerSliderWidget::MusicTimerSliderWidget(QWidget *parent)
     : QWidget(parent)
@@ -18,7 +17,7 @@ MusicTimerSliderWidget::MusicTimerSliderWidget(QWidget *parent)
     m_slider = new MusicMovingLabelSlider(Qt::Horizontal, this);
     m_slider->setValue(0);
     m_slider->setGeometry(15, m_label->width()/2, width() - m_label->width(), 10);
-    m_slider->setStyleSheet(MusicUIObject::MSliderStyle05);
+    m_slider->setStyleSheet(MusicUIObject::MSliderStyle07);
     m_slider->setCursor(QCursor(Qt::PointingHandCursor));
 }
 
@@ -71,9 +70,10 @@ void MusicTimerSliderWidget::setRange(int min, int max)
 void MusicTimerSliderWidget::sliderMovedAt(int pos) const
 {
     int max = m_slider->maximum();
-    if(max != 0)
+    if(max > 0)
     {
-        m_label->move(ceil(pos*(m_slider->width())*1.0/max) - 1, 5);
+        float delta = m_slider->width()*(-0.015/800) + 0.0275;
+        m_label->move(ceil(qint64(pos)*m_slider->width()*(1.0 - delta)/max) - 1, 5);
     }
 }
 
@@ -82,14 +82,14 @@ void MusicTimerSliderWidget::setSliderStyleByType(int type)
     QString rgba1 = "rgb(231, 80, 229)", rgba2 = "rgb(7, 208, 255)";
     switch(type)
     {
-        case 1: rgba1 = "rgb(232, 202, 189)"; rgba2 = "rgb(191, 252, 198)"; break;
-        case 2: rgba1 = "rgb(255, 179, 249)"; rgba2 = "rgb(247, 246, 200)"; break;
-        case 3: rgba1 = "rgb(122, 246, 231)"; rgba2 = "rgb(244, 247, 191)"; break;
-        case 4: rgba1 = "rgb(213, 203, 255)"; rgba2 = "rgb(153, 236, 255)"; break;
+        case 1: rgba1 = "rgb(122, 246, 231)"; rgba2 = "rgb(244, 247, 158)"; break;
+        case 2: rgba1 = "rgb(232, 202, 189)"; rgba2 = "rgb(191, 252, 198)"; break;
+        case 3: rgba1 = "rgb(213, 203, 255)"; rgba2 = "rgb(153, 236, 255)"; break;
+        case 4: rgba1 = "rgb(255, 179, 249)"; rgba2 = "rgb(247, 246, 200)"; break;
     }
     QString prefix = "QSlider::sub-page:Horizontal{background-color:qlineargradient("
                      "spread:pad,x1:0,y1:0,x2:1,y2:0,stop:0 " + rgba1 + ", stop:1 " + rgba2 + ");}";
-    m_slider->setStyleSheet(MusicUIObject::MSliderStyle05 + prefix);
+    m_slider->setStyleSheet(MusicUIObject::MSliderStyle07 + prefix);
 }
 
 void MusicTimerSliderWidget::resizeEvent(QResizeEvent *event)

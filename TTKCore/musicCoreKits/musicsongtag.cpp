@@ -14,7 +14,8 @@
 
 MusicSongTag::MusicSongTag()
 {
-    m_tag = nullptr;
+    m_tag = new TagReadAndWrite;
+    m_extend = true;
     m_id3v2Version = 3;
 }
 
@@ -42,12 +43,10 @@ bool MusicSongTag::readFile(const QString &file)
         return false;
     }
 
-    delete m_tag;
-    m_tag = new TagReadAndWrite(file);
     m_filePath = file;
-    if(!m_tag->readFile())
+    if(!m_tag->readFile(file))
     {
-        return readOtherTaglibNotSupport(file);
+        return m_extend ? readOtherTaglibNotSupport(file) : false;
     }
 
     m_parameters = m_tag->getMusicTags();
@@ -66,6 +65,11 @@ void MusicSongTag::setTagVersion(int id3v2Version)
     {
         m_id3v2Version = 3;
     }
+}
+
+void MusicSongTag::setExtend(bool extend)
+{
+    m_extend = extend;
 }
 
 bool MusicSongTag::readOtherTaglibNotSupport(const QString &path)
@@ -139,7 +143,13 @@ QString MusicSongTag::getYear() const
 
 QString MusicSongTag::getTrackNum() const
 {
-    return m_parameters[TagReadAndWrite::TAG_TRACK];
+    QString v = m_parameters[TagReadAndWrite::TAG_TRACK];
+    bool ok = true;
+    if(v.toInt(&ok) > 0)
+    {
+        return !ok ? "-" : v;
+    }
+    return "-";
 }
 
 QString MusicSongTag::getGenre() const

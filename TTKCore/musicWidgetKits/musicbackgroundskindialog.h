@@ -56,7 +56,7 @@ public:
     /*!
      * Select current item by name\alpha\listAlpha when the widget show.
      */
-    int getListBgSkinAlpha() const;
+    int getBackgroundListAlpha() const;
     /*!
      * Get kist bg skin alpha.
      */
@@ -72,10 +72,6 @@ public:
 
 Q_SIGNALS:
     void currentTextChanged(const QString &text);
-    /*!
-     * Update app bg when user change the current bg emit.
-     */
-    void currentColorChanged(const QString &path);
     /*!
      * Update app bg when user change the current bg emit.
      */
@@ -104,6 +100,10 @@ public Q_SLOTS:
     void myBackgroundListWidgetItemClicked(const QString &name);
     /*!
      * My background list widget item has clicked.
+     */
+    void currentColorChanged(const QString &path);
+    /*!
+     * Update app bg when user change the current bg emit.
      */
     virtual int exec();
     /*!

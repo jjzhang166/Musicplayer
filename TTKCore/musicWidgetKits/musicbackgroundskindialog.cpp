@@ -11,7 +11,6 @@
 #include <QScrollBar>
 #include <QFileDialog>
 #include <QSignalMapper>
-#include <QDebug>
 
 MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
     : MusicAbstractMoveDialog(parent),
@@ -20,7 +19,7 @@ MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
     m_ui->setupUi(this);
 
     m_ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
-    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->topTitleCloseButton->setToolTip(tr("Close"));
     m_ui->recommendSkin->setStyleSheet(MusicUIObject::MColorStyle08);
@@ -28,6 +27,11 @@ MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
     m_ui->paletteButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->customSkin->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->stackedWidget->setLength(m_ui->stackedWidget->width(), MusicAnimationStackedWidget::RightToLeft);
+#ifdef Q_OS_UNIX
+    m_ui->paletteButton->setFocusPolicy(Qt::NoFocus);
+    m_ui->customSkin->setFocusPolicy(Qt::NoFocus);
+    m_ui->resetWindowButton->setFocusPolicy(Qt::NoFocus);
+#endif
 
     QSignalMapper *group = new QSignalMapper(this);
     group->setMapping(m_ui->recommendSkin, 0);
@@ -59,8 +63,8 @@ MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
     addThemeListWidgetItem();
     //////////////////////////////////////////////////////
     m_ui->resetWindowButton->setStyleSheet(MusicUIObject::MKGBtnResetWindow);
-    m_ui->skinTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle05);
-    m_ui->listTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle05);
+    m_ui->skinTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle06);
+    m_ui->listTransparentButton->setStyleSheet(MusicUIObject::MToolButtonStyle06);
 
     connect(m_ui->skinTransparentButton, SIGNAL(valueChanged(int)), parent,
                                        SLOT(musicBgTransparentChanged(int)));
@@ -73,7 +77,6 @@ MusicBackgroundSkinDialog::MusicBackgroundSkinDialog(QWidget *parent)
     connect(m_ui->customSkin, SIGNAL(clicked()) ,SLOT(showCustomSkinDialog()));
     connect(m_backgroundList, SIGNAL(itemClicked(QString)), SLOT(backgroundListWidgetItemClicked(QString)));
     connect(m_myBackgroundList, SIGNAL(itemClicked(QString)), SLOT(myBackgroundListWidgetItemClicked(QString)));
-    connect(this, SIGNAL(currentColorChanged(QString)), MusicTopAreaWidget::instance(), SLOT(musicBgTransparentChanged(QString)));
     connect(m_ui->resetWindowButton, SIGNAL(clicked()), MusicApplicationObject::instance(), SLOT(musicResetWindow()));
 }
 
@@ -141,7 +144,7 @@ void MusicBackgroundSkinDialog::setCurrentBgTheme(const QString &theme, int alph
     setListTransToolText(listAlpha);
 }
 
-int MusicBackgroundSkinDialog::getListBgSkinAlpha() const
+int MusicBackgroundSkinDialog::getBackgroundListAlpha() const
 {
     return m_ui->listTransparentButton->value();
 }
@@ -162,7 +165,7 @@ void MusicBackgroundSkinDialog::showPaletteDialog()
     connect(&paletteWidget, SIGNAL(currentColorToFileChanged(QString)),
                             SLOT(showPaletteDialog(QString)));
     connect(&paletteWidget, SIGNAL(currentColorToMemoryChanged(QString)),
-                            SIGNAL(currentColorChanged(QString)));
+                            SLOT(currentColorChanged(QString)));
     paletteWidget.exec();
 }
 
@@ -233,6 +236,13 @@ void MusicBackgroundSkinDialog::myBackgroundListWidgetItemClicked(const QString 
 
     QString s = name;
     setMBackground(s);
+    emit M_BACKGROUND_PTR->backgroundHasChanged();
+}
+
+void MusicBackgroundSkinDialog::currentColorChanged(const QString &path)
+{
+    MusicTopAreaWidget::instance()->musicBgTransparentChanged(path);
+    M_BACKGROUND_PTR->setMBackground(path);
     emit M_BACKGROUND_PTR->backgroundHasChanged();
 }
 

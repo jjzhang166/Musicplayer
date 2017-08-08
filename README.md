@@ -5,7 +5,7 @@
 
 ![LOGO](https://github.com/Greedysky/Resource/blob/master/Screen/logo_pic.png?raw=true)
 
-### **|[About](https://github.com/Greedysky/TTKMusicplayer#usage)|[License](https://github.com/Greedysky/TTKMusicplayer#license)|[Download](https://github.com/Greedysky/TTKMusicplayer#download)|[Features](https://github.com/Greedysky/TTKMusicplayer#features)|[Mobile](https://github.com/Greedysky/TTKMusicplayer#mobile)|[Screenshots](https://github.com/Greedysky/TTKMusicplayer#screenshots)|[Copyright](https://github.com/Greedysky/TTKMusicplayer#copyright)|[Contribute](https://github.com/Greedysky/TTKMusicplayer#how-to-contribute)|**
+### **|[About](https://github.com/Greedysky/TTKMusicplayer#usage)|[License](https://github.com/Greedysky/TTKMusicplayer#license)|[Download](https://github.com/Greedysky/TTKMusicplayer#download)|[Features](https://github.com/Greedysky/TTKMusicplayer#features)|[Screenshots](https://github.com/Greedysky/TTKMusicplayer#screenshots)|[Copyright](https://github.com/Greedysky/TTKMusicplayer#copyright)|[Contribute](https://github.com/Greedysky/TTKMusicplayer#how-to-contribute)|**
 
 Usage
 ----
@@ -19,14 +19,12 @@ Compiler tutorial I have written in the wiki.(See here <u>https://github.com/Gre
  * Qt develop version be tested on Qt4.8.7 for ubuntu-linux-gcc 64bit
  * Qt develop version be tested on Qt5.x for windows-mingw 32bit
  * Qt develop version be tested on Qt5.x for ubuntu-linux-gcc 64bit
- * Qt develop version be tested on Qt5.5 for android 32bit
  
 | Platform | Qt & Compiler       | Status                                                                                      |
 | :---:    | :---:               | :---:                                                                                       |
 | Linux    | 4.8.7 GCC & 5.x GCC    | ![Linux](https://img.shields.io/wercker/ci/wercker/docs.svg)                            |
 | Windows  | 4.8.7 GCC & 5.x GCC       | ![Windows](https://img.shields.io/wercker/ci/wercker/docs.svg) |
-| OS X     | 5.x Clang     | ![OSX](https://img.shields.io/badge/build-unknown-lightgrey.svg?style=flat-square)                           |
-| Android     | 5.5 & 5.5.1     | ![Android](https://img.shields.io/wercker/ci/wercker/docs.svg)                          |
+| OS X     | 5.x Clang     | ![OSX](https://img.shields.io/badge/build-unknown-lightgrey.svg?style=flat-square)                           |                          |
  
 # For Developers
 
@@ -75,6 +73,7 @@ TTKMusicPlayer can meet your most demands
  * ModPlug File(*.mod *.s3m *.xm *.it *.669 *.amf *.ams *.dbm *.dmf *.dsm *.far,mdl *.med *.mtm 
                 *.okt *.ptm *.stm *.ult *.umx *.mt2 *.psm *.mdz *.s3z *.xmz *.itz *.mdr *.s3r
                 *.xmr *.itr *.dgz *.s3gz *.xmgz *.itgz)
+ * Playlist formats(ttklis, m3u, m3u8, pls, wpl, xspf)
  * Junior fans interface. Interface cool, gorgeous pop. Maintaining a perfect performance under Vista and XP, refreshing
 Screenshots.
  * Search and high-speed downloads. Song search accuracy optimization, intelligent save bandwidth, you can disable the network function, 8 source download speed.
@@ -93,15 +92,6 @@ Screenshots.
  * Music song, artist, album and playlist searcg supported.
  * Music song spectrum and test supported.
  
-Mobile
-----
-*Follow the QQ music UI to achieve most of the features.*
-**(This project won't be updated anymore.)**
-
-![0](https://github.com/Greedysky/Resource/blob/master/Screen/TTKMobile/0.png?raw=true)
-![4](https://github.com/Greedysky/Resource/blob/master/Screen/TTKMobile/4.png?raw=true)
-![5](https://github.com/Greedysky/Resource/blob/master/Screen/TTKMobile/5.png?raw=true)
-![6](https://github.com/Greedysky/Resource/blob/master/Screen/TTKMobile/6.png?raw=true)
 
 Screenshots
 ----
@@ -134,6 +124,9 @@ Screenshots
 
 ### Other Tools
 ![Other Tools](https://github.com/Greedysky/Resource/blob/master/Screen/10.jpg?raw=true)
+
+### Spectrum
+![Magic Music](https://github.com/Greedysky/Resource/blob/master/Screen/11.jpg?raw=true)
 
 Copyright
 -------

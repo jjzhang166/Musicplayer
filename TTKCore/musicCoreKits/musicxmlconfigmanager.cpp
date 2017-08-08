@@ -91,6 +91,7 @@ void MusicXMLConfigManager::writeXMLConfig()
     int otherSearchChoiced = M_SETTING_PTR->value(MusicSettingManager::OtherSearchChoiced).toInt();
     int otherAlbumChoiced = M_SETTING_PTR->value(MusicSettingManager::OtherAlbumChoiced).toInt();
     int otherInfoChoiced = M_SETTING_PTR->value(MusicSettingManager::OtherInfoChoiced).toInt();
+    int otherSideByChoiced = M_SETTING_PTR->value(MusicSettingManager::OtherSideByChoiced).toInt();
 
     ///////////////////////////////////////////////////////////////////////////
     QString bgThemeChoiced = M_SETTING_PTR->value(MusicSettingManager::BgThemeChoiced).toString();
@@ -177,7 +178,7 @@ void MusicXMLConfigManager::writeXMLConfig()
     createProcessingInstruction();
     QDomElement musicPlayerDom = createRoot("TTKMusicPlayer");
     //Class A
-    QDomElement musicSetting = writeDom(musicPlayerDom, "musicSetting");
+    QDomElement musicSettingDom = writeDom(musicPlayerDom, "musicSetting");
     QDomElement plusSettingDom = writeDom(musicPlayerDom, "plusSetting");
     QDomElement otherSettingDom = writeDom(musicPlayerDom, "otherSetting");
     QDomElement backgroundSettingDom = writeDom(musicPlayerDom, "backgroundSetting");
@@ -188,9 +189,9 @@ void MusicXMLConfigManager::writeXMLConfig()
     QDomElement timeSettingDom = writeDom(musicPlayerDom, "timeSetting");
     QDomElement downloadSettingDom = writeDom(musicPlayerDom, "downloadSetting");
     //Class B
-    writeDomElement(musicSetting, "playMode", MusicXmlAttribute("value", playModeChoiced));
-    writeDomElement(musicSetting, "playVolume", MusicXmlAttribute("value", volumeChoiced));
-    writeDomElementText(musicSetting, "lastPlayIndex", MusicXmlAttribute("value", lastPlayIndexChoiced[0]),
+    writeDomElement(musicSettingDom, "playMode", MusicXmlAttribute("value", playModeChoiced));
+    writeDomElement(musicSettingDom, "playVolume", MusicXmlAttribute("value", volumeChoiced));
+    writeDomElementText(musicSettingDom, "lastPlayIndex", MusicXmlAttribute("value", lastPlayIndexChoiced[0]),
                         QString("%1,%2").arg(lastPlayIndexChoiced[1]).arg(lastPlayIndexChoiced[2]));
 
     ///////////////////////////////////////////////////////////////////////////
@@ -210,6 +211,7 @@ void MusicXMLConfigManager::writeXMLConfig()
     writeDomElement(otherSettingDom, "otherSearch", MusicXmlAttribute("value", otherSearchChoiced));
     writeDomElement(otherSettingDom, "otherAlbum", MusicXmlAttribute("value", otherAlbumChoiced));
     writeDomElement(otherSettingDom, "otherInfo", MusicXmlAttribute("value", otherInfoChoiced));
+    writeDomElement(otherSettingDom, "otherSideBy", MusicXmlAttribute("value", otherSideByChoiced));
 
     ///////////////////////////////////////////////////////////////////////////
     writeDomElement(backgroundSettingDom, "bgTheme", MusicXmlAttribute("value", bgThemeChoiced));

@@ -8,10 +8,12 @@
 #include "musicfunctionuiobject.h"
 #include "musictinyuiobject.h"
 #include "musicsettingmanager.h"
+#include "musicapplication.h"
 
-#include <QBoxLayout>
 #include <QLabel>
+#include <QBoxLayout>
 #include <QPushButton>
+#include <QToolButton>
 #include <QStackedWidget>
 #ifdef Q_OS_UNIX
 #include <QDesktopWidget>
@@ -20,13 +22,10 @@
 #define WINDOW_HEIGHT   503
 #define WINDOW_WIDTH    661
 
-MusicVideoPlayWidget::MusicVideoPlayWidget(bool popup, QWidget *parent)
-    : MusicAbstractMoveWidget(false, parent), m_windowPopup(popup)
+MusicVideoPlayWidget::MusicVideoPlayWidget(QWidget *parent)
+    : MusicAbstractMoveWidget(false, parent), m_windowPopup(false)
 {
-    if(popup)
-    {
-        resize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    }
+    setWindowTitle("TTKMovie");
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -49,6 +48,7 @@ MusicVideoPlayWidget::MusicVideoPlayWidget(bool popup, QWidget *parent)
     searchLayout->setSpacing(0);
 
     m_searchEdit = new MusicLocalSongSearchEdit(searchWidget);
+    m_searchEdit->setStyleSheet(MusicUIObject::MColorStyle09);
     m_searchEdit->setFixedHeight(25);
     m_searchButton = new QPushButton(searchWidget);
     m_searchButton->setIcon(QIcon(":/tiny/btn_search_main_hover"));
@@ -62,30 +62,25 @@ MusicVideoPlayWidget::MusicVideoPlayWidget(bool popup, QWidget *parent)
     topLayout->addStretch();
     topLayout->addWidget(searchWidget);
 
+    m_closeButton = new QPushButton(this);
+    m_closeButton->setToolTip(tr("Close"));
+    m_closeButton->setFixedSize(14, 14);
+    m_closeButton->setStyleSheet(MusicUIObject::MKGBtnPClose);
+    m_closeButton->setCursor(QCursor(Qt::PointingHandCursor));
+    connect(m_closeButton, SIGNAL(clicked()), parent, SLOT(musicVideoClosed()));
+    topLayout->addWidget(m_closeButton);
+
+#ifdef Q_OS_UNIX
+    m_searchButton->setFocusPolicy(Qt::NoFocus);
+    m_closeButton->setFocusPolicy(Qt::NoFocus);
+#endif
+
     m_searchEdit->hide();
     m_searchButton->hide();
 
-    m_closeButton = nullptr;
+    m_backButton = nullptr;
     m_winTopButton = nullptr;
 
-    if(popup)
-    {
-        m_winTopButton = new QPushButton(m_topWidget);
-        m_winTopButton->setFixedSize(14, 14);
-        m_winTopButton->setCursor(QCursor(Qt::PointingHandCursor));
-        m_winTopButton->setStyleSheet(MusicUIObject::MKGTinyBtnWintopOff);
-        m_winTopButton->setToolTip(tr("windowTopOn"));
-        connect(m_winTopButton, SIGNAL(clicked()), SLOT(windowTopStateChanged()));
-        topLayout->addWidget(m_winTopButton);
-        m_winTopButton->setEnabled(false);
-
-        m_closeButton = new QPushButton(this);
-        m_closeButton->setToolTip(tr("Close"));
-        m_closeButton->setFixedSize(14, 14);
-        m_closeButton->setStyleSheet(MusicUIObject::MKGBtnPClose);
-        m_closeButton->setCursor(QCursor(Qt::PointingHandCursor));
-        topLayout->addWidget(m_closeButton);
-    }
     m_topWidget->setLayout(topLayout);
     m_topWidget->setFixedHeight(35);
 
@@ -97,12 +92,11 @@ MusicVideoPlayWidget::MusicVideoPlayWidget(bool popup, QWidget *parent)
 
     m_videoFloatWidget = new MusicVideoFloatWidget(this);
     m_videoTable = new MusicVideoTableWidget(this);
-    m_videoView = new MusicVideoView(popup, this);
+    m_videoView = new MusicVideoView(this);
     m_stackedWidget->addWidget(m_videoView);
     m_stackedWidget->addWidget(m_videoTable);
     m_stackedWidget->setCurrentIndex(0);
-    m_videoFloatWidget->setText(MusicVideoFloatWidget::FreshType,
-                                popup ? tr("InlineMode") : tr("PopupMode"));
+    m_videoFloatWidget->setText(MusicVideoFloatWidget::FreshType, tr("PopupMode"));
 
     connect(m_searchButton,SIGNAL(clicked(bool)), SLOT(searchButtonClicked()));
     connect(m_videoTable, SIGNAL(mvURLNameChanged(QString,QString)),
@@ -125,6 +119,7 @@ MusicVideoPlayWidget::~MusicVideoPlayWidget()
     delete m_closeButton;
     delete m_textLabel;
     delete m_searchEdit;
+    delete m_backButton;
     delete m_searchButton;
     delete m_topWidget;
     delete m_videoView;
@@ -134,6 +129,43 @@ MusicVideoPlayWidget::~MusicVideoPlayWidget()
 QString MusicVideoPlayWidget::getClassName()
 {
     return staticMetaObject.className();
+}
+
+void MusicVideoPlayWidget::popup(bool popup)
+{
+    m_videoFloatWidget->setText(MusicVideoFloatWidget::FreshType,
+                                popup ? tr("InlineMode") : tr("PopupMode"));
+    QHBoxLayout *topLayout = MStatic_cast(QHBoxLayout*, m_topWidget->layout());
+    m_windowPopup = popup;
+    blockMoveOption(!popup);
+
+    if(popup)
+    {
+        QSize size = M_SETTING_PTR->value(MusicSettingManager::ScreenSize).toSize();
+        setGeometry((size.width() - WINDOW_WIDTH)/2, (size.height() - WINDOW_HEIGHT)/2,
+                    WINDOW_WIDTH, WINDOW_HEIGHT);
+        resizeWindow(0, 0);
+        setParent(nullptr);
+        show();
+
+        m_winTopButton = new QPushButton(m_topWidget);
+        m_winTopButton->setFixedSize(14, 14);
+        m_winTopButton->setCursor(QCursor(Qt::PointingHandCursor));
+        m_winTopButton->setStyleSheet(MusicUIObject::MKGTinyBtnWintopOff);
+        m_winTopButton->setToolTip(tr("windowTopOn"));
+#ifdef Q_OS_UNIX
+        m_winTopButton->setFocusPolicy(Qt::NoFocus);
+#endif
+        connect(m_winTopButton, SIGNAL(clicked()), SLOT(windowTopStateChanged()));
+        topLayout->insertWidget(topLayout->count() - 1, m_winTopButton);
+        m_winTopButton->setEnabled(false);
+    }
+    else
+    {
+        delete m_winTopButton;
+        m_winTopButton = nullptr;
+        m_videoFloatWidget->setText(MusicVideoFloatWidget::FullscreenType, " " + tr("FullScreenMode"));
+    }
 }
 
 bool MusicVideoPlayWidget::isPopup() const
@@ -185,14 +217,6 @@ void MusicVideoPlayWidget::resizeWindow(int width, int height)
     m_videoFloatWidget->resizeWindow(width, height);
 }
 
-void MusicVideoPlayWidget::setObjectToClose(QObject *object)
-{
-    if(m_closeButton)
-    {
-        connect(m_closeButton, SIGNAL(clicked()), object, SLOT(deleteStackedFuncWidget()));
-    }
-}
-
 QString MusicVideoPlayWidget::getSearchText() const
 {
     return m_searchEdit->text().trimmed();
@@ -200,10 +224,31 @@ QString MusicVideoPlayWidget::getSearchText() const
 
 void MusicVideoPlayWidget::switchToSearchTable()
 {
+    QHBoxLayout *topLayout = MStatic_cast(QHBoxLayout*, m_topWidget->layout());
+    delete m_backButton;
+    m_backButton = new QToolButton(m_topWidget);
+    m_backButton->setFixedSize(20, 20);
+    m_backButton->setToolTip(tr("Back"));
+    m_backButton->setCursor(QCursor(Qt::PointingHandCursor));
+    m_backButton->setStyleSheet(MusicUIObject::MKGBtnBackBack);
+    connect(m_backButton, SIGNAL(clicked()), SLOT(switchToPlayView()));
+    topLayout->insertWidget(0, m_backButton);
+
+    m_textLabel->clear();
     m_searchEdit->show();
     m_searchButton->show();
-
     m_stackedWidget->setCurrentIndex(1);
+}
+
+void MusicVideoPlayWidget::switchToPlayView()
+{
+    delete m_backButton;
+    m_backButton = nullptr;
+
+    setTitleText(m_currentMediaName);
+    m_searchEdit->hide();
+    m_searchButton->hide();
+    m_stackedWidget->setCurrentIndex(0);
 }
 
 void MusicVideoPlayWidget::searchButtonClicked()
@@ -215,12 +260,12 @@ void MusicVideoPlayWidget::windowTopStateChanged()
 {
     Qt::WindowFlags flags = windowFlags();
     bool top = m_winTopButton->styleSheet().contains("btn_top_off_normal");
-    setWindowFlags( top ? (flags | Qt::WindowStaysOnTopHint) :
-                          (flags & ~Qt::WindowStaysOnTopHint) );
+    setWindowFlags( top ? (flags | Qt::WindowStaysOnTopHint) : (flags & ~Qt::WindowStaysOnTopHint) );
+
     show();
+
     m_winTopButton->setToolTip(top ? tr("windowTopOff") : tr("windowTopOn"));
-    m_winTopButton->setStyleSheet(top ? MusicUIObject::MKGTinyBtnWintopOn :
-                                        MusicUIObject::MKGTinyBtnWintopOff);
+    m_winTopButton->setStyleSheet(top ? MusicUIObject::MKGTinyBtnWintopOn : MusicUIObject::MKGTinyBtnWintopOff);
 }
 
 void MusicVideoPlayWidget::videoResearchButtonSearched(const QString &name)
@@ -232,18 +277,22 @@ void MusicVideoPlayWidget::videoResearchButtonSearched(const QString &name)
 
 void MusicVideoPlayWidget::mvURLChanged(const QString &data)
 {
+    MusicApplication *w = MusicApplication::instance();
+    if(w->isPlaying())
+    {
+        w->musicStatePlay();
+    }
+    ///stop current media play while mv starts.
     m_videoView->setMedia(data);
     m_videoView->play();
 
-    m_searchEdit->hide();
-    m_searchButton->hide();
-
-    m_stackedWidget->setCurrentIndex(0);
+    switchToPlayView();
 }
 
 void MusicVideoPlayWidget::mvURLNameChanged(const QString &name, const QString &data)
 {
-    m_textLabel->setText(MusicUtils::Widget::elidedText(font(), name, Qt::ElideRight, 275));
+    m_currentMediaName = name;
+    setTitleText(name);
     mvURLChanged(data);
 }
 
@@ -273,7 +322,7 @@ void MusicVideoPlayWidget::downloadButtonClicked()
 
 void MusicVideoPlayWidget::shareButtonClicked()
 {
-    QString text = m_textLabel->text().trimmed();
+    QString text = m_currentMediaName.trimmed();
     if(text.isEmpty())
     {
         return;
@@ -293,4 +342,9 @@ void MusicVideoPlayWidget::resizeEvent(QResizeEvent *event)
 void MusicVideoPlayWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     Q_UNUSED(event);
+}
+
+void MusicVideoPlayWidget::setTitleText(const QString &text)
+{
+    m_textLabel->setText(MusicUtils::Widget::elidedText(font(), text, Qt::ElideRight, 275));
 }

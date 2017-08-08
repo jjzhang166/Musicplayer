@@ -8,11 +8,18 @@
 #include "musicsongtag.h"
 
 MusicSongsListItemInfoWidget::MusicSongsListItemInfoWidget(QWidget *parent)
-    : QWidget(parent),
+    : MusicAbstractMoveWidget(parent),
       m_ui(new Ui::MusicSongsListItemInfoWidget)
 {
     m_ui->setupUi(this);
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+
+    setWindowFlags(windowFlags() | Qt::Tool);
+
+    m_ui->songNameValue->setStyleSheet(MusicUIObject::MColorStyle03);
+    m_ui->artlistValue->setStyleSheet(MusicUIObject::MColorStyle03);
+    m_ui->sizeValue->setStyleSheet(MusicUIObject::MColorStyle03);
+    m_ui->typeValue->setStyleSheet(MusicUIObject::MColorStyle03);
+    m_ui->timeValue->setStyleSheet(MusicUIObject::MColorStyle03);
 }
 
 MusicSongsListItemInfoWidget::~MusicSongsListItemInfoWidget()
@@ -65,8 +72,7 @@ void MusicSongsListItemInfoWidget::setMusicSongInformation(const MusicSong &info
         }
     }
 
-    if(!showArtPicture(musicArt) &&
-       !showArtPicture(info.getMusicArtistBack()))
+    if(!showArtPicture(musicArt) && !showArtPicture(info.getMusicArtistBack()))
     {
         m_ui->artPicture->setPixmap(QPixmap(":/image/lb_defaultArt").scaled(60, 60));
     }

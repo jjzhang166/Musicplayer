@@ -42,31 +42,30 @@ public:
     /*!
      * Get current window is to top.
      */
-#if defined(Q_OS_WIN)
-#  ifdef MUSIC_GREATER_NEW
-    void nativeEvent(const QByteArray &eventType,
-                     void *message, long *result);
-    /*!
-     * Native event.
-     */
-#  else
-    void winEvent(MSG *message, long *result);
-    /*!
-     * Win event.
-     */
-#  endif
-#endif
     void getParameterSetting();
     /*!
      * Get settings parameters.
      */
-    void windowStartAnimationOpacity();
-    /*!
-     * Window start animation opacity.
-     */
     void windowCloseAnimationOpacity();
     /*!
      * Window close animation opacity.
+     */
+    void soureUpdateCheck();
+    /*!
+     * Soure update check.
+     */
+
+    void sideAnimationByOn();
+    /*!
+     * Side animation by on.
+     */
+    void sideAnimationByOff();
+    /*!
+     * Side animation by off.
+     */
+    void sideAnimationReset();
+    /*!
+     * Side animation reset.
      */
 
 Q_SIGNALS:
@@ -116,10 +115,6 @@ public Q_SLOTS:
     /*!
      * Show set sound effect widget.
      */
-    void musicBackgroundSliderStateChanged();
-    /*!
-     * Current slider state changed.
-     */
 
 protected:
     bool closeCurrentEqualizer();
@@ -128,9 +123,10 @@ protected:
      */
 
     bool m_setWindowToTop;
-    QPropertyAnimation *m_animation;
+    bool m_leftSideByOn, m_rightSideByOn;
+    QPropertyAnimation *m_opacityAnimation, *m_sideAnimation;
     MusicTimerAutoObject *m_musicTimerAutoObj;
-    MusicMobileDevicesWidget *m_mobileDevices;
+    MusicMobileDevicesWidget *m_mobileDeviceWidget;
     QDeviceWatcher *m_deviceWatcher;
 
     static MusicApplicationObject *m_instance;

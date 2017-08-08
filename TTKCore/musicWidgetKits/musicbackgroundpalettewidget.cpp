@@ -8,6 +8,8 @@
 #include <QMouseEvent>
 
 #define COLOR_FILE "color.jpg"
+#define COLOR_COL  10
+#define COLOR_ROW  6
 
 MusicBackgroundPalette::MusicBackgroundPalette(QWidget *parent)
     : QLabel(parent)
@@ -134,11 +136,11 @@ MusicBackgroundPaletteWidget::MusicBackgroundPaletteWidget(QWidget *parent)
     /////////////////////////////////////////
     QGridLayout *layout = new QGridLayout(m_ui->mutliWidget);
     layout->setContentsMargins(0, 0, 0, 0);
-    for(int i=0; i<6; ++i)
-        for(int j=0; j<10; ++j)
+    for(int i=0; i<COLOR_ROW; ++i)
+        for(int j=0; j<COLOR_COL; ++j)
         {
             MusicBackgroundPalette *label = new MusicBackgroundPalette(this);
-            QColor color = colors[i*10 + j];
+            QColor color = colors[i*COLOR_COL + j];
             label->setPixmap(color);
             label->setToolTip(color.name());
             layout->addWidget(label, i, j);
@@ -152,12 +154,16 @@ MusicBackgroundPaletteWidget::MusicBackgroundPaletteWidget(QWidget *parent)
     m_ui->mutliWidget->setLayout(layout);
 
     m_ui->topTitleCloseButton->setIcon(QIcon(":/functions/btn_close_hover"));
-    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle03);
+    m_ui->topTitleCloseButton->setStyleSheet(MusicUIObject::MToolButtonStyle04);
     m_ui->topTitleCloseButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_ui->topTitleCloseButton->setToolTip(tr("Close"));
 
     m_ui->paletteButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
     m_ui->confirmButton->setStyleSheet(MusicUIObject::MPushButtonStyle04);
+#ifdef Q_OS_UNIX
+    m_ui->paletteButton->setFocusPolicy(Qt::NoFocus);
+    m_ui->confirmButton->setFocusPolicy(Qt::NoFocus);
+#endif
 
     connect(m_ui->topTitleCloseButton, SIGNAL(clicked()), SLOT(close()));
     connect(m_ui->paletteButton, SIGNAL(clicked()), SLOT(showPaletteDialog()));
@@ -169,8 +175,9 @@ MusicBackgroundPaletteWidget::~MusicBackgroundPaletteWidget()
     QFile::remove(COLOR_FILE);
     if(!m_confirmButtonClicked)
     {
-        emit currentColorToMemoryChanged( M_BACKGROUND_PTR->getMBackground() );
+        emit currentColorToMemoryChanged(m_previousBackground);
     }
+
     while(!m_widgets.isEmpty())
     {
         delete m_widgets.takeLast();
@@ -236,6 +243,7 @@ void MusicBackgroundPaletteWidget::currentColorToMemory(const QString &path)
 
 int MusicBackgroundPaletteWidget::exec()
 {
-    updateBackground(M_BACKGROUND_PTR->getMBackground());
+    m_previousBackground = M_BACKGROUND_PTR->getMBackground();
+    updateBackground(m_previousBackground);
     return MusicAbstractMoveDialog::exec();
 }

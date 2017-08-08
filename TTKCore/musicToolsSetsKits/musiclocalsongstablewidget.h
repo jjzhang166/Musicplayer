@@ -14,7 +14,7 @@
 /*! @brief The class of the lcal songs table widget.
  * @author Greedysky <greedysky@163.com>
  */
-class MUSIC_WIDGET_EXPORT MusicLocalSongsTableWidget : public MusicSongsListAbstractTableWidget
+class MUSIC_TOOLSET_EXPORT MusicLocalSongsTableWidget : public MusicSongsListAbstractTableWidget
 {
     Q_OBJECT
 public:
@@ -29,29 +29,21 @@ public:
      * Get class object name.
      */
 
-    void clearShowlist();
+    void clear();
     /*!
-     * Clear show list.
+     * Clear current items.
      */
-    void clearShowPath();
-    /*!
-     * Clear show path.
-     */
-    void createShowlist();
-    /*!
-     * Create show list.
-     */
-    void createShowPath();
-    /*!
-     * Create show path.
-     */
-    void addShowlistItems(const QFileInfoList &path);
+    void addItems(const QFileInfoList &path);
     /*!
      * Add show list items.
      */
-    void addShowPathItems(const QFileInfoList &path);
+    inline void setFiles(const QFileInfoList &path) { m_fileNames = path; }
     /*!
-     * Add show path items.
+     * Set files container.
+     */
+    inline const QFileInfoList &getFiles() const { return m_fileNames; }
+    /*!
+     * Get files container.
      */
 
 public Q_SLOTS:
@@ -64,6 +56,55 @@ public Q_SLOTS:
      * Override the widget event.
      */
 
+protected:
+    QFileInfoList m_fileNames;
+
+};
+
+typedef QMap<QString , QFileInfoList> MusicInfoData;
+typedef QMapIterator<QString , QFileInfoList> MusicInfoDataIterator;
+
+/*! @brief The class of the lcal songs info table widget.
+ * @author Greedysky <greedysky@163.com>
+ */
+class MUSIC_TOOLSET_EXPORT MusicLocalSongsInfoTableWidget : public MusicAbstractTableWidget
+{
+    Q_OBJECT
+public:
+    explicit MusicLocalSongsInfoTableWidget(QWidget *parent = 0);
+    /*!
+     * Object contsructor.
+     */
+
+    static QString getClassName();
+    /*!
+     * Get class object name.
+     */
+
+    void clear();
+    /*!
+     * Clear current items.
+     */
+    void addItems(const MusicInfoData &data);
+    /*!
+     * Add show list item.
+     */
+
+Q_SIGNALS:
+    void updateFileLists(const QFileInfoList &list);
+    /*!
+     * Update file lists.
+     */
+
+public Q_SLOTS:
+    virtual void listCellClicked(int row, int column) override;
+    /*!
+     * Table widget list cell click.
+     */
+    void listCellDoubleClicked(int row, int column);
+    /*!
+     * Table widget list double cell click.
+     */
 };
 
 #endif // MUSICLOCALSONGSTABLEWIDGET_H

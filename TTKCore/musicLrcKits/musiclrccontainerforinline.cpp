@@ -217,7 +217,7 @@ void MusicLrcContainerForInline::resizeWindow()
     {
         width += 320;
     }
-    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    if(MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen())
     {
         width += (m_lrcDisplayAll ? 50 : (320 + 50));
     }
@@ -229,17 +229,17 @@ void MusicLrcContainerForInline::createFloatPlayWidget()
 {
     delete m_floatPlayWidget;
     m_floatPlayWidget = nullptr;
-    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    if(MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen())
     {
         m_floatPlayWidget = new MusicLrcFloatPlayWidget(this);
         m_floatPlayWidget->resizeWindow(width(), height());
     }
 }
 
-void MusicLrcContainerForInline::showFullOrNormal()
+void MusicLrcContainerForInline::lrcWidgetShowFullScreen()
 {
     QHBoxLayout *l = MStatic_cast(QHBoxLayout*, m_functionLabel->layout());
-    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    if(MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen())
     {
         l->removeItem(l->itemAt(l->count() - 1));
     }
@@ -373,9 +373,9 @@ void MusicLrcContainerForInline::musicSongMovieClicked()
         return;
     }
 
-    if(MusicLeftAreaWidget::instance()->isFullOrNormal())
+    if(MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen())
     {
-        MusicLeftAreaWidget::instance()->showFullOrNormal();
+        MusicLeftAreaWidget::instance()->lrcWidgetShowFullScreen();
     }
     MusicRightAreaWidget::instance()->musicVideoButtonSearched(m_currentSongName);
 }
@@ -413,8 +413,8 @@ void MusicLrcContainerForInline::contextMenuEvent(QContextMenuEvent *event)
     menu.addAction(tr("makeLrc"), this, SLOT(theCurrentLrcMaked()));
     menu.addAction(tr("errorLrc"), this, SLOT(theCurrentLrcError()));
     menu.addSeparator();
-    menu.addAction(MusicLeftAreaWidget::instance()->isFullOrNormal() ? tr("showNormalMode") : tr("showFullMode"),
-                   MusicLeftAreaWidget::instance(), SLOT(showFullOrNormal()));
+    menu.addAction(MusicLeftAreaWidget::instance()->isLrcWidgetShowFullScreen() ? tr("showNormalMode") : tr("showFullMode"),
+                   MusicLeftAreaWidget::instance(), SLOT(lrcWidgetShowFullScreen()));
     menu.addSeparator();
     menu.addMenu(&changColorMenu);
     menu.addMenu(&changeLrcSize);
@@ -549,7 +549,7 @@ void MusicLrcContainerForInline::mouseReleaseEvent(QMouseEvent *event)
 void MusicLrcContainerForInline::mouseDoubleClickEvent(QMouseEvent *event)
 {
     Q_UNUSED(event);
-    MusicLeftAreaWidget::instance()->showFullOrNormal();
+    MusicLeftAreaWidget::instance()->lrcWidgetShowFullScreen();
 }
 
 void MusicLrcContainerForInline::createColorMenu(QMenu &menu)
@@ -673,6 +673,13 @@ void MusicLrcContainerForInline::initFunctionLabel()
     QPushButton *movie = new QPushButton(this);
     QPushButton *microphone = new QPushButton(this);
     QPushButton *message = new QPushButton(this);
+
+#ifdef Q_OS_UNIX
+    translation->setFocusPolicy(Qt::NoFocus);
+    movie->setFocusPolicy(Qt::NoFocus);
+    microphone->setFocusPolicy(Qt::NoFocus);
+    message->setFocusPolicy(Qt::NoFocus);
+#endif
 
     translation->setFixedSize(30, 30);
     movie->setFixedSize(30, 30);
